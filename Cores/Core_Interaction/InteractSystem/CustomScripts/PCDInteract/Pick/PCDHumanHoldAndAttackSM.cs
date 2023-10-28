@@ -202,7 +202,7 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour {
 
     public void update() {
         sm.UpdateStateAction();
-        if (Input.GetKeyDown(KeyCode.Mouse0)) {
+        if (InputManager.GetKeyDown(KeyCode.Mouse0)) {
             UseWeaponAttack(holdingObject, PCDObjectProperties.Shape.LongStick);
         }
     }

@@ -13,19 +13,19 @@ public class PCDHumanCharacter : MonoBehaviour {
     
     private void TestMovementInput() {
         float forward = 0, right = 0;
-        if (Input.GetKey(KeyCode.W))
+        if (InputManager.GetKey(KeyCode.W))
             forward += 1f;
-        if (Input.GetKey(KeyCode.S))
+        if (InputManager.GetKey(KeyCode.S))
             forward -= 1f;
-        if (Input.GetKey(KeyCode.D))
+        if (InputManager.GetKey(KeyCode.D))
             right += 1f;
-        if (Input.GetKey(KeyCode.A))
+        if (InputManager.GetKey(KeyCode.A))
             right -= 1f;
         moveSM.moveInput.moveAxis = new Vector2(right, forward);
         if (moveSM.moveInput.moveAxis.magnitude > 1f)
             moveSM.moveInput.moveAxis = moveSM.moveInput.moveAxis.normalized;
 
-        moveSM.moveInput.run = Input.GetKey(KeyCode.LeftShift);
+        moveSM.moveInput.run = InputManager.GetKey(KeyCode.LeftShift);
     }
 
 }

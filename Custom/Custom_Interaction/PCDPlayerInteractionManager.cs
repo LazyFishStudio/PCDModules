@@ -33,11 +33,11 @@ public partial class PCDPlayerInteractionManager : BaseInteractionManager
     protected override void Update() {
         base.Update();
 
-        interactInput.interactBackpack = Input.GetKeyDown(KeyCode.T);
-        interactInput.pick = Input.GetKeyDown(KeyCode.Mouse0);
-        interactInput.restPull = Input.GetKeyUp(KeyCode.Mouse0);
-        interactInput.interact = Input.GetKeyDown(KeyCode.Mouse0);
-        interactInput.drop = Input.GetKeyDown(KeyCode.Mouse1);
+        interactInput.interactBackpack = InputManager.GetKeyDown(KeyCode.T);
+        interactInput.pick = InputManager.GetKeyDown(KeyCode.Mouse0);
+        interactInput.restPull = InputManager.GetKeyUp(KeyCode.Mouse0);
+        interactInput.interact = InputManager.GetKeyDown(KeyCode.Mouse0);
+        interactInput.drop = InputManager.GetKeyDown(KeyCode.Mouse1);
 
         HandleInteractInput();
     }
