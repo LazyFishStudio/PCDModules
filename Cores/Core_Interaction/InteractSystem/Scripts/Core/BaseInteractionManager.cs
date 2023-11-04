@@ -18,7 +18,7 @@ namespace InteractSystem
 
         private void FreshFocus() {
             var nearestFocus = UtilClass.FindBest<Focusable>(FindObjectsOfType<Focusable>(), (candidate) => {
-                if (!candidate.CheckFocusCond(this))
+                if (!candidate.FreshAndCheckFocusComps(this))
                     return float.NegativeInfinity;
                 return -candidate.GetDistClearY(this);
             });

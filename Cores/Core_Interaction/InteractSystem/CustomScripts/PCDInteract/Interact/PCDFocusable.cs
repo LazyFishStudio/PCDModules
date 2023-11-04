@@ -5,7 +5,20 @@ using InteractSystem;
 
 public class PCDFocusable : Focusable
 {
-    public override void OnFocusEnter(InteractionManager manager) {
+	public override bool FreshAndCheckFocusComps(InteractionManager manager) {
+        if (!manager.CheckCommonFocusCond(this))
+            return false;
+
+        focusComps = new List<Component>();
+        foreach (var focusable in GetComponents<IFocusable>()) {
+            if (focusable is Component comp && focusable.CheckFocusCond(manager)) {
+                focusComps.Add(comp);
+            }
+		}
+        return focusComps.Count > 0;
+	}
+
+	public override void OnFocusEnter(InteractionManager manager) {
         GetComponentInChildren<MeshUI>()?.ShowUI();
 
         PCDHumanInteractSM player = manager.interactComp as PCDHumanInteractSM;

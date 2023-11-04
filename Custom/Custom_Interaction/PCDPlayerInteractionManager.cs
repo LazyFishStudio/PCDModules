@@ -54,7 +54,7 @@ public partial class PCDPlayerInteractionManager : BaseInteractionManager
             if (interactComp.holdingItem == null) {
                 HandlePickAndPullAction();
 			} else {
-                // IPlaceSlot slot = (focusing != null ? focusing.GetComponent<IPlaceSlot>() : null);
+                // IPlaceSlot slot = (focusing != null ? focusing.GetFocusComponent<IPlaceSlot>() : null);
                 // IPlaceable placeable = interactComp.pickingItem.GetComponent<IPlaceable>();
                 // if (slot != null && placeable != null) {
                 //     placeable.PlacedTo(interactComp, slot);
@@ -68,7 +68,7 @@ public partial class PCDPlayerInteractionManager : BaseInteractionManager
             if (interactComp.holdingItem == null) {
                 // HandlePickAndPullAction();
 			} else {
-                IPlaceSlot slot = (focusing != null ? focusing.GetComponent<IPlaceSlot>() : null);
+                IPlaceSlot slot = (focusing != null ? focusing.GetFocusComponent<IPlaceSlot>() : null);
                 IPlaceable placeable = interactComp.holdingItem.GetComponent<IPlaceable>();
                 if (slot != null && placeable != null) {
                     InteractLogger.LogInteractEvent("PlaceItem", gameObject, (placeable as Component).gameObject);
@@ -99,7 +99,7 @@ public partial class PCDPlayerInteractionManager : BaseInteractionManager
         IInteractable interactable = null;
         if (interactComp.holdingItem != null)
             interactable = interactComp.holdingItem.GetComponent<IInteractable>();
-        if (interactable != null) {
+        if (interactable != null && interactable.CheckInteractCond(interactComp)) {
             /* ��������Ʒ���� */
             bool interacting = interactable.interactor != null;
             if (interactInput.interact) {
@@ -126,10 +126,10 @@ public partial class PCDPlayerInteractionManager : BaseInteractionManager
 
         /* ��������Ʒ���� */
         IInteractable interactItem = null;
-        if (focusing != null && focusing.GetComponent<IInteractable>() != null) {
-            interactItem = focusing.GetComponent<IInteractable>();
+        if (focusing != null && focusing.GetFocusComponent<IInteractable>() != null) {
+            interactItem = focusing.GetFocusComponent<IInteractable>();
             bool interacting = interactItem.interactor != null;
-            if (interactItem != null) {
+            if (interactItem != null && interactItem.CheckInteractCond(interactComp)) {
                 if (interactInput.interact) {
                     if (!interacting) {
                         InteractLogger.LogInteractEvent("InteractStart", gameObject, focusing.gameObject);
@@ -168,13 +168,13 @@ public partial class PCDPlayerInteractionManager : BaseInteractionManager
         if (focusing == null)
             return;
 
-        PullableObject pullable = focusing.GetComponent<PullableObject>();
+        PullableObject pullable = focusing.GetFocusComponent<PullableObject>();
         if (pullable != null) {
             HandlePullAction();
             return;
 		}
 
-        PickableObject pickable = focusing.GetComponent<PickableObject>();
+        PickableObject pickable = focusing.GetFocusComponent<PickableObject>();
         if (pickable != null) {
             HandlePickAction();
             return;
@@ -208,11 +208,11 @@ public class InteractInput
 public partial class PCDPlayerInteractionManager : BaseInteractionManager
 {
     private partial void HandlePickAction() {
-        var pickable = focusing.GetComponent<PickableObject>();
+        var pickable = focusing.GetFocusComponent<PickableObject>();
         if (!pickable.CheckPickCond(this))
             return;
 
-        IPlaceable placeable = focusing.GetComponent<IPlaceable>();
+        IPlaceable placeable = focusing.GetFocusComponent<IPlaceable>();
         if (placeable != null && placeable.attachedPlace != null) {
             placeable.RemovedFrom(interactComp);
             InteractLogger.LogInteractEvent("RemoveItem", gameObject, (placeable as Component).gameObject);
@@ -227,7 +227,7 @@ public partial class PCDPlayerInteractionManager : BaseInteractionManager
     }
 
     private partial void HandlePullAction() {
-        var pullable = focusing.GetComponent<PullableObject>();
+        var pullable = focusing.GetFocusComponent<PullableObject>();
         var player = interactComp as PCDHumanInteractSM;
         player.Pull(pullable);
         InteractLogger.LogInteractEvent("StartPull", gameObject, pullable.gameObject);
