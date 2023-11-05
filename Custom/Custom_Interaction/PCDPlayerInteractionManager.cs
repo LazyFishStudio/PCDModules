@@ -26,8 +26,6 @@ public partial class PCDPlayerInteractionManager : BaseInteractionManager
     private bool backpackEnabled { get => BackpackManager.Inst != null; }
 
     void Start() {
-        DebugTipsText.GetInstance().AddTips("左键：拾取/交互/使用工具");
-        DebugTipsText.GetInstance().AddTips("右键：丢弃/收回工具");
     }
 
     protected override void Update() {
@@ -82,7 +80,6 @@ public partial class PCDPlayerInteractionManager : BaseInteractionManager
         if (interactInput.restPull && interactComp.holdingItem != null) {
             PCDHumanInteractSM player = interactComp as PCDHumanInteractSM;
             if (player.pullingObject != null) {
-                Debug.Log(1);
                 HandleRestPullingAction();
             }
         }

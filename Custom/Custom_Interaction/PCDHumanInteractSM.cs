@@ -65,17 +65,17 @@ public class PCDHumanInteractSM : InteractComp
 
     public override bool Pick(IPickable pickable) {
         var pickableComp = pickable as Component;
-        Debug.Log("Pick " + pickableComp.gameObject.name);
+        // Debug.Log("Pick " + pickableComp.gameObject.name);
         return base.Pick(pickable);
     }
 
     public override bool Drop() {
-        Debug.Log("Drop " + holdingItem.name);
+        // Debug.Log("Drop " + holdingItem.name);
         return base.Drop();
     }
 
     public void Pull(PullableObject pullableObj) {
-        Debug.Log("Pull " + pullableObj.gameObject.name);
+        // Debug.Log("Pull " + pullableObj.gameObject.name);
 
         Action pulledOutCallback = null;
         pulledOutCallback += RestPullingAndPickIt;

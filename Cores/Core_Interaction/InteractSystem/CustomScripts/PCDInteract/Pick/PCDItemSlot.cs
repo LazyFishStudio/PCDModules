@@ -10,7 +10,7 @@ public class PCDItemSlot : ItemSlot
 	public MatModifier preview;
 	public bool dynamicPreview;
 
-	private void DestoryUselessComponents(List<Component> pending, int times = 0) {
+	protected void DestoryUselessComponents(List<Component> pending, int times = 0) {
 		List<Component> nextPending = new List<Component>();
 		foreach (var component in pending) {
 			try {
@@ -34,6 +34,7 @@ public class PCDItemSlot : ItemSlot
 		newItem.transform.SetParent(transform);
 
 		PickableObject pickable = newItem.GetComponent<PickableObject>();
+		pickable.picker = null;
 		if (pickable != null)
 			Destroy(pickable);
 		List<Component> allComponents = newItem.GetComponents<Component>().ToList();

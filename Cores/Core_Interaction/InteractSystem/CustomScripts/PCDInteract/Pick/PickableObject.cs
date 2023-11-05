@@ -12,6 +12,8 @@ public class PickableObject : MonoBehaviour, IFocusable, IPickable, IPlaceable {
     public IPlaceSlot attachedPlace { get; set; }
     public PCDObjectProperties.Shape shape = PCDObjectProperties.Shape.Box;
     public float gravity = 30f;
+    public bool isCantBePicked;
+    public bool disablePhysicOnSlot = true;
 
 	private void FixedUpdate() {
         Rigidbody rb = GetComponent<Rigidbody>();
@@ -25,6 +27,9 @@ public class PickableObject : MonoBehaviour, IFocusable, IPickable, IPlaceable {
             return false;
         if (picker != null)
             return false;
+        if (isCantBePicked) {
+            return false;
+        }
         return true;
     }
 
@@ -37,12 +42,15 @@ public class PickableObject : MonoBehaviour, IFocusable, IPickable, IPlaceable {
     }
 
     public bool PickedBy(InteractComp interactor) {
+        
+
         SetPhysicActive(false);
         picker = interactor;
         picker.holdingItem = gameObject;
 
         PCDHumanInteractSM character = interactor as PCDHumanInteractSM;
         character.holdAndDropSM?.HoldObj(transform, shape);
+        OnPicked();
 
         return true;
     }
@@ -84,8 +92,11 @@ public class PickableObject : MonoBehaviour, IFocusable, IPickable, IPlaceable {
         if (interactor) {
             DroppedBy(interactor);
         }
-        SetPhysicActive(false);
+        if (disablePhysicOnSlot) {
+            SetPhysicActive(false);
+        }
         attachedPlace = slot;
+        transform.localRotation = Quaternion.identity;
         attachedPlace.OnAcceptItemCallback(interactor, this);
         return true;
 	}
@@ -99,7 +110,7 @@ public class PickableObject : MonoBehaviour, IFocusable, IPickable, IPlaceable {
         return true;
 	}
 
-    private void SetPhysicActive(bool active) {
+    public void SetPhysicActive(bool active) {
         if (active) {
             foreach (Collider collider in GetComponentsInChildren<Collider>()) {
                 collider.enabled = true;
@@ -119,6 +130,17 @@ public class PickableObject : MonoBehaviour, IFocusable, IPickable, IPlaceable {
 
     public virtual void OnDropped() {
 
+    }
+
+    public virtual void OnPicked() {
+
+    }
+
+    void OnDestroy() {
+        if (picker) {
+            picker.Drop();
+            picker = null;
+        }
     }
 
 }

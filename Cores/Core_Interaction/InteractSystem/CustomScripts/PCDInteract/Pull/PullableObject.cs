@@ -21,6 +21,9 @@ public class PullableObject : PickableObject {
         if (pulledOutEffect)
             GameObject.Instantiate(pulledOutEffect, transform.position, Quaternion.identity);
         if (destroyOnPullOut) {
+            if (attachedPlace != null) {
+                RemovedFrom(null);
+            }
             GameObject.Destroy(gameObject);
         }
         GetComponentInParent<PullablePCDIKController>(true)?.SetFollowTargetOverride(null);

@@ -85,6 +85,8 @@ public class PCDHumanPullSM : MonoBehaviour {
 
             },
             () => {
+                Debug.DrawLine(pullingObject.transform.position, lHandFollowTarget.position);
+                Debug.DrawLine(pullingObject.transform.position, rHandFollowTarget.position);
                 lHandFollowTarget.position = human.humanBone.lShoulder.position + (pullingObject.transform.position + human.humanBone.root.right * pullingObject.lHaft.localPosition.x - human.humanBone.lShoulder.position).normalized * 1f;
                 rHandFollowTarget.position = human.humanBone.rShoulder.position + (pullingObject.transform.position + human.humanBone.root.right * pullingObject.rHaft.localPosition.x - human.humanBone.rShoulder.position).normalized * 1f;
                 haftCenter.position = (lHandFollowTarget.transform.position + rHandFollowTarget.transform.position) / 2.0f;
@@ -173,24 +175,27 @@ public class PCDHumanPullSM : MonoBehaviour {
             () => {
 
                 // Archoring Hand
-                human.SetRHandArchoring(rHandFollowTarget, archoringTransition_pull);
+                // human.SetRHandArchoring(rHandFollowTarget, archoringTransition_pull);
                 // Override Human LookAt
                 human.SetLookAt(pullingObjectHover.transform, pullingObjectHover.rHaft);
                 
             },
             () => {
 
-                    if (Vector3.Distance(human.humanBone.rShoulder.position, pullingObjectHover.rHaft.position) < 1f) {
-                        rHandFollowTarget.transform.position = pullingObjectHover.rHaft.position;
-                    } else {
-                        rHandFollowTarget.transform.position = human.humanBone.rShoulder.position + (pullingObjectHover.rHaft.position - human.humanBone.rShoulder.position).normalized * 1f;
-                    }
+                    // if (!pullingObjectHover) {
+                    //     sm.GotoState(State.Idle);
+                    // }
+                    // if (Vector3.Distance(human.humanBone.rShoulder.position, pullingObjectHover.rHaft.position) < 1f) {
+                    //     rHandFollowTarget.transform.position = pullingObjectHover.rHaft.position;
+                    // } else {
+                    //     rHandFollowTarget.transform.position = human.humanBone.rShoulder.position + (pullingObjectHover.rHaft.position - human.humanBone.rShoulder.position).normalized * 1f;
+                    // }
 
             },
             () => {
 
                 /* Disoverride Hand */
-                human.SetRHandArchoring(null);
+                // human.SetRHandArchoring(null);
                 /* Disoverride Human LookAt */
                 human.SetLookAt(null, null);
                 /* Clear Human PoseOverride */
