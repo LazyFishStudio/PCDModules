@@ -14,6 +14,7 @@ public class PCDIK : MonoBehaviour {
     public Transform end;
     public Transform[] joints;
     public AnimationCurve jointScaleCurve;
+    public AnimationCurve jointScaleScaleCurve;
     public int jointNum => joints.Length;
     public float rootScale => root.localScale.x;
 
@@ -66,8 +67,8 @@ public class PCDIK : MonoBehaviour {
         end.position = endPoint;
         end.rotation = startBone.rotation;
 
-        start.localScale = Vector3.one * jointScaleCurve.Evaluate(0);
-        end.localScale = Vector3.one * jointScaleCurve.Evaluate(1);
+        start.localScale = Vector3.one * jointScaleCurve.Evaluate(0) * jointScaleScaleCurve.Evaluate(0);
+        end.localScale = Vector3.one * jointScaleCurve.Evaluate(1) * jointScaleScaleCurve.Evaluate(1);
 
     }
 
@@ -86,7 +87,7 @@ public class PCDIK : MonoBehaviour {
             end.position = endPoint;
             end.rotation = startBone.rotation;
 
-            joint.localScale = Vector3.one * jointScaleCurve.Evaluate(midPointProp);
+            joint.localScale = Vector3.one * jointScaleCurve.Evaluate(midPointProp) * jointScaleScaleCurve.Evaluate(midPointProp);
 
             return;
 
@@ -101,8 +102,8 @@ public class PCDIK : MonoBehaviour {
         end.position = endPoint;
         end.rotation = Quaternion.LookRotation(end.position - joint.position, Vector3.Cross(end.position - joint.position, joint.right));
 
-        start.localScale = Vector3.one * jointScaleCurve.Evaluate(0);
-        end.localScale = Vector3.one * jointScaleCurve.Evaluate(1);
+        start.localScale = Vector3.one * jointScaleCurve.Evaluate(0) * jointScaleScaleCurve.Evaluate(0);
+        end.localScale = Vector3.one * jointScaleCurve.Evaluate(1) * jointScaleScaleCurve.Evaluate(1);
 
     }
 
@@ -114,7 +115,7 @@ public class PCDIK : MonoBehaviour {
             for (int i = 0; i < joints.Length; i++) {
                 joints[i].position = startPoint + startToEnd.normalized * (i + 1) * jointSpace;
                 joints[i].rotation = Quaternion.LookRotation(startToEnd, Vector3.up);
-                joints[i].localScale = Vector3.one * jointScaleCurve.Evaluate((i + 1.0f) / (joints.Length + 2.0f));
+                joints[i].localScale = Vector3.one * jointScaleCurve.Evaluate((i + 1.0f) / (joints.Length + 2.0f)) * jointScaleScaleCurve.Evaluate((i + 1.0f) / (joints.Length + 2.0f));
             }
 
             start.position = startPoint;
@@ -123,8 +124,8 @@ public class PCDIK : MonoBehaviour {
             end.position = endPoint;
             end.rotation = Quaternion.LookRotation(end.position - joints[joints.Length - 1].position, Vector3.Cross(end.position - joints[joints.Length - 1].position, joints[joints.Length - 1].right));
 
-            start.localScale = Vector3.one * jointScaleCurve.Evaluate(0);
-            end.localScale = Vector3.one * jointScaleCurve.Evaluate(1);
+            start.localScale = Vector3.one * jointScaleCurve.Evaluate(0) * jointScaleScaleCurve.Evaluate(0);
+            end.localScale = Vector3.one * jointScaleCurve.Evaluate(1) * jointScaleScaleCurve.Evaluate(1);
 
             return;
 
@@ -152,7 +153,7 @@ public class PCDIK : MonoBehaviour {
             Vector3 curToNext = nextJointPos - curJointPos;
             joints[i].position = curJointPos;
             joints[i].rotation = Quaternion.LookRotation(lastToCur + curToNext, jointTargetDir);
-            joints[i].localScale = Vector3.one * jointScaleCurve.Evaluate((i + 1.0f) / (joints.Length + 2.0f));
+            joints[i].localScale = Vector3.one * jointScaleCurve.Evaluate((i + 1.0f) / (joints.Length + 2.0f)) * jointScaleScaleCurve.Evaluate((i + 1.0f) / (joints.Length + 2.0f));
         }
 
         start.position = startPoint;
@@ -161,8 +162,8 @@ public class PCDIK : MonoBehaviour {
         end.position = endPoint;
         end.rotation = Quaternion.LookRotation(end.position - joints[joints.Length - 1].position, Vector3.Cross(end.position - joints[joints.Length - 1].position, joints[joints.Length - 1].right));
 
-        start.localScale = Vector3.one * jointScaleCurve.Evaluate(0);
-        end.localScale = Vector3.one * jointScaleCurve.Evaluate(1);
+        start.localScale = Vector3.one * jointScaleCurve.Evaluate(0) * jointScaleScaleCurve.Evaluate(0);
+        end.localScale = Vector3.one * jointScaleCurve.Evaluate(1) * jointScaleScaleCurve.Evaluate(1);
 
     }
 

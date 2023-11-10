@@ -463,8 +463,9 @@ private void UpdateLegs() {
         }
 
         void UpdateBodyRoll() {
-            if (bodysm.curState.Equals(BodyState.Stepping) && Vector3.Angle(poseInfo.moveDir, humanBone.root.forward) < 135.0f) {
-                float bodyRollProcess = Mathf.Clamp((Mathf.Abs(Vector3.SignedAngle(poseInfo.moveDir, humanBone.root.forward, Vector3.up)) - 1f)/ 90.0f, 0, 1.0f);
+            if (bodysm.curState.Equals(BodyState.Stepping) && Vector3.Angle(poseInfo.moveDir, humanBone.root.forward) < 180.0f) {
+                float bodyRollProcess = Mathf.Clamp((Mathf.Abs(Vector3.SignedAngle(poseInfo.moveDir, humanBone.root.forward, Vector3.up)) - 1f)/ 180.0f, 0, 1.0f);
+                bodyRollProcess = Mathf.Sin(bodyRollProcess * Mathf.PI);
                 float bodyRollSign = Mathf.Sign(Vector3.SignedAngle(poseInfo.moveDir, humanBone.root.forward, Vector3.up));
                 Quaternion bodyRoll = Quaternion.AngleAxis(bodyRollSign * bodyRollProcess * animSetting.bodyRollAngle, Vector3.forward);
                 poseInfo.bodyTargetRotLocal = bodyRoll * poseInfo.bodyTargetRotLocal;

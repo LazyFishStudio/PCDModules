@@ -4,16 +4,16 @@ using UnityEngine;
 public class PCDHumanPullSM : MonoBehaviour {
 
     public enum State {
-        Idle, PullingBoxHover, PullingStick,
+        Idle, PullingSmallBox, PullingStick,
         PullingSmallBoxHover, PullingStickHover
     }
 
-    public float archoringTransition_pull = 0.18f;
+    public float animationTransition = 0.12f;
     public Transform boxObjFollowTarget;
     public Transform stickObjFollowTarget;
     public Transform longStickObjFollowTarget;
     public bool isPulling => pullingObject != null;
-    public bool isPullingBox => sm.curState.Equals(State.PullingBoxHover);
+    public bool isPullingBox => sm.curState.Equals(State.PullingSmallBox);
     public bool isPullingStick => sm.curState.Equals(State.PullingStick);
     [SerializeField]
     private PullableObject pullingObject;
@@ -39,6 +39,8 @@ public class PCDHumanPullSM : MonoBehaviour {
     private FMODUnity.StudioEventEmitter emitter;
     private FMOD.Studio.EventInstance actionEventInstance;
 
+    private Transform pullingObjFollowTarget;
+
     void Awake() {
 
         human = GetComponentInChildren<PCDHuman>();
@@ -51,6 +53,7 @@ public class PCDHumanPullSM : MonoBehaviour {
 
         rHandFollowTarget = new GameObject("LHandFollowTarget").transform;
         lHandFollowTarget = new GameObject("RHandFollowTarget").transform;
+        pullingObjFollowTarget = new GameObject("HaftCenter").transform;
 
     }
     
@@ -59,38 +62,33 @@ public class PCDHumanPullSM : MonoBehaviour {
         sm = new StateMachine<State>(State.Idle);
 
         sm.GetState(State.Idle).Bind(
-            () => {
-                
-            },
-            () => {
-            },
+            () => {},
+            () => {},
             () => {}
         );
 
-        Transform haftCenter = new GameObject("HaftCenter").transform;
 
-        sm.GetState(State.PullingBoxHover).Bind(
+        sm.GetState(State.PullingSmallBox).Bind(
             () => {
 
                 /* Archoring Hands */
-                human.SetLHandArchoring(lHandFollowTarget, archoringTransition_pull);
-                human.SetRHandArchoring(rHandFollowTarget, archoringTransition_pull);
+                human.SetLHandArchoring(pullingObject.lHaft, animationTransition);
+                human.SetRHandArchoring(pullingObject.rHaft, animationTransition);
+                // human.SetLHandArchoring(lHandFollowTarget, animationTransition);
+                // human.SetRHandArchoring(rHandFollowTarget, animationTransition);
 
                 /* Override Human LookAt & FootAndBodyPoseLayer */
-                human.SetLookAt(null, haftCenter);
+                human.SetLookAt(null, pullingObject.transform);
                 human.SetFootAndBodyPoseLayerOverride(pullBoxPoseLayerIndex);
 
                 /* Override PullablePCDIK Target */
-                pullingObject.GetComponentInParent<PullablePCDIKController>()?.SetFollowTargetOverride(haftCenter, archoringTransition_pull);
+                pullingObject.GetComponentInParent<PullablePCDIKController>()?.SetFollowTargetOverride(pullingObjFollowTarget, animationTransition);
 
             },
             () => {
-                Debug.DrawLine(pullingObject.transform.position, lHandFollowTarget.position);
-                Debug.DrawLine(pullingObject.transform.position, rHandFollowTarget.position);
                 lHandFollowTarget.position = human.humanBone.lShoulder.position + (pullingObject.transform.position + human.humanBone.root.right * pullingObject.lHaft.localPosition.x - human.humanBone.lShoulder.position).normalized * 1f;
                 rHandFollowTarget.position = human.humanBone.rShoulder.position + (pullingObject.transform.position + human.humanBone.root.right * pullingObject.rHaft.localPosition.x - human.humanBone.rShoulder.position).normalized * 1f;
-                haftCenter.position = (lHandFollowTarget.transform.position + rHandFollowTarget.transform.position) / 2.0f;
-                HandlePullOut();
+                pullingObjFollowTarget.position = (lHandFollowTarget.transform.position + rHandFollowTarget.transform.position) / 2.0f;
             },
             () => {
                 human.SetLookAt(null, null);
@@ -106,28 +104,12 @@ public class PCDHumanPullSM : MonoBehaviour {
         sm.GetState(State.PullingSmallBoxHover).Bind(
             
             () => {
-
-                /* Archoring Hand */
-                // human.SetLHandArchoring(lHandFollowTarget, dragTransition);
-                // human.SetRHandArchoring(rHandFollowTarget, dragTransition);
-
-                human.SetLookAt(pullingObjectHover.transform, haftCenter);
-                
+                human.SetLookAt(pullingObjectHover.transform, pullingObjectHover.transform);
             },
             () => {
-
-                lHandFollowTarget.position = human.humanBone.lShoulder.position + (pullingObjectHover.transform.position + human.humanBone.root.right * pullingObjectHover.lHaft.localPosition.x - human.humanBone.lShoulder.position).normalized * 1f;
-                rHandFollowTarget.position = human.humanBone.rShoulder.position + (pullingObjectHover.transform.position + human.humanBone.root.right * pullingObjectHover.rHaft.localPosition.x - human.humanBone.rShoulder.position).normalized * 1f;
-                haftCenter.position = (lHandFollowTarget.transform.position + rHandFollowTarget.transform.position) / 2.0f;
-
             },
             () => {
-
-                // human.SetLHandArchoring(null);
-                // human.SetRHandArchoring(null);
-
                 human.SetLookAt(null, null);
-
             }
         );
         
@@ -136,22 +118,19 @@ public class PCDHumanPullSM : MonoBehaviour {
 
                 // 设置 HandArchoring & HandPoseOverride
                 human.SetLHandPoseLayerOverride(pullStickPoseLayerIndex);
-                human.SetRHandArchoring(rHandFollowTarget, archoringTransition_pull);
+                human.SetRHandArchoring(pullingObjFollowTarget, animationTransition);
+                // human.SetRHandArchoring(rHandFollowTarget, animationTransition);
 
                 // 设置 LookAt & FootAndBodyOverride
                 human.SetLookAt(null, pullingObject.rHaft);
                 human.SetFootAndBodyPoseLayerOverride(pullStickPoseLayerIndex);
 
-                // 设置 PullablePCDIK override
-                pullingObject.GetComponentInParent<PullablePCDIKController>()?.SetFollowTargetOverride(rHandFollowTarget, archoringTransition_pull);
             },
             () => {
 
                 // 计算并更新手部位置
-                rHandFollowTarget.position = human.humanBone.rShoulder.position + (pullingObject.transform.position - human.humanBone.rShoulder.position).normalized * 1f;
+                pullingObjFollowTarget.position = human.humanBone.rShoulder.position + (pullingObject.transform.position - human.humanBone.rShoulder.position).normalized * 1f;
 
-                // 更新PullOut检测
-                HandlePullOut();
             },
             () => {
 
@@ -163,44 +142,19 @@ public class PCDHumanPullSM : MonoBehaviour {
                 human.SetLookAt(null, null);
                 human.SetFootAndBodyPoseLayerOverride(-1);
 
-                // 解除 PullablePCDIK override
-                if (pullingObject) {
-                    pullingObject.GetComponentInParent<PullablePCDIKController>(true)?.SetFollowTargetOverride(null);
-                }
+                
             }
         );
 
         sm.GetState(State.PullingStickHover).Bind(
             
             () => {
-
-                // Archoring Hand
-                // human.SetRHandArchoring(rHandFollowTarget, archoringTransition_pull);
-                // Override Human LookAt
                 human.SetLookAt(pullingObjectHover.transform, pullingObjectHover.rHaft);
-                
             },
             () => {
-
-                    // if (!pullingObjectHover) {
-                    //     sm.GotoState(State.Idle);
-                    // }
-                    // if (Vector3.Distance(human.humanBone.rShoulder.position, pullingObjectHover.rHaft.position) < 1f) {
-                    //     rHandFollowTarget.transform.position = pullingObjectHover.rHaft.position;
-                    // } else {
-                    //     rHandFollowTarget.transform.position = human.humanBone.rShoulder.position + (pullingObjectHover.rHaft.position - human.humanBone.rShoulder.position).normalized * 1f;
-                    // }
-
             },
             () => {
-
-                /* Disoverride Hand */
-                // human.SetRHandArchoring(null);
-                /* Disoverride Human LookAt */
                 human.SetLookAt(null, null);
-                /* Clear Human PoseOverride */
-                // ClearPoseLayerOverride();
-
             }
         );
 
@@ -231,7 +185,7 @@ public class PCDHumanPullSM : MonoBehaviour {
             GameObject.Instantiate(dragStickEffect, human.humanBone.rHand.position, Quaternion.identity, human.humanBone.rHand);
         }
         // GameObject.Instantiate(holdBoxEffect, curFollowTarget.position + Vector3.up * 0.5f, Quaternion.identity);
-        sm.GotoState(State.PullingBoxHover);
+        sm.GotoState(State.PullingSmallBox);
     }
 
     /// <summary>
@@ -300,6 +254,10 @@ public class PCDHumanPullSM : MonoBehaviour {
         }
     }
 
+    public void OnPullOutObj() {
+        pulledOutCallback?.Invoke();
+    }
+
 #endregion 
 
 #region Private LifeCycle Function
@@ -313,7 +271,7 @@ public class PCDHumanPullSM : MonoBehaviour {
             pullingObject.GetComponent<Rigidbody>().isKinematic = false;
         }
 
-
+        pullableObj.StartPullBy(transform, pullingObjFollowTarget);
         emitter.SafePlaySetParameterByNameWithLabel("Action", "Pick");
 
         InitPullOut();
@@ -323,40 +281,9 @@ public class PCDHumanPullSM : MonoBehaviour {
     private PullInfo pullingInfo;
     private float pullOutTimeCount;
     
-    private void HandlePullOut() {
-        if (pullingInfo == null) {
-            return;
-        }
-
-        Transform drager = human.humanBone.body;
-
-        float stretchDis = Vector3.Distance(pullingObject.transform.position.ClearY(), drager.position.ClearY());
-
-        float maxStretchLengthScale = pullingInfo.maxStretchLength * pullingObject.rootScale;
-
-        Rigidbody rb = GetComponent<Rigidbody>();
-        rb.AddForce((pullingObject.transform.position - drager.position) * pullingInfo.contractStrength * Time.deltaTime, ForceMode.Acceleration);
-        if (stretchDis > maxStretchLengthScale) {
-            pullOutTimeCount += Time.deltaTime;
-            Debug.DrawLine(pullingObject.transform.position, drager.position, Color.red);
-        } else {
-            pullOutTimeCount = Mathf.Max(0, pullOutTimeCount - Time.deltaTime);
-            Debug.DrawLine(pullingObject.transform.position, drager.position, Color.green);
-        }
-
-        if (pullOutTimeCount >= pullingInfo.pullOutTime) {
-            pullingObject.OnPulledOut();
-            pulledOutCallback?.Invoke();
-            RestPulling();
-            emitter.SafePlaySetParameterByNameWithLabel("Action", "Drop");
-            return;
-        }
-
-    }
-
     private void OnPullExit() {
-        // human.SetLookAt(null);
         sm.GotoState(State.Idle, false);
+        pullingObject?.RestPull();
         pullingObject = null;
     }
 
@@ -368,10 +295,4 @@ public class PCDHumanPullSM : MonoBehaviour {
 
 }
 
-[System.Serializable]
-public class PullInfo {
-    public bool isStretchable = false;
-    public float maxStretchLength = 2.0f;
-    public float contractStrength = 2.0f;
-    public float pullOutTime = 1.0f;
-}
+

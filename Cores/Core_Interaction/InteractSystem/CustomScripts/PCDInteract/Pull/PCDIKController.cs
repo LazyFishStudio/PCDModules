@@ -1,5 +1,5 @@
 using UnityEngine;
-
+[ExecuteInEditMode]
 public class PullablePCDIKController : MonoBehaviour {
     public Transform root;
     public Transform head;
@@ -9,6 +9,8 @@ public class PullablePCDIKController : MonoBehaviour {
     public Transform lookAtTarget;
     public float rotSpeed = 3.0f;
     public float lookAtTriggerDis = 12.0f;
+    public AnimationCurve oriJointScaleScaleCurve;
+    public AnimationCurve pullOutProcessJointScaleScaleCurve;
     protected Vector3 posOffsetScale;
     protected Quaternion targetRot;
     protected float lengthScale => root.localScale.y;
@@ -18,6 +20,14 @@ public class PullablePCDIKController : MonoBehaviour {
     [SerializeField]
     protected float overrideTransitionCount;
     protected float overrideTransitionprocess;
+    protected PCDIK pcdik;
+    protected PullableObject pullable;
+
+    private void Awake() {
+        pcdik = GetComponentInChildren<PCDIK>();
+        pullable = GetComponent<PullableObject>();
+        oriJointScaleScaleCurve = pcdik.jointScaleScaleCurve;
+    }
 
     void Update() {
 
@@ -50,6 +60,32 @@ public class PullablePCDIKController : MonoBehaviour {
             // head.rotation = Quaternion.Lerp(beforeOverrideRot, defaultFollowTarget.rotation, overrideTransitionprocess);
         }
         
+        if (pcdik && pullable.puller != null) {
+
+            // 创建新的 AnimationCurve，其关键帧将是两个曲线之间的插值结果
+            AnimationCurve interpolatedCurve = new AnimationCurve();
+            AnimationCurve curve1 = oriJointScaleScaleCurve;
+            AnimationCurve curve2 = pullOutProcessJointScaleScaleCurve;
+            // 假设 curve1 和 curve2 有相同数量的关键帧，并且对应的关键帧在两条曲线上表示相同的时间点
+            // 这通常是一个有用的前提条件，因为不同的时间点可能导致插值非常复杂
+            for (int i = 0; i < curve1.length; i++)
+            {
+                // 插值关键帧的时间
+                float time = curve1.keys[i].time; // 取其中一个曲线的时间，因为它们应该是相同的
+
+                // 插值关键帧的值
+                float value = Mathf.Lerp(curve1.Evaluate(time), curve2.Evaluate(time), pullable.pullOutProcess);
+
+                // 创建新的关键帧并添加到插值曲线中
+                interpolatedCurve.AddKey(new Keyframe(time, value));
+            }
+
+            pcdik.jointScaleScaleCurve = interpolatedCurve;
+
+        } else {
+            pcdik.jointScaleScaleCurve = oriJointScaleScaleCurve;
+        }
+
     }
 
     public void SetLookAtTarget() {

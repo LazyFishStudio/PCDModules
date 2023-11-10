@@ -12,6 +12,9 @@ public class UI_FocusObjectNameTips : SingletonMono<UI_FocusObjectNameTips> {
 
     void Update() {
         // content = "文字测试文字测试文字测试文字测试文字测试\n文字测试文字测试文字测试文字测试文字测试文字测试";
+        if (!text) {
+            return;
+        }
         background.SetActive(content != "");
         text.SetText(content);
         content = "";

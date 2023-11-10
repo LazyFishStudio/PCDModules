@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using InteractSystem;
+using DG.Tweening;
 // using DG.Tweening;
 
 [RequireComponent(typeof(PCDFocusable))]
@@ -133,7 +134,7 @@ public class PickableObject : MonoBehaviour, IFocusable, IPickable, IPlaceable {
     }
 
     public virtual void OnPicked() {
-
+		DOTween.Kill(transform, false);
     }
 
     void OnDestroy() {

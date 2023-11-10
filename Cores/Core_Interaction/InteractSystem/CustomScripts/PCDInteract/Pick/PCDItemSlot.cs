@@ -3,12 +3,29 @@ using System.Collections.Generic;
 using UnityEngine;
 using InteractSystem;
 using System.Linq;
+using DG.Tweening;
 
 public class PCDItemSlot : ItemSlot
 {
 	public Material previewMat;
 	public MatModifier preview;
 	public bool dynamicPreview;
+	public bool enablePlaceAnimation;
+	public float animTime = 0.22f;
+	public Ease animEase = Ease.InOutSine;
+
+
+	public override void OnAcceptItemCallback(InteractComp interactor, IPlaceable item) {
+		base.OnAcceptItemCallback(interactor, item);
+		if (enablePlaceAnimation) {
+			if (item is Component component)
+				component.transform.DOLocalMoveY(0, animTime).From(1).SetEase(animEase);
+		}
+	}
+
+	public override void OnRemoveItemCallback(IPlaceable item) {
+		base.OnRemoveItemCallback(item);
+	}
 
 	protected void DestoryUselessComponents(List<Component> pending, int times = 0) {
 		List<Component> nextPending = new List<Component>();

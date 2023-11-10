@@ -9,6 +9,7 @@ namespace InteractSystem
 	public class ItemSlot : MonoBehaviour, IFocusable, IPlaceSlot
 	{
 		public IPlaceable holdItem;
+		public Vector3 holdItemEulerOffset;
 
 		public Action<IPlaceSlot, IPlaceable> acceptItemCallbacks { get; set; }
 		public Action<IPlaceSlot, IPlaceable> removeItemCallbacks { get; set; }
@@ -21,7 +22,7 @@ namespace InteractSystem
 		}
 
 		public virtual bool CheckAcceptItem(InteractComp interactor, IPlaceable item) {
-			if (item == null)
+			if (item == null || ((MonoBehaviour)item) is PullableObject)
 				return false;
 
 			if (holdItem != null)
@@ -44,8 +45,9 @@ namespace InteractSystem
 				if (component.GetComponent<Rigidbody>()) {
 					component.GetComponent<Rigidbody>().isKinematic = true;
 				}
-				component.transform.position = transform.position;
 				component.transform.SetParent(transform);
+				component.transform.localPosition = Vector3.zero;
+				component.transform.localEulerAngles = holdItemEulerOffset;
 			}
 
 			acceptItemCallbacks?.Invoke(this, item);

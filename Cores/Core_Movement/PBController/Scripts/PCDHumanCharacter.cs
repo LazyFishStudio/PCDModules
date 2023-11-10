@@ -5,6 +5,12 @@ using UnityEngine;
 public class PCDHumanCharacter : MonoBehaviour {
     [SerializeField]
     private PCDHumanMovementSM moveSM;
+    private Condition condition;
+    private bool isCanRun => condition ? condition.data.saitity > 0 : true;
+
+    private void Awake() {
+        condition = GetComponent<Condition>();
+    }
 
     void Update() {
         TestMovementInput();
@@ -25,7 +31,19 @@ public class PCDHumanCharacter : MonoBehaviour {
         if (moveSM.moveInput.moveAxis.magnitude > 1f)
             moveSM.moveInput.moveAxis = moveSM.moveInput.moveAxis.normalized;
 
-        moveSM.moveInput.run = InputManager.GetKey(KeyCode.LeftShift);
+        // 跑步切换判断
+        if (InputManager.GetKeyDown(KeyCode.LeftShift) && isCanRun) {
+            moveSM.moveInput.run = true;
+        }
+
+        if (moveSM.moveInput.run) {
+            condition?.LoseSaitity(Time.deltaTime / 60.0f);
+        }
+
+        if (!isCanRun || moveSM.moveInput.moveAxis == Vector3.zero) {
+            moveSM.moveInput.run = false;
+        }
+
     }
 
 }
