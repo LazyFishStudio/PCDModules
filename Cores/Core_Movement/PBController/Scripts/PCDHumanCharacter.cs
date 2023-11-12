@@ -4,20 +4,19 @@ using UnityEngine;
 
 public class PCDHumanCharacter : MonoBehaviour {
     [SerializeField]
-    private PCDHumanMovementSM moveSM;
-    private Condition condition;
-    private bool isCanRun => condition ? condition.data.saitity > 0 : true;
+    protected PCDHumanMovementSM moveSM;
+    protected Condition condition;
+    protected bool isCanRun => condition ? condition.data.saitity > 0 : true;
 
-    private void Awake() {
+    void Awake() {
         condition = GetComponent<Condition>();
     }
 
     void Update() {
-        TestMovementInput();
-        moveSM?.update();
+        MovementInput();
     }
     
-    private void TestMovementInput() {
+    protected virtual void MovementInput() {
         float forward = 0, right = 0;
         if (InputManager.GetKey(KeyCode.W))
             forward += 1f;
@@ -33,7 +32,7 @@ public class PCDHumanCharacter : MonoBehaviour {
 
         // 跑步切换判断
         if (InputManager.GetKeyDown(KeyCode.LeftShift) && isCanRun) {
-            moveSM.moveInput.run = true;
+            moveSM.moveInput.run = !moveSM.moveInput.run;
         }
 
         if (moveSM.moveInput.run) {
@@ -44,6 +43,10 @@ public class PCDHumanCharacter : MonoBehaviour {
             moveSM.moveInput.run = false;
         }
 
+    }
+
+    public virtual void ClearInput() {
+        moveSM.moveInput.moveAxis = Vector3.zero;
     }
 
 }

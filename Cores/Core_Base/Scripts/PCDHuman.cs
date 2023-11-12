@@ -4,7 +4,7 @@ using UnityEngine.Events;
 public class PCDHuman : MonoBehaviour {
 
     public enum BodyState {
-        Pose, Stepping
+        Pose, Stepping, ArchoringAtTarget
     }
 
     public enum FootState {
@@ -18,7 +18,6 @@ public class PCDHuman : MonoBehaviour {
     private float scaleDeltaTime => Time.deltaTime / humanBone.rootScale * Mathf.Max(poseInfo.speed / animSetting.oriSpeed, 0.5f);
 
 #region Setting
-
     public bool isLateUpdate = false;
     public bool autoGenerateHumanBone;
 
@@ -176,12 +175,21 @@ public class PCDHuman : MonoBehaviour {
             () => {}
         );
 
-
         bodysm.Init();
 
     }
 
     private void InitFootSM() {
+
+        footsm.GetState(FootState.Pose).Bind(
+            () => {
+                
+            },
+            () => {
+
+            },
+            () => {}
+        );
 
         footsm.GetState(FootState.Idle).Bind(
             () => {
@@ -409,6 +417,7 @@ private void UpdateLegs() {
 
     [SerializeField]
     private Transform lookAtTarget_body;
+    [SerializeField]
     private Transform lookAtTarget_head;
     private void UpdateBody() {
         
@@ -441,7 +450,6 @@ private void UpdateLegs() {
         humanBone.body.localRotation = Quaternion.Slerp(humanBone.body.localRotation, poseInfo.bodyTargetRotLocal, Time.deltaTime * animSetting.bodyRotSpeed);
 
 
-
         void UpdateBodySprint() {
             float toTargetY = poseInfo.bodyTargetPosLocal.y - poseInfo.bodyPosLocal.y;
             float dragForceY = toTargetY * animSetting.bodyDragStrength;
@@ -464,8 +472,9 @@ private void UpdateLegs() {
 
         void UpdateBodyRoll() {
             if (bodysm.curState.Equals(BodyState.Stepping) && Vector3.Angle(poseInfo.moveDir, humanBone.root.forward) < 180.0f) {
-                float bodyRollProcess = Mathf.Clamp((Mathf.Abs(Vector3.SignedAngle(poseInfo.moveDir, humanBone.root.forward, Vector3.up)) - 1f)/ 180.0f, 0, 1.0f);
+                float bodyRollProcess = Mathf.Clamp((Mathf.Abs(Vector3.SignedAngle(poseInfo.moveDir, humanBone.root.forward, Vector3.up)) * 1.5f) / 120.0f, 0, 1.0f);
                 bodyRollProcess = Mathf.Sin(bodyRollProcess * Mathf.PI);
+                bodyRollProcess = poseInfo.speed < 0.5f ? 0 : bodyRollProcess;
                 float bodyRollSign = Mathf.Sign(Vector3.SignedAngle(poseInfo.moveDir, humanBone.root.forward, Vector3.up));
                 Quaternion bodyRoll = Quaternion.AngleAxis(bodyRollSign * bodyRollProcess * animSetting.bodyRollAngle, Vector3.forward);
                 poseInfo.bodyTargetRotLocal = bodyRoll * poseInfo.bodyTargetRotLocal;
@@ -631,6 +640,16 @@ private void UpdateLegs() {
         rHand.ArchoringAt(target, transition);
     }
 
+    public void SetLFootArchoring(Transform target, float transition = 0) {
+        lFoot.ArchoringAt(target, transition);
+        footsm.GotoState(target ? FootState.Pose : FootState.Idle);
+    }
+
+    public void SetRFootArchoring(Transform target, float transition = 0) {
+        rFoot.ArchoringAt(target, transition);
+        footsm.GotoState(target ? FootState.Pose : FootState.Idle);
+    }
+
     public void SetPoseLayerIndex(int poseLayerIndex) {
         if (poseLayerIndex > humanBone.poseLayers.Length - 1) {
             return;
@@ -697,13 +716,21 @@ private void UpdateLegs() {
     [System.Serializable]
     public class Foot {
         public enum State {
-            Stand, Step
+            Stand, Step, ArchoringAtTarget
         }
 
         private Transform footBone;
         private PCDHuman human;
         private float stepDurationCount;
         private float stepProcess;
+
+        public Transform archoringTarget;
+        public float archoringTransition = 0;
+        public float archoringTransitionCount;
+        public float archoringTransitionProcess;
+        public Vector3 lastPos;
+        public Quaternion lastRot;
+        public Vector3 lastPosLocal;
 
         public Vector3 archoringPos;
         public Quaternion archoringRot;
@@ -741,6 +768,18 @@ private void UpdateLegs() {
             return stepProcess;
         }
 
+        public void ArchoringAt(Transform archoringTarget, float transition = 0) {
+            if (archoringTarget == null) {
+                sm.GotoState(State.Stand);
+                this.archoringTarget = null;
+                return;
+            }
+            this.archoringTarget = archoringTarget;
+            archoringTransition = transition;
+
+            sm.GotoState(State.ArchoringAtTarget);
+        }
+
         private void InitSM() {
 
             sm.GetState(State.Stand).Bind(
@@ -767,13 +806,6 @@ private void UpdateLegs() {
 
                     footBone.position = curPos;
 
-                    // Vector3 pelvisToFoot = targetPos - humanBone.root.position + pelvisPosLocal;
-                    // float sign = Vector3.Dot(pelvisToFoot.ClearY(), humanBone.root.forward);
-                    // float angleToRootForward = Vector3.SignedAngle(humanBone.root.forward, pelvisToFoot.ClearY(), Vector3.up);
-                    // Vector3 footDown = Quaternion.AngleAxis(-angleToRootForward, Vector3.up) * pelvisToFoot;
-                    // Vector3 footRight = Quaternion.AngleAxis(90, pelvisToFoot) * humanBone.root.forward;
-                    // Vector3 footForward = Quaternion.AngleAxis(-90, footRight) * footDown;
-                    // archoringRot = Quaternion.LookRotation(humanBone.root.forward, Vector3.up);
                     footBone.rotation = targetRot;
 
                     // if step finish
@@ -787,6 +819,37 @@ private void UpdateLegs() {
                 },
                 () => {
 
+                }
+            );
+
+            sm.GetState(State.ArchoringAtTarget).Bind(
+                () => {
+                    archoringTransitionCount = 0;
+                    lastPos = footBone.position;
+                    lastRot = footBone.rotation;
+                },
+                () => {
+
+                    if (archoringTarget == null) {
+                        lastPosLocal = Quaternion.Inverse(human.humanBone.body.localRotation) * (footBone.localPosition - human.humanBone.body.localPosition);
+                        sm.GotoState(State.Stand);
+                        return;
+                    }
+
+                    if (archoringTransition == 0) {
+                        footBone.position = archoringTarget.position;
+                        footBone.rotation = archoringTarget.rotation;
+                    } else {
+                        archoringTransitionCount += Time.deltaTime;
+                        archoringTransitionProcess = Mathf.Min(1.0f, archoringTransitionCount / archoringTransition);
+                        footBone.position = Vector3.Lerp(lastPos, archoringTarget.position, archoringTransitionProcess);
+                        footBone.rotation = Quaternion.Lerp(lastRot, archoringTarget.rotation, archoringTransitionProcess);
+                    }
+
+                    
+
+                },
+                () => {
                 }
             );
 

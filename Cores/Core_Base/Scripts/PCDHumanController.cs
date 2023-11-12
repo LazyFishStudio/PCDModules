@@ -10,6 +10,9 @@ public class PCDHumanController : MonoBehaviour
     void Awake() {
         humanAnim = GetComponent<PCDHuman>();
         rb = GetComponentInParent<Rigidbody>();
+        if (!rb) {
+            this.enabled = false;
+        }
     }
 
     // Update is called once per frame

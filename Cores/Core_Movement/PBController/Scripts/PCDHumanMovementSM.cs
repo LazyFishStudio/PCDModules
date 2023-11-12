@@ -72,7 +72,7 @@ public class PCDHumanMovementSM : MonoBehaviour {
 
     }
 
-    public void update() {
+    public void Update() {
         HandleMovementInput();
         sm.UpdateStateAction();
     }

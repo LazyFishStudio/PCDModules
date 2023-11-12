@@ -14,7 +14,7 @@ namespace PhysicsBasedCharacterController
         public bool enableCrouch = true;
         public bool enableSprint = true;
 
-        [HideInInspector]
+        // [HideInInspector]
         public Vector2 axisInput;
         [HideInInspector]
         public Vector2 cameraInput = Vector2.zero;
