@@ -34,7 +34,8 @@ public partial class PCDPlayerInteractionManager : BaseInteractionManager
         interactInput.interactBackpack = InputManager.GetKeyDown(KeyCode.T);
         interactInput.pick = InputManager.GetKeyDown(KeyCode.Mouse0);
         interactInput.restPull = InputManager.GetKeyUp(KeyCode.Mouse0);
-        interactInput.interact = InputManager.GetKeyDown(KeyCode.Mouse0);
+        interactInput.interactTrigger = InputManager.GetKeyDown(KeyCode.Mouse0);
+        interactInput.interactHold = InputManager.GetKey(KeyCode.Mouse0);
         interactInput.drop = InputManager.GetKeyDown(KeyCode.Mouse1);
 
         HandleInteractInput();
@@ -43,15 +44,18 @@ public partial class PCDPlayerInteractionManager : BaseInteractionManager
     void LateUpdate() {
         interactInput.pick = false;
         interactInput.restPull = false;
-        interactInput.interact = false;
+        justPick = false;
     }
 
+    private bool justPick = false;
     private void HandleInteractInput() {
         /* ����ʰȡ�ͷ��� */
         if (interactInput.pick) {
             if (interactComp.holdingItem == null) {
                 HandlePickAndPullAction();
-			} else {
+                if (interactComp.holdingItem != null)
+                    justPick = true;
+            } else {
                 // IPlaceSlot slot = (focusing != null ? focusing.GetFocusComponent<IPlaceSlot>() : null);
                 // IPlaceable placeable = interactComp.pickingItem.GetComponent<IPlaceable>();
                 // if (slot != null && placeable != null) {
@@ -93,58 +97,71 @@ public partial class PCDPlayerInteractionManager : BaseInteractionManager
 			}
 		}
 
-        IInteractable interactable = null;
-        if (interactComp.holdingItem != null)
-            interactable = interactComp.holdingItem.GetComponent<IInteractable>();
-        if (interactable != null && interactable.CheckInteractCond(interactComp)) {
-            /* ��������Ʒ���� */
-            bool interacting = interactable.interactor != null;
-            if (interactInput.interact) {
-                if (!interacting) {
-                    interactable.OnInteractStart(interactComp);
-                    InteractLogger.LogInteractEvent("InteractStart", gameObject, interactComp.holdingItem);
+        /* 处理使用手上的物品 */
+        if (interactComp.holdingItem != null) {
+            ITriggerInteractable triggerItem = interactComp.holdingItem.GetComponent<ITriggerInteractable>();
+            IHoldInteractable holdItem = interactComp.holdingItem.GetComponent<IHoldInteractable>();
+            if (triggerItem != null) {
+                if (interactInput.interactTrigger && triggerItem.CheckInteractCond(interactComp)) {
+                    triggerItem.OnInteract(interactComp);
+                    InteractLogger.LogInteractEvent("InteractItem", gameObject, interactComp.holdingItem);
                 }
-                if (interactable.OnInteractStay(interactComp)) {
-                    interactable.OnInteractFinish(interactComp);
-                    InteractLogger.LogInteractEvent("InteractFinish", gameObject, interactComp.holdingItem);
+			} else if (holdItem != null) {
+                if (interactInput.interactHold && holdItem.CheckInteractCond(interactComp)) {
+                    /* 按住交互键，且满足交互条件 */
+                    if (!holdItem.IsInteracting && interactInput.interactTrigger && !justPick) {
+                        /* 并没有人与之交互，开始交互 */
+                        holdItem.OnInteractStart(interactComp);
+                        InteractLogger.LogInteractEvent("InteractItemStart", gameObject, interactComp.holdingItem);
+                    }
+                    if (holdItem.IsInteracting && holdItem.interactor == interactComp) {
+                        /* 当前角色正在与其交互，继续交互 */
+                        if (holdItem.OnInteractStay(interactComp)) {
+                            holdItem.OnInteractFinish(interactComp);
+                            InteractLogger.LogInteractEvent("InteractItemFinish", gameObject, interactComp.holdingItem);
+                        }
+					}
+				} else if (holdItem.IsInteracting && holdItem.interactor == interactComp) {
+                    /* 正在交互，但是把交互键松开了 */
+                    holdItem.OnInteractTerminate(interactComp);
+                    InteractLogger.LogInteractEvent("InteractItemTerminate", gameObject, interactComp.holdingItem);
                 }
-            } else {
-                if (interacting) {
-                    interactable.OnInteractTerminate(interactComp);
-                    InteractLogger.LogInteractEvent("InteractTerminate", gameObject, interactComp.holdingItem);
+			}
+        }
+
+        /* 处理面前的可交互物品 */
+        if (focusing != null) {
+            ITriggerInteractable triggerItem = focusing.GetFocusComponent<ITriggerInteractable>();
+            IHoldInteractable holdItem = focusing.GetFocusComponent<IHoldInteractable>();
+            if (triggerItem != null) {
+                if (interactInput.interactTrigger && triggerItem.CheckInteractCond(interactComp)) {
+                    triggerItem.OnInteract(interactComp);
+                    InteractLogger.LogInteractEvent("InteractItem", gameObject, focusing.gameObject);
                 }
-            }
-        } else if (interactComp.holdingItem != null && focusing == null) {
-            /* Ͷ�����ɽ�����Ʒ */
-            if (interactInput.interact) {
-                // HandleThrowAction();
+            } else if (holdItem != null) {
+                if (interactInput.interactHold && holdItem.CheckInteractCond(interactComp)) {
+                    /* 按住交互键，且满足交互条件 */
+                    if (!holdItem.IsInteracting && interactInput.interactTrigger) {
+                        /* 并没有人与之交互，开始交互 */
+                        holdItem.OnInteractStart(interactComp);
+                        InteractLogger.LogInteractEvent("InteractItemStart", gameObject, focusing.gameObject);
+                    }
+                    if (holdItem.IsInteracting && holdItem.interactor == interactComp) {
+                        /* 当前角色正在与其交互，继续交互 */
+                        if (holdItem.OnInteractStay(interactComp)) {
+                            holdItem.OnInteractFinish(interactComp);
+                            InteractLogger.LogInteractEvent("InteractItemFinish", gameObject, focusing.gameObject);
+                        }
+                    }
+                } else if (holdItem.IsInteracting && holdItem.interactor == interactComp) {
+                    /* 正在交互，但是把交互键松开了 */
+                    holdItem.OnInteractTerminate(interactComp);
+                    InteractLogger.LogInteractEvent("InteractItemTerminate", gameObject, focusing.gameObject);
+                }
             }
         }
 
-        /* ��������Ʒ���� */
-        IInteractable interactItem = null;
-        if (focusing != null && focusing.GetFocusComponent<IInteractable>() != null) {
-            interactItem = focusing.GetFocusComponent<IInteractable>();
-            bool interacting = interactItem.interactor != null;
-            if (interactItem != null && interactItem.CheckInteractCond(interactComp)) {
-                if (interactInput.interact) {
-                    if (!interacting) {
-                        InteractLogger.LogInteractEvent("InteractStart", gameObject, focusing.gameObject);
-                        interactItem.OnInteractStart(interactComp);
-                    }
-                    if (interactItem.OnInteractStay(interactComp)) {
-                        interactItem.OnInteractFinish(interactComp);
-                        InteractLogger.LogInteractEvent("InteractFinish", gameObject, focusing.gameObject);
-                    }
-                } else {
-                    if (interacting) {
-                        interactItem.OnInteractTerminate(interactComp);
-                        InteractLogger.LogInteractEvent("InteractTerminate", gameObject, focusing.gameObject);
-                    }
-                }
-            }
-        }
-
+#if false
         /* ���ý�����ʾ���� */
         if (InteractHintManager.Inst != null) {
             InteractHintManager.HideHintText();
@@ -159,6 +176,7 @@ public partial class PCDPlayerInteractionManager : BaseInteractionManager
                 InteractHintManager.ShowHintText(hintItem.interactType, InteractHintType.MouseLeft);
             }
         }
+#endif
     }
 
     private void HandlePickAndPullAction() {
@@ -197,7 +215,8 @@ public class InteractInput
     public bool drop;
     public bool restPull;
     public bool interactBackpack;
-    public bool interact;
+    public bool interactTrigger;
+    public bool interactHold;
 }
 #endregion
 

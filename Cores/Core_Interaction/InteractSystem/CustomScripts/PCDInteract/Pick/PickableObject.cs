@@ -70,7 +70,7 @@ public class PickableObject : MonoBehaviour, IFocusable, IPickable, IPlaceable {
 
         character.holdAndDropSM?.HoldObj(null, shape);
 
-        IInteractable interactable = GetComponent<IInteractable>();
+        IHoldInteractable interactable = GetComponent<IHoldInteractable>();
         if (interactable != null && interactable.interactor != null) {
             interactable.OnInteractTerminate(interactor);
 		}

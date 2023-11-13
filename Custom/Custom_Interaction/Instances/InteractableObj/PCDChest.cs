@@ -3,30 +3,24 @@ using System.Collections.Generic;
 using UnityEngine;
 using InteractSystem;
 
-public class PCDChest : PCDInteractable {
+public class PCDChest : PCDTriggerInteractable {
     public string chestTag;
     public Transform chestLid;
     public GameObject[] inChestItemsPrefabs;
     public GameObject chestOpenEffectPrefab;
     private bool isOpened;
-    public override bool CheckInteractCond(InteractComp interactor) { 
-        if (!interactor.holdingItem) {
+
+    public override bool CheckInteractCond(InteractComp interactor) {
+        if (interactor.holdingItem == null)
             return false;
-        }
+
         PCDKey key = interactor.holdingItem.GetComponent<PCDKey>();
-        if (!key) {
-            return false;
-        }
-        return key.keyTag == chestTag;
+        return key && key.keyTag == chestTag;
     }
 
-    public override bool OnInteractStay(InteractComp interactor) { 
-        return true; 
-    }
-
-    public override void OnInteractFinish(InteractComp interactor) {
+    public override bool OnInteract(InteractComp interactor) { 
         Open();
-        this.interactor = null;
+        return true;
     }
 
     public void Open() {
@@ -46,14 +40,4 @@ public class PCDChest : PCDInteractable {
         }
         isOpened = true;
     }
-
-    public void Lock() {
-        if (!isOpened) {
-            return;
-        }
-        if (chestLid) {
-            chestLid.localEulerAngles = Vector3.zero;
-        }
-    }
-
 }
