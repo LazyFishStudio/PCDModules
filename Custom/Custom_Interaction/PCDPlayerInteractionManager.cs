@@ -209,7 +209,8 @@ public partial class PCDPlayerInteractionManager : BaseInteractionManager
 
     private void RegisterAction(string name, string type, string textDesc, Action action) {
         var desc = new InputDesc(name, type, textDesc);
-        inputDescs.Add(desc);
+        if (textDesc != null)
+            inputDescs.Add(desc);
         if (inputActions.ContainsKey(desc.ToString()))
             Debug.LogError("Input Map Has Conflict!");
         inputActions[desc.ToString()] = action;

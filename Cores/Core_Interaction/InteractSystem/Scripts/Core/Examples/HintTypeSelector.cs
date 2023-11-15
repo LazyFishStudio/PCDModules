@@ -9,19 +9,14 @@ public class HintTypeSelector : MonoBehaviour
 	public GameObject keyFObj;
 
 	private void Awake() {
-		mouseLeftObj.SetActive(false);
+		mouseLeftObj.SetActive(true);
 		mouseRightObj.SetActive(false);
 		keyFObj.SetActive(false);
-		switch (InteractHintManager.curHintType) {
-			case InteractHintType.MouseLeft:
-				mouseLeftObj.SetActive(true);
-				break;
-			case InteractHintType.MouseRight:
-				mouseRightObj.SetActive(true);
-				break;
-			case InteractHintType.KeyF:
-				keyFObj.SetActive(true);
-				break;
-		}
+	}
+
+	public void RefreshHintType(InteractHintType type) {
+		mouseLeftObj.SetActive(type == InteractHintType.MouseLeft);
+		mouseRightObj.SetActive(type == InteractHintType.MouseRight);
+		keyFObj.SetActive(type == InteractHintType.KeyF);
 	}
 }
