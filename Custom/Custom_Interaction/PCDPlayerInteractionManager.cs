@@ -170,7 +170,7 @@ public partial class PCDPlayerInteractionManager : BaseInteractionManager, IPCDA
             IPlaceable placeable = interactComp.holdingItem.GetComponent<IPlaceable>();
             if (slot != null && placeable != null) {
                 string interactDesc = "放置";
-                if (placeable is PCDGenericSlot genericSlot && genericSlot.interactDesc != null && genericSlot.interactDesc != "") {
+                if (slot is PCDGenericSlot genericSlot && genericSlot.interactDesc != null && genericSlot.interactDesc != "") {
                     interactDesc = genericSlot.interactDesc;
                 }
                 actionManager.RegisterAction(playerName, "Mouse1", "GetKeyDown", interactDesc, () => {
