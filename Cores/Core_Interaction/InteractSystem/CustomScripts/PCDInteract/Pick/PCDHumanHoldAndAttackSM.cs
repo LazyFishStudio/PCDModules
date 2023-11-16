@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class PCDHumanHoldAndAttackSM : MonoBehaviour {
+public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
 
     public enum PickType {
         Pick, Drag
@@ -11,6 +11,9 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour {
         DropBox,
         AttackingLongStickHorizon
     }
+
+    public string playerName = "P1";
+
     [Header("Holding设置")]
     public Transform boxObjFollowTarget;
     public Transform smallBoxObjFollowTarget;
@@ -74,8 +77,32 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour {
 
         
     }
-    
-    void InitHandActionSM() {
+
+	private void Start() {
+        PCDPlayerActionManager actionManager = PCDPlayerActionManager.GetInstance();
+        actionManager.RegisterActionHandler(this as IPCDActionHandler);
+    }
+
+    public void RegisterActionOnUpdate() {
+        PCDPlayerActionManager actionManager = PCDPlayerActionManager.GetInstance();
+
+        var holdingItem = GetComponent<PCDHumanInteractSM>().holdingItem;
+        if (holdingItem == null)
+            return;
+        
+        PCDWeapon weapon = holdingItem.GetComponent<PCDWeapon>();
+        if (weapon == null)
+            return;
+
+        string interactDesc = "攻击";
+        if (weapon.interactDesc != null && weapon.interactDesc != "")
+            interactDesc = weapon.interactDesc;
+        actionManager.RegisterAction(playerName, "Mouse0", "GetKeyDown", interactDesc, () => {
+            UseWeaponAttack(holdingObject, PCDObjectProperties.Shape.LongStick);
+        });
+    }
+
+	void InitHandActionSM() {
 
         sm = new StateMachine<State>(State.Idle);
 
@@ -202,9 +229,6 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour {
 
     public void update() {
         sm.UpdateStateAction();
-        if (InputManager.GetKeyDown(KeyCode.Mouse0)) {
-            UseWeaponAttack(holdingObject, PCDObjectProperties.Shape.LongStick);
-        }
     }
 
 #region PRIVATE IMPLEMENT

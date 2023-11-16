@@ -7,7 +7,7 @@ using UnityEngine.XR;
 using UnityEngine.UI;
 
 #region Interface
-public partial class PCDPlayerInteractionManager : BaseInteractionManager
+public partial class PCDPlayerInteractionManager : BaseInteractionManager, IPCDActionHandler
 {
     private partial void HandlePickAction();
     private partial void HandlePullAction();
@@ -20,13 +20,15 @@ public partial class PCDPlayerInteractionManager : BaseInteractionManager
 #endregion
 
 #region Internal
-public partial class PCDPlayerInteractionManager : BaseInteractionManager
+public partial class PCDPlayerInteractionManager : BaseInteractionManager, IPCDActionHandler
 {
     public InteractInput interactInput;
     public GameObject virtualInput;
     private bool backpackEnabled { get => BackpackManager.Inst != null; }
 
-    void Start() {
+    private void Start() {
+        PCDPlayerActionManager actionManager = PCDPlayerActionManager.GetInstance();
+        actionManager.RegisterActionHandler(this as IPCDActionHandler);
     }
 
     protected override void Update() {
@@ -38,39 +40,6 @@ public partial class PCDPlayerInteractionManager : BaseInteractionManager
         interactInput.interactTrigger = InputManager.GetKeyDown(KeyCode.Mouse0);
         interactInput.interactHold = InputManager.GetKey(KeyCode.Mouse0);
         interactInput.drop = InputManager.GetKeyDown(KeyCode.Mouse1);
-
-        ResetInputActions();
-        GetInputActions();
-        HandleInputActions();
-
-        /*
-        if (true) {
-            string hint = "";
-            foreach (InputDesc desc in inputDescs) {
-                if (desc.keyDesc != null)
-                    hint += string.Format("{0}：{1} ", desc.ToString(), desc.keyDesc);
-                else
-                    hint += string.Format("{0}：null ", desc.ToString());
-            }
-            Debug.Log(hint);
-        }
-        */
-
-        /*
-        if (InteractHintManager.Inst != null) {
-            InteractHintManager.HideHintText();
-            if (interactable != null && interactable.interactor == null && interactComp.holdingItem != null) {
-                PCDInteractable item = interactComp.holdingItem.GetComponent<PCDInteractable>();
-                if (item != null && item.interactType != "") {
-                    InteractHintManager.ShowHintText(item.interactType, InteractHintType.MouseLeft);
-                }
-            }
-            var hintItem = interactItem as PCDInteractable;
-            if (hintItem != null && hintItem.interactType != "" && hintItem.CheckInteractCond(interactComp)) {
-                InteractHintManager.ShowHintText(hintItem.interactType, InteractHintType.MouseLeft);
-            }
-        }
-        */
     }
 }
 
@@ -87,7 +56,7 @@ public class InteractInput
 #endregion
 
 #region Implement
-public partial class PCDPlayerInteractionManager : BaseInteractionManager
+public partial class PCDPlayerInteractionManager : BaseInteractionManager, IPCDActionHandler
 {
     private partial void HandlePickAction() {
         var pickable = focusing.GetFocusComponent<PickableObject>();
@@ -176,95 +145,70 @@ public partial class PCDPlayerInteractionManager : BaseInteractionManager
 #endregion
 
 #region Refractor
-public partial class PCDPlayerInteractionManager : BaseInteractionManager
+public partial class PCDPlayerInteractionManager : BaseInteractionManager, IPCDActionHandler
 {
-    public struct InputDesc
-	{
-        public string keyName; /* Pick, Drop, etc */
-        public string keyState; /* GetKeyDown, GetKey, GetKeyUp */
-        public string keyDesc; /* text description */
+    public string playerName = "P1";
 
-        public InputDesc(string name, string state, string desc) {
-            keyName = name;
-            keyState = state;
-            keyDesc = desc;
-        }
+    public void RegisterActionOnUpdate() {
+        PCDPlayerActionManager actionManager = PCDPlayerActionManager.GetInstance();
 
-        public override string ToString() {
-            return keyName + keyState;
-		}
-    }
-
-    public List<InputDesc> inputDescs;
-    public Dictionary<string, Action> inputActions;
-
-    private void ResetInputActions() {
-        if (inputDescs == null)
-            inputDescs = new List<InputDesc>();
-        inputDescs.Clear();
-        if (inputActions == null)
-            inputActions = new Dictionary<string, Action>();
-        inputActions.Clear();
-	}
-
-    private void RegisterAction(string name, string type, string textDesc, Action action) {
-        var desc = new InputDesc(name, type, textDesc);
-        if (textDesc != null)
-            inputDescs.Add(desc);
-        if (inputActions.ContainsKey(desc.ToString()))
-            Debug.LogError("Input Map Has Conflict!");
-        inputActions[desc.ToString()] = action;
-    }
-
-    private void GetInputActions() {
+        /* 注册 Pick 和 Pull 操作 */
         if (interactComp.holdingItem == null && focusing != null) {
             PullableObject pullable = focusing.GetFocusComponent<PullableObject>();
             if (pullable != null) {
-                RegisterAction("Pick", "GetKeyDown", "抓住", HandlePullAction);
+                actionManager.RegisterAction(playerName, "Mouse0", "GetKeyDown", "抓住", HandlePullAction);
             }
             PickableObject pickable = focusing.GetFocusComponent<PickableObject>();
             if (pullable == null && pickable != null) {
-                RegisterAction("Pick", "GetKeyDown", "拾取", HandlePickAction);
+                actionManager.RegisterAction(playerName, "Mouse0", "GetKeyDown", "拾取", HandlePickAction);
             }
         }
 
+        /* 注册 Place，ResetPull 和 Drop 操作 */
         if (interactComp.holdingItem != null) {
             IPlaceSlot slot = (focusing != null ? focusing.GetFocusComponent<IPlaceSlot>() : null);
             IPlaceable placeable = interactComp.holdingItem.GetComponent<IPlaceable>();
             if (slot != null && placeable != null) {
-                RegisterAction("Drop", "GetKeyDown", "放置", () => {
+                string interactDesc = "放置";
+                if (placeable is PCDGenericSlot genericSlot && genericSlot.interactDesc != null && genericSlot.interactDesc != "") {
+                    interactDesc = genericSlot.interactDesc;
+                }
+                actionManager.RegisterAction(playerName, "Mouse1", "GetKeyDown", interactDesc, () => {
                     InteractLogger.LogInteractEvent("PlaceItem", gameObject, (placeable as Component).gameObject);
                     placeable.PlacedTo(interactComp, slot);
                 });
             } else {
                 PCDHumanInteractSM player = interactComp as PCDHumanInteractSM;
                 if (player.pullingObject != null) {
-                    RegisterAction("ResetPull", "GetKeyUp", null, HandleRestPullingAction);
+                    actionManager.RegisterAction(playerName, "Mouse0", "GetKeyUp", null, HandleRestPullingAction);
                 } else if (player.holdingObject != null) {
-                    RegisterAction("Drop", "GetKeyDown", "放下", HandleDropHoldingAction);
+                    actionManager.RegisterAction(playerName, "Mouse1", "GetKeyDown", "放下", HandleDropHoldingAction);
                 }
             }
         }
 
+        /* 注册背包操作 */
         if (backpackEnabled) {
             if (interactComp.holdingItem == null) {
-                RegisterAction("Backpack", "GetKeyDown", null, HandleFastPickFromBackpackAction);
+                actionManager.RegisterAction(playerName, "F", "GetKeyDown", null, HandleFastPickFromBackpackAction);
             } else {
-                RegisterAction("Backpack", "GetKeyDown", "放入背包", HandleFastPutIntoBackpackAction);
+                actionManager.RegisterAction(playerName, "F", "GetKeyDown", "放入背包", HandleFastPutIntoBackpackAction);
             }
         }
 
+        /* 注册手上物品使用操作 */
         if (interactComp.holdingItem != null) {
             PCDTriggerProp triggerItem = interactComp.holdingItem.GetComponent<PCDTriggerProp>();
             if (triggerItem != null) {
                 RegisterTriggerInteractable(triggerItem as ITriggerInteractable, triggerItem.interactType);
-			}
+            }
             PCDHoldProp holdItem = interactComp.holdingItem.GetComponent<PCDHoldProp>();
             if (holdItem != null) {
                 RegisterHoldInteractable(holdItem as IHoldInteractable, holdItem.interactType);
             }
         }
 
+        /* 注册场景物品交互操作 */
         if (focusing != null) {
             PCDTriggerInteractable triggerItem = focusing.GetFocusComponent<PCDTriggerInteractable>();
             if (triggerItem != null) {
@@ -277,47 +221,11 @@ public partial class PCDPlayerInteractionManager : BaseInteractionManager
         }
     }
 
-    private void HandleInputActions() {
-        if (interactInput.pick) {
-            if (inputActions.TryGetValue("PickGetKeyDown", out Action action)) {
-                action?.Invoke();
-			}
-		}
-        if (interactInput.drop) {
-            if (inputActions.TryGetValue("DropGetKeyDown", out Action action)) {
-                action?.Invoke();
-            }
-        }
-        if (interactInput.interactBackpack) {
-            if (inputActions.TryGetValue("BackpackGetKeyDown", out Action action)) {
-                action?.Invoke();
-            }
-        }
-        if (interactInput.restPull) {
-            if (inputActions.TryGetValue("ResetPullGetKeyUp", out Action action)) {
-                action?.Invoke();
-            }
-        }
-        if (interactInput.interactTrigger) {
-            if (inputActions.TryGetValue("InteractGetKeyDown", out Action action)) {
-                action?.Invoke();
-            }
-        }
-        if (interactInput.interactHold) {
-            if (inputActions.TryGetValue("InteractGetKey", out Action action)) {
-                action?.Invoke();
-            }
-        }
-        if (!interactInput.interactHold) {
-            if (inputActions.TryGetValue("InteractGetKeyUp", out Action action)) {
-                action?.Invoke();
-            }
-        }
-    }
-
     private void RegisterTriggerInteractable(ITriggerInteractable item, string interactType) {
+        PCDPlayerActionManager actionManager = PCDPlayerActionManager.GetInstance();
+
         if (item.CheckInteractCond(interactComp)) {
-            RegisterAction("Interact", "GetKeyDown", interactType, () => {
+            actionManager.RegisterAction(playerName, "Mouse0", "GetKeyDown", interactType, () => {
                 item.OnInteract(interactComp);
                 InteractLogger.LogInteractEvent("InteractItem", gameObject, (item as Component).gameObject);
             });
@@ -325,9 +233,11 @@ public partial class PCDPlayerInteractionManager : BaseInteractionManager
     }
 
     private void RegisterHoldInteractable(IHoldInteractable item, string interactType) {
+        PCDPlayerActionManager actionManager = PCDPlayerActionManager.GetInstance();
+
         if (!item.IsInteracting && item.CheckInteractCond(interactComp)) {
             /* 空闲，满足条件，注册开始交互事件 */
-            RegisterAction("Interact", "GetKeyDown", interactType, () => {
+            actionManager.RegisterAction(playerName, "Mouse0", "GetKeyDown", interactType, () => {
                 item.OnInteractStart(interactComp);
                 InteractLogger.LogInteractEvent("InteractItemStart", gameObject, (item as Component).gameObject);
                 if (item.OnInteractStay(interactComp)) {
@@ -339,13 +249,13 @@ public partial class PCDPlayerInteractionManager : BaseInteractionManager
         if (item.IsInteracting && item.interactor == interactComp) {
             if (item.CheckInteractCond(interactComp)) {
                 /* 正在交互，仍然满足交互条件，注册继续和中止事件 */
-                RegisterAction("Interact", "GetKey", interactType, () => {
+                actionManager.RegisterAction(playerName, "Mouse0", "GetKey", interactType, () => {
                     if (item.OnInteractStay(interactComp)) {
                         item.OnInteractFinish(interactComp);
                         InteractLogger.LogInteractEvent("InteractItemFinish", gameObject, (item as Component).gameObject);
                     }
                 });
-                RegisterAction("Interact", "GetKeyUp", null, () => {
+                actionManager.RegisterAction(playerName, "Mouse0", "GetKeyUp", null, () => {
                     item.OnInteractTerminate(interactComp);
                     InteractLogger.LogInteractEvent("InteractItemTerminate", gameObject, (item as Component).gameObject);
                 });

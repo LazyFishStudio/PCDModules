@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class PCDWeapon : MonoBehaviour {
+    public string interactDesc;
     public Transform owner;
     public PCDWeaponProperties.ToolType toolType = PCDWeaponProperties.ToolType.Null;
     public PCDWeaponProperties.WeaponSharpness sharpness = PCDWeaponProperties.WeaponSharpness.Dull;
