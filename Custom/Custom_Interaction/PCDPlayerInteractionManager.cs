@@ -183,7 +183,8 @@ public partial class PCDPlayerInteractionManager : BaseInteractionManager, IPCDA
             } else {
                 PCDHumanInteractSM player = interactComp as PCDHumanInteractSM;
                 if (player.pullingObject != null) {
-                    actionManager.RegisterAction(playerName, "FirstInteract", "GetKeyUp", null, HandleRestPullingAction);
+                    /* 需要持续注册"抓住"，用以显示提示 */
+                    actionManager.RegisterAction(playerName, "FirstInteract", "GetKeyUp", "抓住", HandleRestPullingAction);
                 } else if (player.holdingObject != null) {
                     actionManager.RegisterAction(playerName, "SecondInteract", "GetKeyDown", "放下", HandleDropHoldingAction);
                 }
