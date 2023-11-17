@@ -51,7 +51,7 @@ public class PickableObject : MonoBehaviour, IFocusable, IPickable, IPlaceable {
 
         PCDHumanInteractSM character = interactor as PCDHumanInteractSM;
         character.holdAndDropSM?.HoldObj(transform, shape);
-        OnPicked();
+        OnPickedBy(interactor);
 
         return true;
     }
@@ -61,7 +61,7 @@ public class PickableObject : MonoBehaviour, IFocusable, IPickable, IPlaceable {
         if (character.holdAndDropSM && character.holdAndDropSM.isAttacking) {
             return false;
         }
-        OnDropped();
+        OnDroppedBy(interactor);
         
         SetPhysicActive(true);
         transform.SetParent(null);
@@ -99,15 +99,21 @@ public class PickableObject : MonoBehaviour, IFocusable, IPickable, IPlaceable {
         attachedPlace = slot;
         transform.localRotation = Quaternion.identity;
         attachedPlace.OnAcceptItemCallback(interactor, this);
+
+        OnPlaceTo(slot);
+
         return true;
 	}
 
     public bool RemovedFrom(InteractComp interactor) {
         attachedPlace.OnRemoveItemCallback(this);
-        attachedPlace = null;
         if (interactor) {
             PickedBy(interactor);
         }
+
+        OnRemoveFrom(interactor);
+        attachedPlace = null;
+
         return true;
 	}
 
@@ -129,12 +135,20 @@ public class PickableObject : MonoBehaviour, IFocusable, IPickable, IPlaceable {
         }
     }
 
-    public virtual void OnDropped() {
+    public virtual void OnDroppedBy(InteractComp interactor) {
 
     }
 
-    public virtual void OnPicked() {
+    public virtual void OnPickedBy(InteractComp interactor) {
 		DOTween.Kill(transform, false);
+    }
+
+    public virtual void OnPlaceTo(IPlaceSlot slot) {
+
+    }
+
+    public virtual void OnRemoveFrom(InteractComp interactor) {
+
     }
 
     void OnDestroy() {
