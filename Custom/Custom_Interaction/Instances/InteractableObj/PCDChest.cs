@@ -18,8 +18,9 @@ public class PCDChest : PCDTriggerInteractable {
         return key && key.keyTag == chestTag;
     }
 
-    public override bool OnInteract(InteractComp interactor) { 
+    public override bool OnInteract(InteractComp interactor) {
         Open();
+        Destroy(interactor.holdingItem);
         return true;
     }
 

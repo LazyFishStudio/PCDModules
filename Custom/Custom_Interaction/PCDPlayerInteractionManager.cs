@@ -156,11 +156,11 @@ public partial class PCDPlayerInteractionManager : BaseInteractionManager, IPCDA
         if (interactComp.holdingItem == null && focusing != null) {
             PullableObject pullable = focusing.GetFocusComponent<PullableObject>();
             if (pullable != null) {
-                actionManager.RegisterAction(playerName, "Mouse0", "GetKeyDown", "抓住", HandlePullAction);
+                actionManager.RegisterAction(playerName, "FirstInteract", "GetKeyDown", "抓住", HandlePullAction);
             }
             PickableObject pickable = focusing.GetFocusComponent<PickableObject>();
             if (pullable == null && pickable != null) {
-                actionManager.RegisterAction(playerName, "Mouse0", "GetKeyDown", "拾取", HandlePickAction);
+                actionManager.RegisterAction(playerName, "FirstInteract", "GetKeyDown", "拾取", HandlePickAction);
             }
         }
 
@@ -173,16 +173,16 @@ public partial class PCDPlayerInteractionManager : BaseInteractionManager, IPCDA
                 if (slot is PCDGenericSlot genericSlot && genericSlot.interactDesc != null && genericSlot.interactDesc != "") {
                     interactDesc = genericSlot.interactDesc;
                 }
-                actionManager.RegisterAction(playerName, "Mouse1", "GetKeyDown", interactDesc, () => {
+                actionManager.RegisterAction(playerName, "SecondInteract", "GetKeyDown", interactDesc, () => {
                     InteractLogger.LogInteractEvent("PlaceItem", gameObject, (placeable as Component).gameObject);
                     placeable.PlacedTo(interactComp, slot);
                 });
             } else {
                 PCDHumanInteractSM player = interactComp as PCDHumanInteractSM;
                 if (player.pullingObject != null) {
-                    actionManager.RegisterAction(playerName, "Mouse0", "GetKeyUp", null, HandleRestPullingAction);
+                    actionManager.RegisterAction(playerName, "FirstInteract", "GetKeyUp", null, HandleRestPullingAction);
                 } else if (player.holdingObject != null) {
-                    actionManager.RegisterAction(playerName, "Mouse1", "GetKeyDown", "放下", HandleDropHoldingAction);
+                    actionManager.RegisterAction(playerName, "SecondInteract", "GetKeyDown", "放下", HandleDropHoldingAction);
                 }
             }
         }
@@ -225,7 +225,7 @@ public partial class PCDPlayerInteractionManager : BaseInteractionManager, IPCDA
         PCDPlayerActionManager actionManager = PCDPlayerActionManager.GetInstance();
 
         if (item.CheckInteractCond(interactComp)) {
-            actionManager.RegisterAction(playerName, "Mouse0", "GetKeyDown", interactType, () => {
+            actionManager.RegisterAction(playerName, "FirstInteract", "GetKeyDown", interactType, () => {
                 item.OnInteract(interactComp);
                 InteractLogger.LogInteractEvent("InteractItem", gameObject, (item as Component).gameObject);
             });
@@ -237,7 +237,7 @@ public partial class PCDPlayerInteractionManager : BaseInteractionManager, IPCDA
 
         if (!item.IsInteracting && item.CheckInteractCond(interactComp)) {
             /* 空闲，满足条件，注册开始交互事件 */
-            actionManager.RegisterAction(playerName, "Mouse0", "GetKeyDown", interactType, () => {
+            actionManager.RegisterAction(playerName, "FirstInteract", "GetKeyDown", interactType, () => {
                 item.OnInteractStart(interactComp);
                 InteractLogger.LogInteractEvent("InteractItemStart", gameObject, (item as Component).gameObject);
                 if (item.OnInteractStay(interactComp)) {
@@ -249,13 +249,13 @@ public partial class PCDPlayerInteractionManager : BaseInteractionManager, IPCDA
         if (item.IsInteracting && item.interactor == interactComp) {
             if (item.CheckInteractCond(interactComp)) {
                 /* 正在交互，仍然满足交互条件，注册继续和中止事件 */
-                actionManager.RegisterAction(playerName, "Mouse0", "GetKey", interactType, () => {
+                actionManager.RegisterAction(playerName, "FirstInteract", "GetKey", interactType, () => {
                     if (item.OnInteractStay(interactComp)) {
                         item.OnInteractFinish(interactComp);
                         InteractLogger.LogInteractEvent("InteractItemFinish", gameObject, (item as Component).gameObject);
                     }
                 });
-                actionManager.RegisterAction(playerName, "Mouse0", "GetKeyUp", null, () => {
+                actionManager.RegisterAction(playerName, "FirstInteract", "GetKeyUp", null, () => {
                     item.OnInteractTerminate(interactComp);
                     InteractLogger.LogInteractEvent("InteractItemTerminate", gameObject, (item as Component).gameObject);
                 });

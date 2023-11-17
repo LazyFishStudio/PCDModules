@@ -97,7 +97,7 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
         string interactDesc = "攻击";
         if (weapon.interactDesc != null && weapon.interactDesc != "")
             interactDesc = weapon.interactDesc;
-        actionManager.RegisterAction(playerName, "Mouse0", "GetKeyDown", interactDesc, () => {
+        actionManager.RegisterAction(playerName, "FirstInteract", "GetKeyDown", interactDesc, () => {
             UseWeaponAttack(holdingObject, PCDObjectProperties.Shape.LongStick);
         });
     }

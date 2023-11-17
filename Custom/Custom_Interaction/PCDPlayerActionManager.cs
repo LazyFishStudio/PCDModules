@@ -8,9 +8,13 @@ public class PCDPlayerActionManager : SingletonMono<PCDPlayerActionManager>
 {
 	public List<InputDesc> actionDescList;
 	private Dictionary<string, Action> playerActionDict;
+    private Dictionary<string, Vector2> playerMoveAxisDict;
 
     public List<IPCDActionHandler> actionHandlers;
     public List<IPCDActionHandler> lateActionHandlers;
+
+    private bool registerFinished = false;
+    private System.Object registerLock = new System.Object();
 
     public void RegisterActionHandler(IPCDActionHandler handler) {
         actionHandlers.Add(handler);
@@ -29,55 +33,59 @@ public class PCDPlayerActionManager : SingletonMono<PCDPlayerActionManager>
         playerActionDict[desc.ToString()] = action;
     }
 
+    public void TriggerAction(string actionName) {
+        if (!registerFinished)
+            RegisterAllActions();
+        if (playerActionDict.TryGetValue(actionName, out Action action)) {
+            action?.Invoke();
+        }
+    }
+
+    public void SetMoveAxis(string playerName, Vector2 axis) {
+        playerMoveAxisDict[playerName] = axis;
+    }
+
+    public Vector2 GetMoveAxis(string playerName) {
+        if (playerMoveAxisDict.TryGetValue(playerName, out Vector2 moveAxis))
+            return moveAxis;
+        return new Vector2(0f, 0f);
+    }
+
     private void Awake() {
         actionDescList = new List<InputDesc>();
         playerActionDict = new Dictionary<string, Action>();
         actionHandlers = new List<IPCDActionHandler>();
         lateActionHandlers = new List<IPCDActionHandler>();
+        playerMoveAxisDict = new Dictionary<string, Vector2>();
     }
 
 	private void Update() {
-        foreach (var handler in actionHandlers) {
-            handler.RegisterActionOnUpdate();
-		}
-        foreach (var handler in lateActionHandlers) {
-            handler.RegisterActionOnUpdate();
-		}
-
-        HandlePlayerInput();
+        RegisterAllActions();
     }
 
 	private void LateUpdate() {
         ResetInputActions();
     }
 
-	private void ResetInputActions() {
-        actionDescList.Clear();
-        playerActionDict.Clear();
+    private void RegisterAllActions() {
+        lock (registerLock) {
+            if (!registerFinished) {
+                foreach (var handler in actionHandlers) {
+                    handler.RegisterActionOnUpdate();
+                }
+                foreach (var handler in lateActionHandlers) {
+                    handler.RegisterActionOnUpdate();
+                }
+                registerFinished = true;
+            }
+        }
     }
 
-    private void HandlePlayerInput() {
-        KeyCode[] keyList = { KeyCode.Mouse0, KeyCode.Mouse1, KeyCode.F };
-
-        foreach (var key in keyList) {
-            if (Input.GetKeyDown(key)) {
-                string keyName = string.Format("[{0}, {1}, {2}]", "P1", key.ToString(), "GetKeyDown");
-                if (playerActionDict.TryGetValue(keyName, out Action action)) {
-                    action?.Invoke();
-				}
-			}
-            if (Input.GetKey(key)) {
-                string keyName = string.Format("[{0}, {1}, {2}]", "P1", key.ToString(), "GetKey");
-                if (playerActionDict.TryGetValue(keyName, out Action action)) {
-                    action?.Invoke();
-                }
-            }
-            if (Input.GetKeyUp(key)) {
-                string keyName = string.Format("[{0}, {1}, {2}]", "P1", key.ToString(), "GetKeyUp");
-                if (playerActionDict.TryGetValue(keyName, out Action action)) {
-                    action?.Invoke();
-                }
-            }
+	private void ResetInputActions() {
+        lock (registerLock) {
+            registerFinished = false;
+            actionDescList.Clear();
+            playerActionDict.Clear();
         }
     }
 }

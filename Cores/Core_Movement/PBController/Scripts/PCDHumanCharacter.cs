@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class PCDHumanCharacter : MonoBehaviour {
+    public string playerName = "P1";
+
     [SerializeField]
     protected PCDHumanMovementSM moveSM;
     protected Condition condition;
@@ -12,20 +14,17 @@ public class PCDHumanCharacter : MonoBehaviour {
         condition = GetComponent<Condition>();
     }
 
+    protected float forward = 0f;
+    protected float right = 0f;
     void Update() {
+        Vector3 moveAxis = PCDPlayerActionManager.GetInstance().GetMoveAxis(playerName);
+        forward = moveAxis.y;
+        right = moveAxis.x;
+
         MovementInput();
     }
     
     protected virtual void MovementInput() {
-        float forward = 0, right = 0;
-        if (InputManager.GetKey(KeyCode.W))
-            forward += 1f;
-        if (InputManager.GetKey(KeyCode.S))
-            forward -= 1f;
-        if (InputManager.GetKey(KeyCode.D))
-            right += 1f;
-        if (InputManager.GetKey(KeyCode.A))
-            right -= 1f;
         moveSM.moveInput.moveAxis = new Vector2(right, forward);
         if (moveSM.moveInput.moveAxis.magnitude > 1f)
             moveSM.moveInput.moveAxis = moveSM.moveInput.moveAxis.normalized;
