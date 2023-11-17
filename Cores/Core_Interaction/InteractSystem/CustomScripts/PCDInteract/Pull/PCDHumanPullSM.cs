@@ -256,6 +256,7 @@ public class PCDHumanPullSM : MonoBehaviour {
 
     public void OnPullOutObj() {
         pulledOutCallback?.Invoke();
+        emitter.SafePlaySetParameterByNameWithLabel("Action", "Drop");
     }
 
 #endregion 
