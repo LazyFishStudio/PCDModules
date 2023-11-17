@@ -150,6 +150,9 @@ public partial class PCDPlayerInteractionManager : BaseInteractionManager, IPCDA
     public string playerName = "P1";
 
     public void RegisterActionOnUpdate() {
+        if (!gameObject.activeInHierarchy)
+            return;
+
         PCDPlayerActionManager actionManager = PCDPlayerActionManager.GetInstance();
 
         /* 注册 Pick 和 Pull 操作 */
