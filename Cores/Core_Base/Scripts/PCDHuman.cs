@@ -81,7 +81,8 @@ public class PCDHuman : MonoBehaviour {
 
         drawGizmos = true;
 
-        CreateBoneControllerAndInitPose();
+        humanBone.Init();
+        InitPoseInfoAndResetBonePosToBoneSetting();
 
         InitBodySM();
         InitFootSM();
@@ -400,16 +401,16 @@ private void UpdateLegs() {
         }
 
         if (humanBone.isLArmActive) {
-            poseInfo.lHandTargetPosLocal = curPose.body.localRotation * curPose.lHand.localPosition - curPose.body.localPosition;
-            poseInfo.lHandTargetRotLocal = curPose.lHand.localRotation;
-            lHand.Update(poseInfo.lShoulderPosLocal, poseInfo.lHandTargetPosLocal, poseInfo.lHandTargetRotLocal);
+            poseInfo.lHandTargetPosLocalRefToBody = curPose.body.localRotation * curPose.lHand.localPosition - curPose.body.localPosition;
+            poseInfo.lHandTargetRotLocalRefToBody = curPose.lHand.localRotation;
+            lHand.Update(poseInfo.lShoulderPosLocal, poseInfo.lHandTargetPosLocalRefToBody, poseInfo.lHandTargetRotLocalRefToBody);
             humanBone.lShoulder.rotation = Quaternion.LookRotation((humanBone.lHand.position - humanBone.lShoulder.position).normalized, humanBone.lHand.up);
         }
 
         if (humanBone.isRArmActive) {
-            poseInfo.rHandTargetPosLocal = curPose.body.localRotation * curPose.rHand.localPosition - curPose.body.localPosition;
-            poseInfo.rHandTargetRotLocal = curPose.rHand.localRotation;
-            rHand.Update(poseInfo.rShoulderPosLocal, poseInfo.rHandTargetPosLocal, poseInfo.rHandTargetRotLocal);
+            poseInfo.rHandTargetPosLocalRefToBody = curPose.body.localRotation * curPose.rHand.localPosition - curPose.body.localPosition;
+            poseInfo.rHandTargetRotLocalRefToBody = curPose.rHand.localRotation;
+            rHand.Update(poseInfo.rShoulderPosLocal, poseInfo.rHandTargetPosLocalRefToBody, poseInfo.rHandTargetRotLocalRefToBody);
             humanBone.rShoulder.rotation = Quaternion.LookRotation((humanBone.rHand.position - humanBone.rShoulder.position).normalized, humanBone.rHand.up);
         }
         
@@ -471,7 +472,8 @@ private void UpdateLegs() {
         }
 
         void UpdateBodyRoll() {
-            if (bodysm.curState.Equals(BodyState.Stepping) && Vector3.Angle(poseInfo.moveDir, humanBone.root.forward) < 180.0f) {
+            // 待解决问题：检测出RootForward比MoveDir先到达目标角度的情况（会导致Roll角度相反），目前可以通过控制MoveDir的旋转速度大于RootForward来解决
+            if (bodysm.curState.Equals(BodyState.Stepping) && Vector3.Angle(poseInfo.moveDir, humanBone.root.forward) < 180.1f) {
                 float bodyRollProcess = Mathf.Clamp((Mathf.Abs(Vector3.SignedAngle(poseInfo.moveDir, humanBone.root.forward, Vector3.up)) * 1.5f) / 120.0f, 0, 1.0f);
                 bodyRollProcess = Mathf.Sin(bodyRollProcess * Mathf.PI);
                 bodyRollProcess = poseInfo.speed < 0.5f ? 0 : bodyRollProcess;
@@ -505,12 +507,88 @@ private void UpdateLegs() {
 
     }
 
-    public void CreateBoneControllerAndInitPose() {
+    public void InitPoseInfoAndResetBonePosToBoneSetting() {
 
-        humanBone.Init();
+        Debug.Log("init bone");
+        
+        InitPoseInfo();
+        InitFootHand();
+        ResetBodyPosToBoneSetting();
+        ResetFootHandPoseInfoToBoneSetting();
+        ResetFootHandPosToPoseInfo();
+        
+    }
+
+    public void InitPoseInfo() {
         poseInfo = new();
         SetPoseLayerIndex(0);
         SetPose(0);
+    }
+
+    // 要先initBody 因为 Foot Hand 的位置依赖于 Body 的相对位置
+    private void ResetBodyPosToBoneSetting() {
+        // 将Body的初始位置作为原始位置
+        // 初始化PoseInfo中的数值
+        poseInfo.bodyPosLocal = humanBone.bodyOriPosLocal;
+        poseInfo.bodyTargetPosLocal = poseInfo.bodyPosLocal;
+
+        // 初始化Body的旋转到Pose
+        humanBone.body.localPosition = poseInfo.bodyPosLocal;
+        humanBone.body.localRotation = curPose.body.localRotation;
+
+        humanBone.lPelvis.localPosition = humanBone.lPelvisOriPosLocal + humanBone.body.localPosition;
+        humanBone.rPelvis.localPosition = humanBone.rPelvisOriPosLocal + humanBone.body.localPosition;
+        humanBone.lShoulder.localPosition = humanBone.lShoulderOriPosLocal + humanBone.body.localPosition;
+        humanBone.rShoulder.localPosition = humanBone.rShoulderOriPosLocal + humanBone.body.localPosition;
+
+    }
+
+    private void ResetFootHandPoseInfoToBoneSetting() {
+
+        if (humanBone.isLLegActive) {
+            poseInfo.lFootTargetPos = humanBone.body.position + humanBone.body.rotation * (curPose.lFoot.localPosition - curPose.body.localPosition);
+        }
+
+        if (humanBone.isRLegActive) {
+            poseInfo.rFootTargetPos = humanBone.body.position + humanBone.body.rotation * (curPose.rFoot.localPosition - curPose.body.localPosition);
+        }
+        
+        if (humanBone.isLArmActive) {
+            poseInfo.lHandTargetPosLocalRefToBody = curPose.lHand.localPosition - humanBone.body.localPosition;
+            poseInfo.lHandTargetRotLocalRefToBody = curPose.lHand.localRotation;
+        }
+
+        if (humanBone.isRArmActive) {
+            poseInfo.rHandTargetPosLocalRefToBody = curPose.rHand.localPosition - humanBone.body.localPosition;
+            poseInfo.rHandTargetRotLocalRefToBody = curPose.rHand.localRotation;
+        }
+
+    }
+
+    private void ResetFootHandPosToPoseInfo() {
+
+        if (humanBone.isLLegActive) {
+            lFoot.SetFootPos(poseInfo.lFootTargetPos);
+        }
+
+        if (humanBone.isRLegActive) {
+            rFoot.SetFootPos(poseInfo.rFootTargetPos);
+            // humanBone.rFoot.transform.rotation = rFoot.archoringRot;
+        }
+        
+        if (humanBone.isLArmActive) {
+            lHand.SetHandPos(poseInfo.lHandTargetPosLocalRefToBody);
+        }
+
+        if (humanBone.isRArmActive) {
+            rHand.SetHandPos(poseInfo.rHandTargetPosLocalRefToBody);
+        }
+    }
+
+    private void InitFootHand() {
+
+        footsm.Init();
+        handsm.Init();
 
         if (humanBone.isLLegActive) {
             lFoot = new(this, humanBone.lFoot);
@@ -525,53 +603,6 @@ private void UpdateLegs() {
         if (humanBone.isRArmActive) {
             rHand = new(this, humanBone.rHand);
         }
-
-        InitPose();
-        
-    }
-
-    public void InitPose() {
-
-        // 将Body的初始位置作为原始位置
-        humanBone.bodyOriPosLocal = humanBone.body.localPosition;
-        // 初始化Body的旋转到Pose
-        humanBone.body.localRotation = curPose.body.localRotation;
-
-
-        // 初始化PoseInfo中的数值
-        poseInfo.bodyPosLocal = humanBone.bodyOriPosLocal;
-        poseInfo.bodyTargetPosLocal = humanBone.bodyOriPosLocal;
-
-
-        if (humanBone.isLLegActive) {
-            poseInfo.lFootTargetPos = humanBone.body.position + humanBone.body.rotation * (curPose.lFoot.localPosition - curPose.body.localPosition);
-            lFoot.curPos = poseInfo.lFootTargetPos;
-            lFoot.targetPos = poseInfo.lFootTargetPos;
-            lFoot.archoringPos = poseInfo.lFootTargetPos;
-            humanBone.lFoot.transform.position = poseInfo.lFootTargetPos;
-        }
-
-        if (humanBone.isRLegActive) {
-            poseInfo.rFootTargetPos = humanBone.body.position + humanBone.body.rotation * (curPose.rFoot.localPosition - curPose.body.localPosition);
-            rFoot.curPos = poseInfo.rFootTargetPos;
-            rFoot.targetPos = poseInfo.rFootTargetPos;
-            rFoot.archoringPos = poseInfo.rFootTargetPos;
-            humanBone.rFoot.transform.position = rFoot.archoringPos;
-            humanBone.rFoot.transform.rotation = rFoot.archoringRot;
-        }
-        
-        if (humanBone.isLArmActive) {
-            poseInfo.lHandTargetPosLocal = curPose.lHand.localPosition - humanBone.body.localPosition;
-            poseInfo.lHandTargetRotLocal = curPose.lHand.localRotation;
-            lHand.curPosLocal = poseInfo.lHandTargetPosLocal;
-        }
-
-        if (humanBone.isRArmActive) {
-            poseInfo.rHandTargetPosLocal = curPose.rHand.localPosition - humanBone.body.localPosition;
-            poseInfo.rHandTargetRotLocal = curPose.rHand.localRotation;
-            rHand.curPosLocal = poseInfo.rHandTargetPosLocal;
-        }
-
     }
 
     private HumanPoseLayer GetPoseLayer(int layerIndex) {
@@ -780,6 +811,11 @@ private void UpdateLegs() {
             sm.GotoState(State.ArchoringAtTarget);
         }
 
+        public void SetFootPos(Vector3 curFootPos) {
+            curPos = lastPos = targetPos = archoringPos = curFootPos;
+            footBone.position = curPos;
+        }
+
         private void InitSM() {
 
             sm.GetState(State.Stand).Bind(
@@ -875,14 +911,14 @@ private void UpdateLegs() {
         public float archoringTransitionProcess;
 
         public Vector3 archoringPos;
-        public Vector3 shoulderPosLocal;
-        public Vector3 targetPosLocal;
+        public Vector3 shoulderPosLocalRefToBody;
+        public Vector3 targetPosLocalRefToBody;
         public Quaternion targetRotLocal;
-        public Vector3 lastPosLocal;
-        public Vector3 curPosLocal;
+        public Vector3 lastPosLocalRefToBody;
+        public Vector3 curPosLocalRefToBody;
         public Transform archoringTarget;
-        public Vector3 curPos => human.humanBone.body.position + human.humanBone.body.rotation * curPosLocal;
-        public Vector3 targetPos => human.humanBone.body.position + human.humanBone.body.rotation * targetPosLocal;
+        public Vector3 curPos => human.humanBone.body.position + human.humanBone.body.rotation * curPosLocalRefToBody;
+        public Vector3 targetPos => human.humanBone.body.position + human.humanBone.body.rotation * targetPosLocalRefToBody;
         public Vector3 lastPos;
         public Quaternion lastRot;
 
@@ -916,10 +952,15 @@ private void UpdateLegs() {
         }
 
         public void Update(Vector3 shoulderPosLocal, Vector3 targetPosLocal, Quaternion targetRotLocal) {
-            this.shoulderPosLocal = shoulderPosLocal;
-            this.targetPosLocal = targetPosLocal;
+            this.shoulderPosLocalRefToBody = shoulderPosLocal;
+            this.targetPosLocalRefToBody = targetPosLocal;
             this.targetRotLocal = targetRotLocal;
             sm.UpdateStateAction();
+        }
+
+        public void SetHandPos(Vector3 curHandPosLocalRefToBody) {
+            curPosLocalRefToBody = lastPosLocalRefToBody = targetPosLocalRefToBody = curHandPosLocalRefToBody;
+            handBone.localPosition = human.humanBone.body.localPosition + human.humanBone.body.localRotation * curPosLocalRefToBody;
         }
 
         private void InitSM() {
@@ -928,16 +969,16 @@ private void UpdateLegs() {
                 () => {
                     poseDurationCount = 0;
                     // lastPosLocal = curPosLocal;
-                    lastPosLocal = Quaternion.Inverse(human.humanBone.body.localRotation) * (handBone.localPosition - human.humanBone.body.localPosition);
+                    lastPosLocalRefToBody = Quaternion.Inverse(human.humanBone.body.localRotation) * (handBone.localPosition - human.humanBone.body.localPosition);
                 },
                 () => {
 
                     poseDurationCount += human.scaleDeltaTime;
                     poseProcess = Mathf.Min(1.0f, (float)(poseDurationCount / poseDuration));
 
-                    curPosLocal = Vector3.Lerp(lastPosLocal, targetPosLocal, human.animSetting.handPosCurve.Evaluate(poseProcess));
-                    handBone.localPosition = human.humanBone.body.localPosition + human.humanBone.body.localRotation * curPosLocal;
-                    Vector3 shoulderToHand = handBone.position - human.humanBone.root.position + shoulderPosLocal;
+                    curPosLocalRefToBody = Vector3.Lerp(lastPosLocalRefToBody, targetPosLocalRefToBody, human.animSetting.handPosCurve.Evaluate(poseProcess));
+                    handBone.localPosition = human.humanBone.body.localPosition + human.humanBone.body.localRotation * curPosLocalRefToBody;
+                    Vector3 shoulderToHand = handBone.position - human.humanBone.root.position + shoulderPosLocalRefToBody;
                     handBone.localRotation = Quaternion.Slerp(handBone.localRotation, targetRotLocal, 2.0f * Time.deltaTime);
                     // handBone.localRotation = targetRotLocal;
 
@@ -954,7 +995,7 @@ private void UpdateLegs() {
                 () => {
 
                     if (archoringTarget == null) {
-                        lastPosLocal = Quaternion.Inverse(human.humanBone.body.localRotation) * (handBone.localPosition - human.humanBone.body.localPosition);
+                        lastPosLocalRefToBody = Quaternion.Inverse(human.humanBone.body.localRotation) * (handBone.localPosition - human.humanBone.body.localPosition);
                         sm.GotoState(State.Pose);
                         return;
                     }
@@ -1036,7 +1077,7 @@ private void UpdateLegs() {
             isLArmActive = lShoulder != null && lHand != null;
             isRArmActive = rShoulder != null && rHand != null;
 
-            bodyOriPosLocal = body.localPosition - root.localPosition;
+            bodyOriPosLocal = body.localPosition;
 
             if (isLLegActive) {
                 lPelvisOriPosLocal = lPelvis.localPosition - body.localPosition;
@@ -1108,6 +1149,8 @@ private void UpdateLegs() {
     public class PoseInfo {
         public Vector3 velocity;
         public Vector3 moveDir;
+        // 待添加功能：用目标运动方向代替当前运动方向来判断Roll动画
+        public Vector3 targetMoveDir;
         public float turnAngle;
         public float speed;
         public Vector3 lPelvisPosLocal;
@@ -1116,10 +1159,10 @@ private void UpdateLegs() {
         public Vector3 rFootTargetPos;
         public Vector3 lShoulderPosLocal;
         public Vector3 rShoulderPosLocal;
-        public Vector3 lHandTargetPosLocal;
-        public Vector3 rHandTargetPosLocal;
-        public Quaternion lHandTargetRotLocal;
-        public Quaternion rHandTargetRotLocal;
+        public Vector3 lHandTargetPosLocalRefToBody;
+        public Vector3 rHandTargetPosLocalRefToBody;
+        public Quaternion lHandTargetRotLocalRefToBody;
+        public Quaternion rHandTargetRotLocalRefToBody;
         public Vector3 bodyPosLocal;
         public Quaternion bodyTargetRotLocal;
         public Vector3 bodyTargetPosLocal;
