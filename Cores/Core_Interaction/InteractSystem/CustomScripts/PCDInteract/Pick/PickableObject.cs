@@ -9,12 +9,21 @@ using DG.Tweening;
 public class PickableObject : MonoBehaviour, IFocusable, IPickable, IPlaceable {
     [TextArea]
     public string pickHint;
+    [ES3NonSerializable]
     public InteractComp picker;
-    public IPlaceSlot attachedPlace { get; set; }
+
+    public UnityEngine.Object attachedPlaceInternal;
+    public IPlaceSlot attachedPlace { get => attachedPlaceInternal as IPlaceSlot; set => attachedPlaceInternal = (UnityEngine.Object)value; }
     public PCDObjectProperties.Shape shape = PCDObjectProperties.Shape.Box;
     public float gravity = 30f;
     public bool isCantBePicked;
     public bool disablePhysicOnSlot = true;
+
+    private void Start() {
+        if (attachedPlace != null && disablePhysicOnSlot) {
+            SetPhysicActive(false);
+        }
+	}
 
 	private void FixedUpdate() {
         Rigidbody rb = GetComponent<Rigidbody>();
@@ -43,11 +52,11 @@ public class PickableObject : MonoBehaviour, IFocusable, IPickable, IPlaceable {
     }
 
     public bool PickedBy(InteractComp interactor) {
-        
-
         SetPhysicActive(false);
         picker = interactor;
         picker.holdingItem = gameObject;
+
+        transform.SetParent(null);
 
         PCDHumanInteractSM character = interactor as PCDHumanInteractSM;
         character.holdAndDropSM?.HoldObj(transform, shape);
