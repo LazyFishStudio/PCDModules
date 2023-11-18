@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.Mathematics;
 using System;
 using UnityEngine;
 using InteractSystem;
@@ -18,13 +17,25 @@ public class PullableObject : PickableObject {
     public float pullOutProcessDeathZone = 1.0f;
     [Range(0, 1.0f)]
     public float pullOutProcess;
+    public float deltaPullOutProcess; // 可以检测PullableObject被向后拖动和被向前拉回，触发一些事件
+    [SerializeField]
+    private float lastPullOutProcess;
     private float pullOutTimeCount;
 
     void Update() {
         if (puller) {
             UpdatePulling();
+            deltaPullOutProcess = pullOutProcess - lastPullOutProcess;
+            lastPullOutProcess = pullOutProcess;
         } else {
-            pullOutProcess = 0;
+            pullOutProcess = deltaPullOutProcess = lastPullOutProcess = 0;
+        }
+    }
+
+    void FixedUpdate() {
+        if (puller) {
+            Rigidbody rb = puller.GetComponent<Rigidbody>();
+            rb.AddForce((transform.position - puller.position) * pullInfo.contractStrength * Time.fixedDeltaTime, ForceMode.Acceleration);
         }
     }
 
@@ -37,8 +48,8 @@ public class PullableObject : PickableObject {
             pullOutProcess = (dis - pullOutProcessDeathZone) / (pullInfo.maxStretchLength - pullOutProcessDeathZone);
         }
 
-        Rigidbody rb = puller.GetComponent<Rigidbody>();
-        rb.AddForce((transform.position - puller.position) * pullInfo.contractStrength * Time.deltaTime, ForceMode.Acceleration);
+        // Rigidbody rb = puller.GetComponent<Rigidbody>();
+        // rb.AddForce((transform.position - puller.position) * pullInfo.contractStrength * Time.deltaTime, ForceMode.Acceleration);
 
         float stretchDis = Vector3.Distance(transform.position.ClearY(), puller.position.ClearY());
         float maxStretchLengthScale = pullInfo.maxStretchLength * rootScale;
