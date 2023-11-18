@@ -84,6 +84,10 @@ public class PCDHumanPullSM : MonoBehaviour {
                 /* Override PullablePCDIK Target */
                 pullingObject.GetComponentInParent<PullablePCDIKController>()?.SetFollowTargetOverride(pullingObjFollowTarget, animationTransition);
 
+                lHandFollowTarget.position = human.humanBone.lShoulder.position + (pullingObject.transform.position + human.humanBone.root.right * pullingObject.lHaft.localPosition.x - human.humanBone.lShoulder.position).normalized * 1f;
+                rHandFollowTarget.position = human.humanBone.rShoulder.position + (pullingObject.transform.position + human.humanBone.root.right * pullingObject.rHaft.localPosition.x - human.humanBone.rShoulder.position).normalized * 1f;
+                pullingObjFollowTarget.position = (lHandFollowTarget.transform.position + rHandFollowTarget.transform.position) / 2.0f;
+
             },
             () => {
                 lHandFollowTarget.position = human.humanBone.lShoulder.position + (pullingObject.transform.position + human.humanBone.root.right * pullingObject.lHaft.localPosition.x - human.humanBone.lShoulder.position).normalized * 1f;
@@ -124,6 +128,8 @@ public class PCDHumanPullSM : MonoBehaviour {
                 // 设置 LookAt & FootAndBodyOverride
                 human.SetLookAt(null, pullingObject.rHaft);
                 human.SetFootAndBodyPoseLayerOverride(pullStickPoseLayerIndex);
+
+                pullingObjFollowTarget.position = human.humanBone.rShoulder.position + (pullingObject.transform.position - human.humanBone.rShoulder.position).normalized * 1f;
 
             },
             () => {
