@@ -15,7 +15,7 @@ public class DraggableObject : MonoBehaviour {
         rb = GetComponent<Rigidbody>();
     }
     
-    void Update() {
+    void FixedUpdate() {
 
         if (!dragger) {
             return;
@@ -33,11 +33,13 @@ public class DraggableObject : MonoBehaviour {
             // 计算弹力的大小
             float dragForce = (distanceToPlayer - dragDistance) * dragStrength;
             // 应用弹力
-            rb?.AddForceAtPosition(dragDirection * dragForce * Mathf.Min(Time.deltaTime, 0.0125f), dragPoint.position, ForceMode.Acceleration);
+            rb?.AddForceAtPosition(dragDirection * dragForce * Time.fixedDeltaTime, dragPoint.position, ForceMode.Acceleration);
+            // rb?.AddForceAtPosition(dragDirection * dragForce * Mathf.Min(Time.deltaTime, 0.0125f), dragPoint.position, ForceMode.Acceleration);
 
             if (rotateToDragger) {
                 targetRot = Quaternion.LookRotation((dragger.transform.position - transform.position).ClearY(), Vector3.up);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, rotateSpeed * Time.deltaTime);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, rotateSpeed * Time.fixedDeltaTime);
+                // transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, rotateSpeed * Time.deltaTime);
             }
         }
 
