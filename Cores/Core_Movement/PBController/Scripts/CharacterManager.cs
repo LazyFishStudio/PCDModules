@@ -197,7 +197,12 @@ namespace PhysicsBasedCharacterController
         private Vector3 currVelocity = Vector3.zero;
         private float turnSmoothVelocity;
         private bool lockRotation = false;
-
+        private Transform lookLockTarget;
+        private float lookLockBias;
+        private bool characterFrozen;
+        private float targetLockAngle;
+        private float targetLockWeight = 1.0f;
+        public bool inverseLookDir;
 
         /**/
 
@@ -446,8 +451,7 @@ namespace PhysicsBasedCharacterController
 
         #region Feature
 
-        private Transform lookLockTarget;
-        private float lookLockBias;
+        
         /// <summary>
         /// 将角色朝向锁定到 target，传入 null 则取消锁定；
         /// degreeBias 参数表示向右偏移角度，180 就是背对目标。
@@ -458,7 +462,6 @@ namespace PhysicsBasedCharacterController
             targetLockWeight = weight;
         }
 
-        private bool characterFrozen;
         /// <summary>
         /// 移除角色速度 & 忽略输入 & 固定位置；frozen 表示开启
         /// </summary>
@@ -554,8 +557,6 @@ namespace PhysicsBasedCharacterController
         }
 
 
-        private float targetLockAngle;
-        private float targetLockWeight = 1.0f;
         private void MoveRotation()
         {
             if (lookLockTarget != null) { 
@@ -575,7 +576,6 @@ namespace PhysicsBasedCharacterController
                 // lookDir = biasRotation * lookDir; 
                 // Vector3 smoothedLookInputDirection = Vector3.Slerp(transform.forward, lookDir, 1 - Mathf.Exp(-10f * Time.deltaTime)).normalized; 
                 // transform.rotation = Quaternion.LookRotation(smoothedLookInputDirection, Vector3.up); 
-                
                 return; 
             } 
 

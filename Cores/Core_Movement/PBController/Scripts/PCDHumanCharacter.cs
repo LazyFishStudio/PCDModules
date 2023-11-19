@@ -10,6 +10,7 @@ public class PCDHumanCharacter : MonoBehaviour {
     protected PCDHumanMovementSM moveSM;
     protected Condition condition;
     protected bool isCanRun => IsCanRun();
+    public Vector2 inputAxis;
 
     protected virtual void Awake() {
         condition = GetComponent<Condition>();
@@ -26,7 +27,8 @@ public class PCDHumanCharacter : MonoBehaviour {
     }
     
     protected virtual void MovementInput() {
-        moveSM.moveInput.moveAxis = new Vector2(right, forward);
+        inputAxis = new Vector2(right, forward);
+        moveSM.moveInput.moveAxis = inputAxis;
         if (moveSM.moveInput.moveAxis.magnitude > 1f)
             moveSM.moveInput.moveAxis = moveSM.moveInput.moveAxis.normalized;
 
