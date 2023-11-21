@@ -43,7 +43,10 @@ namespace InteractSystem
 					component.GetComponent<Collider>().enabled = false;
 				}
 				if (component.GetComponent<Rigidbody>()) {
-					component.GetComponent<Rigidbody>().isKinematic = true;
+					Rigidbody rb = component.GetComponent<Rigidbody>();
+					rb.isKinematic = true;
+					holdingItemInterpolation = rb.interpolation;
+					rb.interpolation = RigidbodyInterpolation.None;
 				}
 				component.transform.SetParent(transform);
 				component.transform.localPosition = Vector3.zero;
@@ -52,6 +55,8 @@ namespace InteractSystem
 
 			acceptItemCallbacks?.Invoke(this, item);
 		}
+
+		private RigidbodyInterpolation holdingItemInterpolation;
 
 		public virtual void OnRemoveItemCallback(IPlaceable item) {
 			holdItem = null;
@@ -62,7 +67,9 @@ namespace InteractSystem
 					component.GetComponent<Collider>().enabled = true;
 				}
 				if (component.GetComponent<Rigidbody>()) {
-					component.GetComponent<Rigidbody>().isKinematic = false;
+					Rigidbody rb = component.GetComponent<Rigidbody>();
+					rb.isKinematic = false;
+					rb.interpolation = holdingItemInterpolation;
 				}
 				component.transform.SetParent(null);
 			}
