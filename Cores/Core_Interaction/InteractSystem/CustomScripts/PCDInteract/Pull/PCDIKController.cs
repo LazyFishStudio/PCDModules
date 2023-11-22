@@ -19,6 +19,8 @@ public class PullablePCDIKController : MonoBehaviour {
     protected float overrideTransition;
     [SerializeField]
     protected float overrideTransitionCount;
+    [SerializeField]
+    [Range(0, 1.0f)]
     protected float overrideTransitionprocess;
     protected PCDIK pcdik;
     protected PullableObject pullable;

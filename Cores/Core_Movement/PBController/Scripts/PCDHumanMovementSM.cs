@@ -16,6 +16,10 @@ public class PCDHumanMovementSM : MonoBehaviour {
     public float runSpeed = 7.0f;
     public MoveInput moveInput;
     [SerializeField]
+    private string walkPoseLayerName = "Walk";
+    [SerializeField]
+    private string runPoseLayerName = "Run";
+    [SerializeField]
     private StateMachine<State> sm;
     private CharacterManager charaM;
     private InputReader inputReader;
@@ -26,6 +30,10 @@ public class PCDHumanMovementSM : MonoBehaviour {
         inputReader = GetComponent<InputReader>();
         human = GetComponentInChildren<PCDHuman>();
 
+        // InitMoveSM();
+    }
+
+    void Start() {
         InitMoveSM();
     }
     
@@ -35,7 +43,7 @@ public class PCDHumanMovementSM : MonoBehaviour {
 
         sm.GetState(State.Idle).Bind(
             () => {
-                human.SetPoseLayerIndex(0);
+                human.SetPoseLayerName(walkPoseLayerName);
             },
             () => {
                 SetControllerInput_Idle();
@@ -46,7 +54,7 @@ public class PCDHumanMovementSM : MonoBehaviour {
         sm.GetState(State.Walk).Bind(
             () => {
                 charaM.movementSpeed = walkSpeed;
-                human.SetPoseLayerIndex(0);
+                human.SetPoseLayerName(walkPoseLayerName);
             },
             () => {
                 SetControllerInput_Move();
@@ -56,7 +64,7 @@ public class PCDHumanMovementSM : MonoBehaviour {
 
         sm.GetState(State.Run).Bind(
             () => {
-                human.SetPoseLayerIndex(1);
+                human.SetPoseLayerName(runPoseLayerName);
                 charaM.sprintSpeed = runSpeed;
                 inputReader.sprint = true;
             },

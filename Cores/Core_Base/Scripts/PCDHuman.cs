@@ -1,6 +1,10 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 using UnityEngine.Events;
 
+[ExecuteInEditMode]
 public class PCDHuman : MonoBehaviour {
 
     public enum BodyState {
@@ -18,6 +22,10 @@ public class PCDHuman : MonoBehaviour {
     private float scaleDeltaTime => Time.deltaTime / humanBone.rootScale * Mathf.Max(poseInfo.speed / animSetting.oriSpeed, 0.5f);
 
 #region Setting
+    public bool enablePosePreview = true;
+    public int previewPoseLayerIndex = 0;
+    public int previewPoseIndex = 1;
+
     public bool isLateUpdate = false;
     public bool autoGenerateHumanBone;
 
@@ -82,7 +90,7 @@ public class PCDHuman : MonoBehaviour {
         drawGizmos = true;
 
         humanBone.Init();
-        InitPoseInfoAndResetBonePosToBoneSetting();
+        InitPoseInfoAndSetBonePosToBoneSettingAndPose0();
 
         InitBodySM();
         InitFootSM();
@@ -92,19 +100,26 @@ public class PCDHuman : MonoBehaviour {
 
     void Update() {
 
-        if (!isLateUpdate) {
-            UpdateVelocityInfo();
+#if UNITY_EDITOR
+        if (UnityEditor.EditorApplication.isPlaying) {
+#endif
+            if (!isLateUpdate) {
+                UpdateVelocityInfo();
 
-            footsm.UpdateStateAction();
-            bodysm.UpdateStateAction();
-            handsm.UpdateStateAction();
+                footsm.UpdateStateAction();
+                bodysm.UpdateStateAction();
+                handsm.UpdateStateAction();
 
-            UpdateBody();
-            UpdateLegs();
-            UpdateArms();
-
-            
+                UpdateBody();
+                UpdatePelvisAndFoot();
+                UpdateShoulderAndHand();
+            }
+#if UNITY_EDITOR
+        } else {
+            UpdateEditorModePreview();
         }
+#endif
+            
 
     }
 
@@ -117,12 +132,13 @@ public class PCDHuman : MonoBehaviour {
             handsm.UpdateStateAction();
 
             UpdateBody();
-            UpdateLegs();
-            UpdateArms();
+            UpdatePelvisAndFoot();
+            UpdateShoulderAndHand();
         }
     }
 
     void OnValidate() {
+
         if (autoGenerateHumanBone) {
 
             humanBone.root = transform;
@@ -146,6 +162,14 @@ public class PCDHuman : MonoBehaviour {
 
             autoGenerateHumanBone = false;
         }
+        
+        if (enablePosePreview) {
+            previewPoseLayerIndex = Mathf.Max(0, previewPoseLayerIndex);
+            previewPoseLayerIndex %= humanBone.poseLayers.Length;
+
+        }
+        
+
     }
 
     private bool isAnyFootOutRange => lFoot.GetDisToTargetPos() >= animSetting.stepTriggerDis * humanBone.rootScale || rFoot.GetDisToTargetPos() >= animSetting.stepTriggerDis * humanBone.rootScale;
@@ -347,7 +371,7 @@ public class PCDHuman : MonoBehaviour {
 
 #region Private Animation Core
 
-private void UpdateLegs() {
+private void UpdatePelvisAndFoot() {
 
         if (humanBone.isLLegActive) UpdateLLeg();
         if (humanBone.isRLegActive) UpdateRLeg();
@@ -355,8 +379,8 @@ private void UpdateLegs() {
         void UpdateLLeg() {
 
             poseInfo.lPelvisPosLocal = humanBone.body.localPosition + humanBone.body.localRotation * humanBone.lPelvisOriPosLocal;
+            humanBone.lPelvis.localPosition = poseInfo.lPelvisPosLocal;
 
-            Vector3 lPelvisPosScale = humanBone.root.position + humanBone.root.rotation * poseInfo.lPelvisPosLocal * humanBone.rootScale;
             poseInfo.lFootTargetPos = curPose.lFoot.position.CopySetY(humanBone.root.position.y);
             if (footsm.curState.Equals(FootState.Stepping) || footsm.curState.Equals(FootState.Wait)) {
                 poseInfo.lFootTargetPos += poseInfo.moveDir * animSetting.stepTargetOffset * humanBone.rootScale;
@@ -365,16 +389,16 @@ private void UpdateLegs() {
 
             lFoot.Update(poseInfo.lPelvisPosLocal, poseInfo.lFootTargetPos, humanBone.body.rotation * curPose.lFoot.localRotation);
 
-            humanBone.lPelvis.localPosition = poseInfo.lPelvisPosLocal;
+            // 肩膀的旋转需要再手部运动之后才更新
             humanBone.lPelvis.rotation = Quaternion.LookRotation((humanBone.lFoot.position - humanBone.lPelvis.position).normalized, humanBone.lFoot.up);
-        
+
         }
 
         void UpdateRLeg() {
 
             poseInfo.rPelvisPosLocal = humanBone.body.localPosition + humanBone.body.localRotation * humanBone.rPelvisOriPosLocal;
+            humanBone.rPelvis.localPosition = poseInfo.rPelvisPosLocal;
 
-            Vector3 rPelvisPosScale = humanBone.root.position + humanBone.root.rotation * poseInfo.rPelvisPosLocal * humanBone.rootScale;
             poseInfo.rFootTargetPos = curPose.rFoot.position.CopySetY(humanBone.root.position.y);
             if (footsm.curState.Equals(FootState.Stepping) || footsm.curState.Equals(FootState.Wait)) {
                 poseInfo.rFootTargetPos += poseInfo.moveDir * animSetting.stepTargetOffset * humanBone.rootScale;
@@ -382,14 +406,14 @@ private void UpdateLegs() {
 
             rFoot.Update(poseInfo.rPelvisPosLocal, poseInfo.rFootTargetPos, humanBone.body.rotation * curPose.rFoot.localRotation);
 
-            humanBone.rPelvis.localPosition = poseInfo.rPelvisPosLocal;
+            // 肩膀的旋转需要再手部运动之后才更新
             humanBone.rPelvis.rotation = Quaternion.LookRotation((humanBone.rFoot.position - humanBone.rPelvis.position).normalized, humanBone.rFoot.up);
 
         }
 
     }
 
-    private void UpdateArms() {
+    private void UpdateShoulderAndHand() {
 
         if (humanBone.isLArmActive) {
             poseInfo.lShoulderPosLocal = humanBone.body.localPosition + humanBone.body.localRotation * humanBone.lShoulderOriPosLocal;
@@ -507,26 +531,35 @@ private void UpdateLegs() {
 
     }
 
-    public void InitPoseInfoAndResetBonePosToBoneSetting() {
+    public void InitPoseInfoAndSetBonePosToBoneSettingAndPose0() {
 
-        Debug.Log("init bone");
+        // Debug.Log("init bone");
         
-        InitPoseInfo();
+        // 重置PoseInfo，把PoseLayer和Pose设置为0
+        SetTPose();
+        // 重置Hand和Foot
         InitFootHand();
-        ResetBodyPosToBoneSetting();
-        ResetFootHandPoseInfoToBoneSetting();
-        ResetFootHandPosToPoseInfo();
+        SetFullBodyPosAndPoseInfoToCurPose();
         
     }
 
-    public void InitPoseInfo() {
+    public void SetFullBodyPosAndPoseInfoToCurPose() {
+        // 将Body的初始位置作为原始位置
+        SetBodyPosToBoneSetting();
+        // 将Hand和Foot的PoseInfo设置为Pose0位置
+        SetFootHandPoseInfoToBoneSetting();
+        // 将Hand和Foot的Pos设置为PoseInfo的Target位置
+        SetFootHandPosToPoseInfo();
+    }
+
+    public void SetTPose() {
         poseInfo = new();
         SetPoseLayerIndex(0);
-        SetPose(0);
+        SetPose(1);
     }
 
     // 要先initBody 因为 Foot Hand 的位置依赖于 Body 的相对位置
-    private void ResetBodyPosToBoneSetting() {
+    private void SetBodyPosToBoneSetting() {
         // 将Body的初始位置作为原始位置
         // 初始化PoseInfo中的数值
         poseInfo.bodyPosLocal = humanBone.bodyOriPosLocal;
@@ -543,7 +576,7 @@ private void UpdateLegs() {
 
     }
 
-    private void ResetFootHandPoseInfoToBoneSetting() {
+    private void SetFootHandPoseInfoToBoneSetting() {
 
         if (humanBone.isLLegActive) {
             poseInfo.lFootTargetPos = humanBone.body.position + humanBone.body.rotation * (curPose.lFoot.localPosition - curPose.body.localPosition);
@@ -565,7 +598,7 @@ private void UpdateLegs() {
 
     }
 
-    private void ResetFootHandPosToPoseInfo() {
+    private void SetFootHandPosToPoseInfo() {
 
         if (humanBone.isLLegActive) {
             lFoot.SetFootPos(poseInfo.lFootTargetPos);
@@ -681,6 +714,16 @@ private void UpdateLegs() {
         footsm.GotoState(target ? FootState.Pose : FootState.Idle);
     }
 
+
+    public void SetPoseLayerName(string poseLayerName) {
+        if (!humanBone.poseNameToLayerMap.ContainsKey(poseLayerName)) {
+            SetPoseLayerIndex(-1);
+            return;
+        }
+        SetPoseLayerIndex(humanBone.poseNameToLayerMap[poseLayerName]);
+        FreshCurPose();
+    }
+
     public void SetPoseLayerIndex(int poseLayerIndex) {
         if (poseLayerIndex > humanBone.poseLayers.Length - 1) {
             return;
@@ -688,57 +731,132 @@ private void UpdateLegs() {
         curPoseLayerIndex = poseLayerIndex;
         FreshCurPose();
     }
+    
+    public void SetAllPoseLayerOverrideName(string poseLayerName) {
+        if (!humanBone.poseNameToLayerMap.ContainsKey(poseLayerName)) {
+            SetAllPoseLayerOverrideIndex(-1);
+            return;
+        }
+        SetAllPoseLayerOverrideIndex(humanBone.poseNameToLayerMap[poseLayerName]);
+    }
 
-    public void SetAllPoseLayerOverride(int poseLayerIndex) {
+    public void SetAllPoseLayerOverrideIndex(int poseLayerIndex) {
+        if (poseLayerIndex > humanBone.poseLayers.Length - 1) {
+            return;
+        }
+        SetBodyPoseLayerOverrideIndex(poseLayerIndex);
+        SetLHandPoseLayerOverrideIndex(poseLayerIndex);
+        SetRHandPoseLayerOverrideIndex(poseLayerIndex);
+        SetLFootPoseLayerOverrideIndex(poseLayerIndex);
+        SetRFootPoseLayerOverrideIndex(poseLayerIndex);
+
+        FreshCurPose();
+    }
+
+    public void SetFootAndBodyPoseLayerOverrideName(string poseLayerName) {
+        if (!humanBone.poseNameToLayerMap.ContainsKey(poseLayerName)) {
+            SetFootAndBodyPoseLayerOverrideIndex(-1);
+            return;
+        }
+        SetFootAndBodyPoseLayerOverrideIndex(humanBone.poseNameToLayerMap[poseLayerName]);
+    }
+
+    public void SetFootAndBodyPoseLayerOverrideIndex(int poseLayerIndex) {
+        if (poseLayerIndex > humanBone.poseLayers.Length - 1) {
+            return;
+        }
+        SetBodyPoseLayerOverrideIndex(poseLayerIndex);
+        SetLHandPoseLayerOverrideIndex(poseLayerIndex);
+        SetRHandPoseLayerOverrideIndex(poseLayerIndex);
+
+        FreshCurPose();
+    }
+
+    public void SetBodyPoseLayerOverrideName(string poseLayerName) {
+        if (!humanBone.poseNameToLayerMap.ContainsKey(poseLayerName)) {
+            SetBodyPoseLayerOverrideIndex(-1);
+            return;
+        }
+        SetBodyPoseLayerOverrideIndex(humanBone.poseNameToLayerMap[poseLayerName]);
+    }
+
+    public void SetBodyPoseLayerOverrideIndex(int poseLayerIndex) {
         if (poseLayerIndex > humanBone.poseLayers.Length - 1) {
             return;
         }
         bodyPoseLayerIndexOverride = poseLayerIndex;
+
+        FreshCurPose();
+    }
+
+    public void SetLHandPoseLayerOverrideName(string poseLayerName) {
+        if (!humanBone.poseNameToLayerMap.ContainsKey(poseLayerName)) {
+            SetLHandPoseLayerOverrideIndex(-1);
+            return;
+        }
+        SetLHandPoseLayerOverrideIndex(humanBone.poseNameToLayerMap[poseLayerName]);
+    }
+
+    public void SetLHandPoseLayerOverrideIndex(int poseLayerIndex) {
+        if (poseLayerIndex > humanBone.poseLayers.Length - 1) {
+            return;
+        }
         lHandPoseLayerIndexOverride = poseLayerIndex;
+
+        FreshCurPose();
+    }
+
+    public void SetRHandPoseLayerOverrideName(string poseLayerName) {
+        if (!humanBone.poseNameToLayerMap.ContainsKey(poseLayerName)) {
+            SetRHandPoseLayerOverrideIndex(-1);
+            return;
+        }
+        SetRHandPoseLayerOverrideIndex(humanBone.poseNameToLayerMap[poseLayerName]);
+    }
+
+    public void SetRHandPoseLayerOverrideIndex(int poseLayerIndex) {
+        if (poseLayerIndex > humanBone.poseLayers.Length - 1) {
+            return;
+        }
         rHandPoseLayerIndexOverride = poseLayerIndex;
+
+        FreshCurPose();
+    }
+
+    public void SetLFootPoseLayerOverrideName(string poseLayerName) {
+        if (!humanBone.poseNameToLayerMap.ContainsKey(poseLayerName)) {
+            SetLFootPoseLayerOverrideIndex(-1);
+            return;
+        }
+        SetLFootPoseLayerOverrideIndex(humanBone.poseNameToLayerMap[poseLayerName]);
+    }
+
+    public void SetLFootPoseLayerOverrideIndex(int poseLayerIndex) {
+        if (poseLayerIndex > humanBone.poseLayers.Length - 1) {
+            return;
+        }
         lFootPoseLayerIndexOverride = poseLayerIndex;
+
+        FreshCurPose();
+    }
+
+    public void SetRFootPoseLayerOverrideName(string poseLayerName) {
+        if (!humanBone.poseNameToLayerMap.ContainsKey(poseLayerName)) {
+            SetRFootPoseLayerOverrideIndex(-1);
+            return;
+        }
+        SetRFootPoseLayerOverrideIndex(humanBone.poseNameToLayerMap[poseLayerName]);
+    }
+
+    public void SetRFootPoseLayerOverrideIndex(int poseLayerIndex) {
+        if (poseLayerIndex > humanBone.poseLayers.Length - 1) {
+            return;
+        }
         rFootPoseLayerIndexOverride = poseLayerIndex;
 
         FreshCurPose();
     }
 
-    public void SetFootAndBodyPoseLayerOverride(int poseLayerIndex) {
-        if (poseLayerIndex > humanBone.poseLayers.Length - 1) {
-            return;
-        }
-        bodyPoseLayerIndexOverride = poseLayerIndex;
-        lFootPoseLayerIndexOverride = poseLayerIndex;
-        rFootPoseLayerIndexOverride = poseLayerIndex;
-
-        FreshCurPose();
-    }
-
-    public void SetBodyPoseLayerOverride(int poseLayerIndex) {
-        if (poseLayerIndex > humanBone.poseLayers.Length - 1) {
-            return;
-        }
-        bodyPoseLayerIndexOverride = poseLayerIndex;
-
-        FreshCurPose();
-    }
-
-    public void SetLHandPoseLayerOverride(int poseLayerIndex) {
-        if (poseLayerIndex > humanBone.poseLayers.Length - 1) {
-            return;
-        }
-        lHandPoseLayerIndexOverride = poseLayerIndex;
-
-        FreshCurPose();
-    }
-
-    public void SetRHandPoseLayerOverride(int poseLayerIndex) {
-        if (poseLayerIndex > humanBone.poseLayers.Length - 1) {
-            return;
-        }
-        rHandPoseLayerIndexOverride = poseLayerIndex;
-
-        FreshCurPose();
-    }
 
 #endregion
 
@@ -1027,7 +1145,7 @@ private void UpdateLegs() {
 
 #region Private InfoClass
 
-     [System.Serializable]
+    [System.Serializable]
     public class PCDHumanBoneSetting {
 
         public Transform root;
@@ -1050,16 +1168,13 @@ private void UpdateLegs() {
 
         public Transform poseLayerParent;
         public HumanPoseLayer[] poseLayers;
+        public Dictionary<string, int> poseNameToLayerMap;
 
         public Vector3 bodyOriPosLocal;
         public Vector3 lPelvisOriPosLocal;
         public Vector3 rPelvisOriPosLocal;
-        public Vector3 lFootOriPosLocal;
-        public Vector3 rFootOriPosLocal;
         public Vector3 lShoulderOriPosLocal;
         public Vector3 rShoulderOriPosLocal;
-        public Vector3 lHandOriPosLocal;
-        public Vector3 rHandOriPosLocal;
 
 
         public bool isLLegActive;
@@ -1072,38 +1187,37 @@ private void UpdateLegs() {
 
         public void Init() {
 
-            isLLegActive = lPelvis != null && lFoot != null;
-            isRLegActive = rPelvis != null && rFoot != null;
-            isLArmActive = lShoulder != null && lHand != null;
-            isRArmActive = rShoulder != null && rHand != null;
-
-            bodyOriPosLocal = body.localPosition;
-
-            if (isLLegActive) {
-                lPelvisOriPosLocal = lPelvis.localPosition - body.localPosition;
-                lFootOriPosLocal = lFoot.localPosition - body.localPosition;
-            }
-
-            if (isRLegActive) {
-                rPelvisOriPosLocal = rPelvis.localPosition - body.localPosition;
-                rFootOriPosLocal = rFoot.localPosition - body.localPosition;
-            }
-
-            if (isLArmActive) {
-                lShoulderOriPosLocal = lShoulder.localPosition - body.localPosition;
-                lHandOriPosLocal = lHand.localPosition - body.localPosition;
-            }
-
-            if (isRArmActive) {
-                rShoulderOriPosLocal = rShoulder.localPosition - body.localPosition;
-                rHandOriPosLocal = rHand.localPosition - body.localPosition;
-            }
-
+            poseNameToLayerMap = new();
+            
             if (poseLayerParent && poseLayerParent.childCount > 0) {
                 poseLayers = new HumanPoseLayer[poseLayerParent.childCount];
                 for (int i = 0; i < poseLayerParent.childCount; i++) {
                     poseLayers[i] = new HumanPoseLayer(poseLayerParent.GetChild(i));
+                    poseNameToLayerMap.Add(poseLayerParent.GetChild(i).gameObject.name, i);
                 }
+            }
+
+            isLLegActive = lPelvis != null && lPelvis.gameObject.activeSelf && lFoot != null && lFoot.gameObject.activeSelf;
+            isRLegActive = rPelvis != null && rPelvis.gameObject.activeSelf && rFoot != null && rFoot.gameObject.activeSelf;
+            isLArmActive = lShoulder != null && lShoulder.gameObject.activeSelf && lHand != null && lHand.gameObject.activeSelf;
+            isRArmActive = rShoulder != null && rShoulder.gameObject.activeSelf && rHand != null && rHand.gameObject.activeSelf;
+
+            bodyOriPosLocal = body.localPosition;
+
+            if (isLLegActive) {
+                lPelvisOriPosLocal = poseLayers[0].poses[0].lFoot.localPosition - poseLayers[0].poses[0].body.localPosition;
+            }
+
+            if (isRLegActive) {
+                rPelvisOriPosLocal = poseLayers[0].poses[0].rFoot.localPosition - poseLayers[0].poses[0].body.localPosition;
+            }
+
+            if (isLArmActive) {
+                lShoulderOriPosLocal = poseLayers[0].poses[0].lHand.localPosition - poseLayers[0].poses[0].body.localPosition;
+            }
+
+            if (isRArmActive) {
+                rShoulderOriPosLocal = poseLayers[0].poses[0].rHand.localPosition - poseLayers[0].poses[0].body.localPosition;
             }
 
         }
@@ -1214,6 +1328,44 @@ private void UpdateLegs() {
 
 
 #endregion
+
+    private void UpdateEditorModePreview() {
+        if (!enablePosePreview) {
+            return;
+        }
+
+        humanBone.Init();
+        InitPoseInfoAndSetBonePosToBoneSettingAndPose0();
+        SetPoseLayerIndex(previewPoseLayerIndex);
+        SetPose(previewPoseIndex);
+        SetFullBodyPosAndPoseInfoToCurPose();
+
+        
+        if (humanBone.isLLegActive) {
+            // poseInfo.lPelvisPosLocal = humanBone.body.localPosition + humanBone.body.localRotation * humanBone.lPelvisOriPosLocal;
+            // humanBone.lPelvis.localPosition = poseInfo.lPelvisPosLocal;
+            humanBone.lPelvis.rotation = Quaternion.LookRotation((humanBone.lFoot.position - humanBone.lPelvis.position).normalized, humanBone.lFoot.up);
+        }
+
+        if (humanBone.isRLegActive) {
+            // poseInfo.rPelvisPosLocal = humanBone.body.localPosition + humanBone.body.localRotation * humanBone.rPelvisOriPosLocal;
+            // humanBone.rPelvis.localPosition = poseInfo.rPelvisPosLocal;
+            humanBone.rPelvis.rotation = Quaternion.LookRotation((humanBone.rFoot.position - humanBone.rPelvis.position).normalized, humanBone.rFoot.up);
+        }
+
+        if (humanBone.isLArmActive) {
+            // poseInfo.lShoulderPosLocal = humanBone.body.localPosition + humanBone.body.localRotation * humanBone.lShoulderOriPosLocal;
+            // humanBone.lShoulder.localPosition = poseInfo.lShoulderPosLocal;
+            humanBone.lShoulder.rotation = Quaternion.LookRotation((humanBone.lHand.position - humanBone.lShoulder.position).normalized, humanBone.lHand.up);
+        }
+
+        if (humanBone.isRArmActive) {
+            // poseInfo.rShoulderPosLocal = humanBone.body.localPosition + humanBone.body.localRotation * humanBone.rShoulderOriPosLocal;
+            // humanBone.rShoulder.localPosition = poseInfo.rShoulderPosLocal;
+            humanBone.rShoulder.rotation = Quaternion.LookRotation((humanBone.rHand.position - humanBone.rShoulder.position).normalized, humanBone.rHand.up);
+        }
+
+    }
 
     private bool drawGizmos = false;
 

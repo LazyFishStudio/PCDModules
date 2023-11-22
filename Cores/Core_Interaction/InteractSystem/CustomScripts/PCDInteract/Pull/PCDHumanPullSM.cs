@@ -23,9 +23,9 @@ public class PCDHumanPullSM : MonoBehaviour {
     private Transform rHandFollowTarget;
     private Transform lHandFollowTarget;
     [SerializeField]
-    private int pullBoxPoseLayerIndex;
+    private string pullingSmallBoxPoseLayerName = "PullingSmallBox";
     [SerializeField]
-    private int pullStickPoseLayerIndex;
+    private string pullingStickPoseLayerName = "PullingStick";
     [SerializeField]
     private GameObject dragBoxEffect;
     [SerializeField]
@@ -79,7 +79,7 @@ public class PCDHumanPullSM : MonoBehaviour {
 
                 /* Override Human LookAt & FootAndBodyPoseLayer */
                 human.SetLookAt(null, pullingObject.transform);
-                human.SetFootAndBodyPoseLayerOverride(pullBoxPoseLayerIndex);
+                human.SetFootAndBodyPoseLayerOverrideName(pullingSmallBoxPoseLayerName);
 
                 /* Override PullablePCDIK Target */
                 pullingObject.GetComponentInParent<PullablePCDIKController>()?.SetFollowTargetOverride(pullingObjFollowTarget, animationTransition);
@@ -98,7 +98,7 @@ public class PCDHumanPullSM : MonoBehaviour {
                 human.SetLookAt(null, null);
                 human.SetLHandArchoring(null);
                 human.SetRHandArchoring(null);
-                human.SetFootAndBodyPoseLayerOverride(-1); 
+                human.SetFootAndBodyPoseLayerOverrideIndex(-1); 
                 if (pullingObject) {
                     pullingObject.GetComponentInParent<PullablePCDIKController>(true)?.SetFollowTargetOverride(null);
                 }
@@ -121,13 +121,13 @@ public class PCDHumanPullSM : MonoBehaviour {
             () => {
 
                 // 设置 HandArchoring & HandPoseOverride
-                human.SetLHandPoseLayerOverride(pullStickPoseLayerIndex);
+                human.SetLHandPoseLayerOverrideName(pullingStickPoseLayerName);
                 human.SetRHandArchoring(pullingObjFollowTarget, animationTransition);
                 // human.SetRHandArchoring(rHandFollowTarget, animationTransition);
 
                 // 设置 LookAt & FootAndBodyOverride
                 human.SetLookAt(null, pullingObject.rHaft);
-                human.SetFootAndBodyPoseLayerOverride(pullStickPoseLayerIndex);
+                human.SetFootAndBodyPoseLayerOverrideName(pullingStickPoseLayerName);
 
                 pullingObjFollowTarget.position = human.humanBone.rShoulder.position + (pullingObject.transform.position - human.humanBone.rShoulder.position).normalized * 1f;
 
@@ -141,12 +141,12 @@ public class PCDHumanPullSM : MonoBehaviour {
             () => {
 
                 // 解除 HandArchoring & HandPoseOverride
-                human.SetLHandPoseLayerOverride(-1);
+                human.SetLHandPoseLayerOverrideIndex(-1);
                 human.SetRHandArchoring(null);
 
                 // 解除 LookAt & FootAndBodyOverride
                 human.SetLookAt(null, null);
-                human.SetFootAndBodyPoseLayerOverride(-1);
+                human.SetFootAndBodyPoseLayerOverrideIndex(-1);
 
                 
             }

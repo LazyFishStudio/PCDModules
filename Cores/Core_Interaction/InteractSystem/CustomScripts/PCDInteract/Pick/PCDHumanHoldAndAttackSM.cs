@@ -24,18 +24,18 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
     private Transform holdingObject;
     private Transform followTarget;
     [SerializeField]
-    private int holdBoxPoseLayerIndex;
+    private string holdingBoxPoseLayerName = "HoldingBox";
     [SerializeField]
-    private int dropBoxPoseLayerIndex;
+    private string dropBoxPoseLayerName = "HoldingSmallBox";
     [SerializeField]
     private float dropBoxPoseDuration = 0.1f;
     private float dropBoxPoseDurationCount;
     [SerializeField]
-    private int holdSmallBoxPoseLayerIndex;
+    private string holdingSmallBoxPoseLayerName = "HoldingSmallBox";
     [SerializeField]
-    private int holdStickPoseLayerIndex;
+    private string holdingStickPoseLayerName = "HoldingStick";
     [SerializeField]
-    private int holdLongStickPoseLayerIndex;
+    private string holdingLongStickPoseLayerName = "HoldingLongStick";
     [SerializeField]
     private GameObject holdBoxEffect;
     [SerializeField]
@@ -117,9 +117,9 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
 
         sm.GetState(State.HoldingBox).Bind(
             () => {
-                human.SetBodyPoseLayerOverride(holdBoxPoseLayerIndex);
-                human.SetLHandPoseLayerOverride(holdBoxPoseLayerIndex);
-                human.SetRHandPoseLayerOverride(holdBoxPoseLayerIndex);
+                human.SetBodyPoseLayerOverrideName(holdingBoxPoseLayerName);
+                human.SetLHandPoseLayerOverrideName(holdingBoxPoseLayerName);
+                human.SetRHandPoseLayerOverrideName(holdingBoxPoseLayerName);
                 human.StartUpdateHandPose(0);
                 human.poseInfo.bodyVelocity = Vector3.down * 5.0f;
             },
@@ -133,9 +133,9 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
         
         sm.GetState(State.DropBox).Bind(
             () => {
-                human.SetBodyPoseLayerOverride(dropBoxPoseLayerIndex);
-                human.SetLHandPoseLayerOverride(dropBoxPoseLayerIndex);
-                human.SetRHandPoseLayerOverride(dropBoxPoseLayerIndex);
+                human.SetBodyPoseLayerOverrideName(dropBoxPoseLayerName);
+                human.SetLHandPoseLayerOverrideName(dropBoxPoseLayerName);
+                human.SetRHandPoseLayerOverrideName(dropBoxPoseLayerName);
                 human.StartUpdateHandPose(0);
                 dropBoxPoseDurationCount = 0;
             },
@@ -152,9 +152,9 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
 
         sm.GetState(State.HoldingSmallBox).Bind(
             () => {
-                human.SetBodyPoseLayerOverride(holdSmallBoxPoseLayerIndex);
-                human.SetLHandPoseLayerOverride(holdSmallBoxPoseLayerIndex);
-                human.SetRHandPoseLayerOverride(holdSmallBoxPoseLayerIndex);
+                human.SetBodyPoseLayerOverrideName(holdingSmallBoxPoseLayerName);
+                human.SetLHandPoseLayerOverrideName(holdingSmallBoxPoseLayerName);
+                human.SetRHandPoseLayerOverrideName(holdingSmallBoxPoseLayerName);
                 human.StartUpdateHandPose(0);
                 // human.poseInfo.bodyVelocity = Vector3.down * 5.0f;
             },
@@ -455,9 +455,9 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
 #endregion
 
     private void ClearPoseLayerOverride() {
-        human.SetBodyPoseLayerOverride(-1);
-        human.SetLHandPoseLayerOverride(-1);
-        human.SetRHandPoseLayerOverride(-1);
+        human.SetBodyPoseLayerOverrideIndex(-1);
+        human.SetLHandPoseLayerOverrideIndex(-1);
+        human.SetRHandPoseLayerOverrideIndex(-1);
         human.StartUpdateHandPose();
     }
 

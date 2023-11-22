@@ -22,7 +22,7 @@ public class PullableObject : PickableObject {
     private float lastPullOutProcess;
     private float pullOutTimeCount;
 
-    void Update() {
+    protected virtual void Update() {
         if (puller) {
             UpdatePulling();
             deltaPullOutProcess = pullOutProcess - lastPullOutProcess;
@@ -45,7 +45,7 @@ public class PullableObject : PickableObject {
         if (dis < pullOutProcessDeathZone) {
             pullOutProcess = 0;
         } else {
-            pullOutProcess = (dis - pullOutProcessDeathZone) / (pullInfo.maxStretchLength - pullOutProcessDeathZone);
+            pullOutProcess = Mathf.Clamp01((dis - pullOutProcessDeathZone) / (pullInfo.maxStretchLength - pullOutProcessDeathZone));
         }
 
         // Rigidbody rb = puller.GetComponent<Rigidbody>();
@@ -94,6 +94,10 @@ public class PullableObject : PickableObject {
 
     }
 
+    public virtual void OnRestPull() {
+
+    }
+
     public virtual void StartPullBy(Transform puller, Transform followTarget) {
         this.puller = puller;
         // 设置 PullablePCDIK override
@@ -102,9 +106,11 @@ public class PullableObject : PickableObject {
     }
 
     public virtual void RestPull() {
-        if (puller) {
-            puller = null;
+        if (!puller) {
+            return;
         }
+        puller = null;
+        OnRestPull();
         // 解除 PullablePCDIK override
         GetComponentInParent<PullablePCDIKController>(true)?.SetFollowTargetOverride(null);
         GetComponentInParent<DraggableObject>()?.RestDrag();
