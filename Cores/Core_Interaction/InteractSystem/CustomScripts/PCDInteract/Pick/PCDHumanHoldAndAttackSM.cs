@@ -120,7 +120,7 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
                 human.SetBodyPoseLayerOverrideName(holdingBoxPoseLayerName);
                 human.SetLHandPoseLayerOverrideName(holdingBoxPoseLayerName);
                 human.SetRHandPoseLayerOverrideName(holdingBoxPoseLayerName);
-                human.StartUpdateHandPose(0);
+                human.DoHandPose(0);
                 human.poseInfo.bodyVelocity = Vector3.down * 5.0f;
             },
             () => {
@@ -136,7 +136,7 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
                 human.SetBodyPoseLayerOverrideName(dropBoxPoseLayerName);
                 human.SetLHandPoseLayerOverrideName(dropBoxPoseLayerName);
                 human.SetRHandPoseLayerOverrideName(dropBoxPoseLayerName);
-                human.StartUpdateHandPose(0);
+                human.DoHandPose(0);
                 dropBoxPoseDurationCount = 0;
             },
             () => {
@@ -155,7 +155,7 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
                 human.SetBodyPoseLayerOverrideName(holdingSmallBoxPoseLayerName);
                 human.SetLHandPoseLayerOverrideName(holdingSmallBoxPoseLayerName);
                 human.SetRHandPoseLayerOverrideName(holdingSmallBoxPoseLayerName);
-                human.StartUpdateHandPose(0);
+                human.DoHandPose(0);
                 // human.poseInfo.bodyVelocity = Vector3.down * 5.0f;
             },
             () => {
@@ -458,7 +458,7 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
         human.SetBodyPoseLayerOverrideIndex(-1);
         human.SetLHandPoseLayerOverrideIndex(-1);
         human.SetRHandPoseLayerOverrideIndex(-1);
-        human.StartUpdateHandPose();
+        human.DoHandPose();
     }
 
 }

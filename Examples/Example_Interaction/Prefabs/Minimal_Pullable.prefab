@@ -334,6 +334,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   overrideTransitionCount: 140.50859
+  overrideTransitionprocess: 0
 --- !u!114 &7165568837203788687
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -346,7 +347,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85982c95c6761f54b99623aeca8947af, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  focusHintContent: 
+  focusComps: []
 --- !u!114 &8937115282494307627
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -361,6 +362,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pickHint: 
   picker: {fileID: 0}
+  attachedPlaceInternal: {fileID: 0}
   shape: 1
   gravity: 30
   isCantBePicked: 0
@@ -379,6 +381,8 @@ MonoBehaviour:
   pulledOutEffect: {fileID: 0}
   pullOutProcessDeathZone: 2
   pullOutProcess: 0
+  deltaPullOutProcess: 0
+  lastPullOutProcess: 0
 --- !u!1 &2844143085905469932
 GameObject:
   m_ObjectHideFlags: 0
