@@ -10,7 +10,9 @@ public class PCDHuman : MonoBehaviour {
     }
 
     public enum FootState {
-        Pose, Idle, Wait, Standing, Stepping
+        Pose, 
+        ArchoringAtTarget, 
+        Idle, Wait, Standing, Stepping
     }
 
     public enum HandState {
@@ -225,6 +227,16 @@ public class PCDHuman : MonoBehaviour {
             () => {
                 lFoot.DoWalk();
                 rFoot.DoWalk();
+            }
+        );
+
+        footsm.GetState(FootState.ArchoringAtTarget).Bind(
+            () => {
+            },
+            () => {
+
+            },
+            () => {
             }
         );
 
@@ -830,12 +842,12 @@ private void UpdatePelvisAndFoot() {
 
     public void SetLFootArchoring(Transform target, float transition = 0) {
         lFoot.ArchoringAt(target, transition);
-        footsm.GotoState(target ? FootState.Pose : FootState.Idle);
+        footsm.GotoState(target ? FootState.ArchoringAtTarget : FootState.Idle);
     }
 
     public void SetRFootArchoring(Transform target, float transition = 0) {
         rFoot.ArchoringAt(target, transition);
-        footsm.GotoState(target ? FootState.Pose : FootState.Idle);
+        footsm.GotoState(target ? FootState.ArchoringAtTarget : FootState.Idle);
     }
 
 
