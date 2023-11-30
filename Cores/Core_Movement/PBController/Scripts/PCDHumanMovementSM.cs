@@ -23,12 +23,12 @@ public class PCDHumanMovementSM : MonoBehaviour {
     private StateMachine<State> sm;
     private CharacterManager charaM;
     private InputReader inputReader;
-    private PCDHuman human;
+    private PCDHuman[] humans;
 
     void Awake() {
         charaM = GetComponent<CharacterManager>();
         inputReader = GetComponent<InputReader>();
-        human = GetComponentInChildren<PCDHuman>();
+        humans = GetComponentsInChildren<PCDHuman>();
 
         // InitMoveSM();
     }
@@ -43,7 +43,8 @@ public class PCDHumanMovementSM : MonoBehaviour {
 
         sm.GetState(State.Idle).Bind(
             () => {
-                human.SetPoseLayerName(walkPoseLayerName);
+                foreach (PCDHuman human in humans)
+                    human.SetPoseLayerName(walkPoseLayerName);
             },
             () => {
                 SetControllerInput_Idle();
@@ -54,7 +55,8 @@ public class PCDHumanMovementSM : MonoBehaviour {
         sm.GetState(State.Walk).Bind(
             () => {
                 charaM.movementSpeed = walkSpeed;
-                human.SetPoseLayerName(walkPoseLayerName);
+                foreach (PCDHuman human in humans)
+                    human.SetPoseLayerName(walkPoseLayerName);
             },
             () => {
                 SetControllerInput_Move();
@@ -64,7 +66,8 @@ public class PCDHumanMovementSM : MonoBehaviour {
 
         sm.GetState(State.Run).Bind(
             () => {
-                human.SetPoseLayerName(runPoseLayerName);
+                foreach (PCDHuman human in humans)
+                    human.SetPoseLayerName(runPoseLayerName);
                 charaM.sprintSpeed = runSpeed;
                 inputReader.sprint = true;
             },
