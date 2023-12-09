@@ -35,7 +35,7 @@ public class PCDFoot : PCDBoneDriver {
 	private UnityAction stepFinishCallBack;
 	public StateMachine<State> sm = new StateMachine<State>(State.Stand);
 
-	public PCDFoot(PCDWalkMgr human, PCDBone footBone) : base(footBone) {
+	public PCDFoot(PCDWalkMgr human, PCDBone footBone, bool autoTryGetOwnship = false) : base(footBone, autoTryGetOwnship) {
 		this.human = human;
 		this.footBone = footBone.transform;
 		InitSM();
@@ -47,6 +47,9 @@ public class PCDFoot : PCDBoneDriver {
 	}
 
 	public void Update(Vector3 targetPos, Quaternion targetRot) {
+		if (!CheckBoneOwnership())
+			return;
+
 		this.targetPos = targetPos;
 		this.targetRot = targetRot;
 		sm.UpdateStateAction();

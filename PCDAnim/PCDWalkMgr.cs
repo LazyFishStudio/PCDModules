@@ -8,18 +8,22 @@ using UnityEngine;
 public class PCDWalkMgr : MonoBehaviour
 {
 	public enum WalkState { Idle, Walking };
-	
 	public WalkState walkState = WalkState.Idle;
-	public PCDAnimator animator;
-	public PCDHuman.PCDHumanBoneSetting humanBone;
-	public PCDHuman.AnimSetting animSetting;
 
-	public PCDHuman.PoseInfo poseInfo;
+	private PCDAnimator animator;
+	private PCDHumanConfig config;
+
+	public PCDHuman.PCDHumanBoneSetting humanBone => config.humanBone;
+	public PCDHuman.AnimSetting animSetting => config.animSetting;
+	public PCDHuman.PoseInfo poseInfo => config.poseInfo;
+
 	[SerializeField] private PCDFoot lFoot;
 	[SerializeField] private PCDFoot rFoot;
 	[SerializeField] private PCDBoneDriver lHand;
 	[SerializeField] private PCDBoneDriver rHand;
-	[SerializeField] private PCDBoneDriver body;
+	[SerializeField] private PCDShoulder lShoulder;
+	[SerializeField] private PCDShoulder rShoulder;
+	[SerializeField] private PCDBodyHead bodyHead;
 
 	private Rigidbody rb;
 	private string curKeyFrame = "Idle";
@@ -31,25 +35,25 @@ public class PCDWalkMgr : MonoBehaviour
     private bool isAnyFootNotReset => isAnyFootOutRange || Mathf.Abs(humanBone.lFoot.position.y - humanBone.root.position.y) > 0.01f || Mathf.Abs(humanBone.rFoot.position.y - humanBone.root.position.y) > 0.01f;
 
 	private void Awake() {
+		config = GetComponent<PCDHumanConfig>();
 		animator = GetComponent<PCDAnimator>();
 		rb = GetComponentInParent<Rigidbody>();
 
 		if (humanBone.isLLegActive) {
-			lFoot = new(this, humanBone.lFoot.GetComponent<PCDBone>());
+			lFoot = new(this, humanBone.lFoot.GetComponent<PCDBone>(), true);
 		}
 		if (humanBone.isRLegActive) {
-			rFoot = new(this, humanBone.rFoot.GetComponent<PCDBone>());
+			rFoot = new(this, humanBone.rFoot.GetComponent<PCDBone>(), true);
 		}
 		if (true) {
-			lHand = new PCDBoneDriver(humanBone.lHand.GetComponent<PCDBone>());
-			lHand.TryGetOwnership();
+			lHand = new PCDBoneDriver(humanBone.lHand.GetComponent<PCDBone>(), true);
 		}
 		if (true) {
-			rHand = new PCDBoneDriver(humanBone.rHand.GetComponent<PCDBone>());
-			rHand.TryGetOwnership();
+			rHand = new PCDBoneDriver(humanBone.rHand.GetComponent<PCDBone>(), true);
 		}
-		body = new PCDBoneDriver(humanBone.body.GetComponent<PCDBone>());
-		body.TryGetOwnership();
+		lShoulder = new PCDShoulder(humanBone.lShoulder.GetComponent<PCDBone>(), humanBone.lHand.GetComponent<PCDBone>(), true);
+		rShoulder = new PCDShoulder(humanBone.rShoulder.GetComponent<PCDBone>(), humanBone.rHand.GetComponent<PCDBone>(), true);
+		bodyHead = new PCDBodyHead(this, humanBone.body.GetComponent<PCDBone>(), humanBone.head.GetComponent<PCDBone>());
 	}
 
 	private void UpdateFootTarget() {
@@ -92,11 +96,19 @@ public class PCDWalkMgr : MonoBehaviour
 		}
 	}
 
-	private float holdTime = 0f;
+	private void UpdateBodyHeadShoulder() {
+		var kfReader = animator.GetAnimReader("Walk").GetKeyFrameReader(curKeyFrame);
+		var activeFoot = (curKeyFrame == "Idle" ? null : (curKeyFrame == "LStep" ? lFoot : rFoot));
+		bodyHead.UpdateBodyAndHead(kfReader, activeFoot);
+		lShoulder.UpdateShoulder();
+		rShoulder.UpdateShoulder();
+	}
 
+	private float holdTime = 0f;
 	private void UpdateWalkLoop() {
 		if (walkState == WalkState.Walking) {
 			UpdateFootTarget();
+			UpdateBodyHeadShoulder();
 			return;
 		}
 
@@ -104,6 +116,7 @@ public class PCDWalkMgr : MonoBehaviour
 		/* Too slow and all foot reset, idle -> just return */
 		if (isSpeedSlow && !isAnyFootNotReset) {
 			UpdateFootTarget();
+			UpdateBodyHeadShoulder();
 			return;
 		}
 
@@ -111,6 +124,7 @@ public class PCDWalkMgr : MonoBehaviour
 		holdTime += scaleDeltaTime;
 		if (holdTime < animSetting.stepInterval) {
 			UpdateFootTarget();
+			UpdateBodyHeadShoulder();
 			return;
 		}
 
@@ -120,6 +134,7 @@ public class PCDWalkMgr : MonoBehaviour
 
 		/* Calculate targetPos */
 		UpdateFootTarget();
+		UpdateBodyHeadShoulder();
 
 		/* Drive body */
 		walkState = WalkState.Walking;
@@ -131,24 +146,24 @@ public class PCDWalkMgr : MonoBehaviour
 				walkState = WalkState.Idle;
 				lHand.FadeBoneToKeyFrame(idleKFReader, animSetting.handPoseDuration);
 				rHand.FadeBoneToKeyFrame(idleKFReader, animSetting.handPoseDuration);
-				body.FadeBoneToKeyFrame(idleKFReader, animSetting.handPoseDuration);
 				// SendMessage("Play", SendMessageOptions.DontRequireReceiver);
 			});
 			lHand.FadeBoneToKeyFrame(kfReader, animSetting.handPoseDuration);
 			rHand.FadeBoneToKeyFrame(kfReader, animSetting.handPoseDuration);
-			body.FadeBoneToKeyFrame(kfReader, animSetting.handPoseDuration);
+
+			// body.FadeBoneToKeyFrame(kfReader, animSetting.handPoseDuration);
 		} else {
 			rFoot.Step(() => {
 				holdTime = 0f;
 				walkState = WalkState.Idle;
 				lHand.FadeBoneToKeyFrame(idleKFReader, animSetting.handPoseDuration);
 				rHand.FadeBoneToKeyFrame(idleKFReader, animSetting.handPoseDuration);
-				body.FadeBoneToKeyFrame(idleKFReader, animSetting.handPoseDuration);
 				// SendMessage("Play", SendMessageOptions.DontRequireReceiver);
 			});
 			lHand.FadeBoneToKeyFrame(kfReader, animSetting.handPoseDuration);
 			rHand.FadeBoneToKeyFrame(kfReader, animSetting.handPoseDuration);
-			body.FadeBoneToKeyFrame(kfReader, animSetting.handPoseDuration);
+
+			// body.FadeBoneToKeyFrame(kfReader, animSetting.handPoseDuration);
 		}
 	}
 
