@@ -17,6 +17,7 @@ public class PCDWalkMgr : MonoBehaviour
 	public PCDHuman.AnimSetting animSetting => config.animSetting;
 	public PCDHuman.PoseInfo poseInfo => config.poseInfo;
 
+	[SerializeField] private Transform lookAtTarget;
 	[SerializeField] private PCDFoot lFoot;
 	[SerializeField] private PCDFoot rFoot;
 	[SerializeField] private PCDBoneDriver lHand;
@@ -25,6 +26,7 @@ public class PCDWalkMgr : MonoBehaviour
 	[SerializeField] private PCDShoulder rShoulder;
 	[SerializeField] private PCDBodyHead bodyHead;
 
+	private PCDAnimReader curAnimReader;
 	private Rigidbody rb;
 	private string curKeyFrame = "Idle";
 	private BoneTransInfo lFootInfo;
@@ -61,8 +63,8 @@ public class PCDWalkMgr : MonoBehaviour
 
 	private void UpdateFootTarget() {
 		/* Update BoneInfo */
-		lFootInfo = animator.GetAnimReader("Walk").GetKeyFrameReader(curKeyFrame).GetBoneInfo("LFoot");
-		rFootInfo = animator.GetAnimReader("Walk").GetKeyFrameReader(curKeyFrame).GetBoneInfo("RFoot");
+		lFootInfo = curAnimReader.GetKeyFrameReader(curKeyFrame).GetBoneInfo("LFoot");
+		rFootInfo = curAnimReader.GetKeyFrameReader(curKeyFrame).GetBoneInfo("RFoot");
 
 		/* Update Left-Foot */
 		UpdateLFootTargetPosToStepTarget();
@@ -102,7 +104,7 @@ public class PCDWalkMgr : MonoBehaviour
 	private void UpdateBodyHeadShoulder() {
 		var kfReader = animator.GetAnimReader("Walk").GetKeyFrameReader(curKeyFrame);
 		var activeFoot = (curKeyFrame == "Idle" ? null : (curKeyFrame == "LStep" ? lFoot : rFoot));
-		bodyHead.UpdateBodyAndHead(kfReader, activeFoot);
+		bodyHead.UpdateBodyAndHead(kfReader, activeFoot, lookAtTarget);
 		lShoulder.UpdateShoulder();
 		rShoulder.UpdateShoulder();
 	}
@@ -183,4 +185,23 @@ public class PCDWalkMgr : MonoBehaviour
 		UpdateVelocityInfo();
 		UpdateWalkLoop();
 	}
+
+	public void SetLookAt(Transform target, float headWeight = -1.0f, float bodyWeight = -1.0f) {
+		lookAtTarget = target;
+		bodyHead.headLookAtWeight = headWeight >= 0 ? headWeight : animSetting.lookAtWeight_head;
+		bodyHead.bodyLookAtWeight = bodyWeight >= 0 ? bodyWeight : animSetting.lookAtWeight_body;
+	}
+
+	public void ResetLookAt() {
+		lookAtTarget = null;
+	}
+
+	public void SetAnim(string animName) {
+		PCDAnimReader newAnimReader = animator.GetAnimReader(animName);
+		if (newAnimReader == null) {
+			return;
+		}
+		curAnimReader = newAnimReader;
+	}
+
 }
