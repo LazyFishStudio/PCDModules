@@ -104,67 +104,60 @@ public class PCDWalkMgr : MonoBehaviour
 		rShoulder.UpdateShoulder();
 	}
 
-	private float holdTime = 0f;
-	private void UpdateWalkLoop() {
-		if (walkState == WalkState.Walking) {
-			UpdateFootTarget();
-			UpdateBodyHeadShoulder();
-			return;
-		}
-
-		bool isSpeedSlow = poseInfo.speed < animSetting.stepTriggerSpeed;
-		/* Too slow and all foot reset, idle -> just return */
-		if (isSpeedSlow && !isAnyFootNotReset) {
-			UpdateFootTarget();
-			UpdateBodyHeadShoulder();
-			return;
-		}
-
-		/* Step Interval */
-		holdTime += scaleDeltaTime;
-		if (holdTime < animSetting.stepInterval) {
-			UpdateFootTarget();
-			UpdateBodyHeadShoulder();
-			return;
-		}
-
-		/* Update KeyFrame information */
-		bool isStepLeft = CheckLeftStepFirst();
-		curKeyFrame = isSpeedSlow ? "Idle" : (isStepLeft ? "LStep" : "RStep");
-
-		/* Calculate targetPos */
+	private void UpdateBodyParts() {
 		UpdateFootTarget();
 		UpdateBodyHeadShoulder();
+	}
 
-		/* Drive body */
-		walkState = WalkState.Walking;
+	private void DriveNextStep(bool isStepLeft) {
 		var kfReader = animator.GetAnimReader("Walk").GetKeyFrameReader(curKeyFrame);
 		var idleKFReader = animator.GetAnimReader("Walk").GetKeyFrameReader("Idle");
 		if (isStepLeft) {
 			lFoot.Step(() => {
 				holdTime = 0f;
 				walkState = WalkState.Idle;
-				lHand.FadeBoneToKeyFrame(idleKFReader, animSetting.handPoseDuration);
-				rHand.FadeBoneToKeyFrame(idleKFReader, animSetting.handPoseDuration);
+				lHand.FadeBoneToKeyFrame(idleKFReader, animSetting.handPoseDuration, animSetting.handPosCurve);
+				rHand.FadeBoneToKeyFrame(idleKFReader, animSetting.handPoseDuration, animSetting.handPosCurve);
 				// SendMessage("Play", SendMessageOptions.DontRequireReceiver);
 			});
-			lHand.FadeBoneToKeyFrame(kfReader, animSetting.handPoseDuration);
-			rHand.FadeBoneToKeyFrame(kfReader, animSetting.handPoseDuration);
+			lHand.FadeBoneToKeyFrame(kfReader, animSetting.handPoseDuration, animSetting.handPosCurve);
+			rHand.FadeBoneToKeyFrame(kfReader, animSetting.handPoseDuration, animSetting.handPosCurve);
 
 			// body.FadeBoneToKeyFrame(kfReader, animSetting.handPoseDuration);
 		} else {
 			rFoot.Step(() => {
 				holdTime = 0f;
 				walkState = WalkState.Idle;
-				lHand.FadeBoneToKeyFrame(idleKFReader, animSetting.handPoseDuration);
-				rHand.FadeBoneToKeyFrame(idleKFReader, animSetting.handPoseDuration);
+				lHand.FadeBoneToKeyFrame(idleKFReader, animSetting.handPoseDuration, animSetting.handPosCurve);
+				rHand.FadeBoneToKeyFrame(idleKFReader, animSetting.handPoseDuration, animSetting.handPosCurve);
 				// SendMessage("Play", SendMessageOptions.DontRequireReceiver);
 			});
-			lHand.FadeBoneToKeyFrame(kfReader, animSetting.handPoseDuration);
-			rHand.FadeBoneToKeyFrame(kfReader, animSetting.handPoseDuration);
-
-			// body.FadeBoneToKeyFrame(kfReader, animSetting.handPoseDuration);
+			lHand.FadeBoneToKeyFrame(kfReader, animSetting.handPoseDuration, animSetting.handPosCurve);
+			rHand.FadeBoneToKeyFrame(kfReader, animSetting.handPoseDuration, animSetting.handPosCurve);
 		}
+	}
+
+	private float holdTime = 0f;
+	private void UpdateWalkLoop() {
+		if (walkState == WalkState.Walking) {
+			UpdateBodyParts();
+			return;
+		}
+
+		bool isStepLeft = CheckLeftStepFirst();
+		bool isSpeedSlow = poseInfo.speed < animSetting.stepTriggerSpeed;
+		curKeyFrame = isSpeedSlow ? "Idle" : (isStepLeft ? "LStep" : "RStep");
+		UpdateBodyParts();
+
+		holdTime += scaleDeltaTime;
+		if (holdTime < animSetting.stepInterval)
+			return;
+		if (isSpeedSlow && !isAnyFootNotReset)
+			return;
+
+		/* Next step */
+		walkState = WalkState.Walking;
+		DriveNextStep(isStepLeft);
 	}
 
 	private void UpdateVelocityInfo() {
