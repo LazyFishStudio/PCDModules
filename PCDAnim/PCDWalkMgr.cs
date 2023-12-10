@@ -9,6 +9,7 @@ public class PCDWalkMgr : MonoBehaviour
 {
 	public enum WalkState { Idle, Walking };
 	public WalkState walkState = WalkState.Idle;
+	public string defaultAnim = "Walk";
 
 	private PCDAnimator animator;
 	private PCDHumanConfig config;
@@ -63,7 +64,7 @@ public class PCDWalkMgr : MonoBehaviour
 
 
 		
-		SetAnim("Walk");
+		SetAnim(defaultAnim);
 		curKFReader = curAnimReader.GetKeyFrameReader(curKeyFrame);
 		bodyHead.SetBodyPosLocal(curKFReader.GetBoneInfo("Body").localPosition);
 		lHand.SetLocalPosition(curKFReader.GetBoneInfo("LHand").localPosition);
@@ -77,8 +78,8 @@ public class PCDWalkMgr : MonoBehaviour
 
 	private void UpdateFootTarget() {
 		/* Update BoneInfo */
-		lFootInfo = curAnimReader.GetKeyFrameReader(curKeyFrame).GetBoneInfo("LFoot");
-		rFootInfo = curAnimReader.GetKeyFrameReader(curKeyFrame).GetBoneInfo("RFoot");
+		lFootInfo = GetKFReaderSafe(curKeyFrame).GetBoneInfo("LFoot");
+		rFootInfo = GetKFReaderSafe(curKeyFrame).GetBoneInfo("RFoot");
 
 		/* Update Left-Foot */
 		UpdateLFootTargetPosToStepTarget();
@@ -116,7 +117,7 @@ public class PCDWalkMgr : MonoBehaviour
 	}
 
 	private void UpdateBodyHeadShoulder() {
-		curKFReader = curAnimReader.GetKeyFrameReader(curKeyFrame);
+		curKFReader = GetKFReaderSafe(curKeyFrame);
 		var activeFoot = (curKeyFrame == "Idle" ? null : (curKeyFrame == "LStep" ? lFoot : rFoot));
 		bodyHead.UpdateBodyAndHead(curKFReader, activeFoot, lookAtTarget);
 		lShoulder.UpdateShoulder();
@@ -128,8 +129,17 @@ public class PCDWalkMgr : MonoBehaviour
 		UpdateBodyHeadShoulder();
 	}
 
+	private PCDKFReader GetKFReaderSafe(string kfName) {
+		PCDKFReader curKFReader = curAnimReader.GetKeyFrameReader(kfName);
+		if (curKFReader == null) {
+			return curAnimReader.GetKeyFrameReader("Idle");
+		} else {
+			return curKFReader;
+		}
+	}
+
 	private void DriveNextStep(bool isStepLeft) {
-		curKFReader = curAnimReader.GetKeyFrameReader(curKeyFrame);
+		curKFReader = GetKFReaderSafe(curKeyFrame);
 		var idleKFReader = curAnimReader.GetKeyFrameReader("Idle");
 		if (isStepLeft) {
 			lFoot.Step(() => {
@@ -213,6 +223,10 @@ public class PCDWalkMgr : MonoBehaviour
 			return;
 		}
 		curAnimReader = newAnimReader;
+	}
+
+	public void ResetAnimToDefault() {
+		SetAnim(defaultAnim);
 	}
 
 	public void DriveHandToKF(PCDKFReader targetKFReader = null) {

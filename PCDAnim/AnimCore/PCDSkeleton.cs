@@ -6,6 +6,23 @@ public class PCDSkeleton : MonoBehaviour
 {
     private Dictionary<string, PCDBone> pcdBoneDict;
     private bool isInit;
+    public PCDHumanBone humanBone;
+
+
+    void Awake() {
+        humanBone = new();
+        humanBone.root = GetBone("Root");
+        humanBone.head = GetBone("Head");
+        humanBone.body = GetBone("Body");
+        humanBone.lShoulder = GetBone("LShoulder");
+        humanBone.rShoulder = GetBone("RShoulder");
+        humanBone.lPelvis = GetBone("LPelvis");
+        humanBone.rPelvis = GetBone("RPelvis");
+        humanBone.lHand = GetBone("LHand");
+        humanBone.rHand = GetBone("RHand");
+        humanBone.lFoot = GetBone("LFoot");
+        humanBone.rFoot = GetBone("RFoot");
+    }
 
     public void InitBones() {
         pcdBoneDict = new();
@@ -34,4 +51,18 @@ public class PCDSkeleton : MonoBehaviour
         return pcdBoneDict[boneName];
     }
 
+}
+
+public class PCDHumanBone {
+    public PCDBone root;
+    public PCDBone head;
+    public PCDBone body;
+    public PCDBone lShoulder;
+    public PCDBone rShoulder;
+    public PCDBone lPelvis;
+    public PCDBone rPelvis;
+    public PCDBone lHand;
+    public PCDBone rHand;
+    public PCDBone lFoot;
+    public PCDBone rFoot;
 }

@@ -34,16 +34,25 @@ public class PCDHumanPullSM : MonoBehaviour {
     private string actionEventInstancePath;
     [SerializeField]
     private StateMachine<State> sm;
-    private PCDHuman human;
+    private PCDWalkMgr walkMgr;
+    private PCDPoseMgr poseMgr;
+    private PCDArchoringMgr archoringMgr;
+    private PCDAnimator animator;
+    private PCDHumanConfig humanConfig;
 
     private FMODUnity.StudioEventEmitter emitter;
     private FMOD.Studio.EventInstance actionEventInstance;
 
     private Transform pullingObjFollowTarget;
+    private PCDSkeleton skeleton => humanConfig.skeleton;
 
     void Awake() {
 
-        human = GetComponentInChildren<PCDHuman>();
+        walkMgr = GetComponentInChildren<PCDWalkMgr>();
+        poseMgr = GetComponentInChildren<PCDPoseMgr>();
+        archoringMgr = GetComponentInChildren<PCDArchoringMgr>();
+        animator = GetComponentInChildren<PCDAnimator>();
+        humanConfig = GetComponentInChildren<PCDHumanConfig>();
         InitHandActionSM();
 
         emitter = GetComponent<FMODUnity.StudioEventEmitter>();
@@ -72,33 +81,38 @@ public class PCDHumanPullSM : MonoBehaviour {
             () => {
 
                 /* Archoring Hands */
-                human.SetLHandArchoring(pullingObject.lHaft, animationTransition);
-                human.SetRHandArchoring(pullingObject.rHaft, animationTransition);
-                // human.SetLHandArchoring(lHandFollowTarget, animationTransition);
-                // human.SetRHandArchoring(rHandFollowTarget, animationTransition);
+                // walkMgr.SetLHandArchoring(pullingObject.lHaft, animationTransition);
+                // walkMgr.SetRHandArchoring(pullingObject.rHaft, animationTransition);
+                archoringMgr.BoneArchoringToTransform("LHand", pullingObject.lHaft, animationTransition);
+                archoringMgr.BoneArchoringToTransform("RHand", pullingObject.rHaft, animationTransition);
 
                 /* Override Human LookAt & FootAndBodyPoseLayer */
-                human.SetLookAt(null, pullingObject.transform);
-                human.SetFootAndBodyPoseLayerOverrideName(pullingSmallBoxPoseLayerName);
+                walkMgr.SetLookAt(pullingObject.transform);
+                // poseMgr.SetFootAndBodyPoseLayerOverrideName(pullingSmallBoxPoseLayerName);
+                poseMgr.FadeToKeyFrame(animator.GetAnimReader(pullingSmallBoxPoseLayerName).GetKeyFrameReader("Idle"), true, false, false, false, false);
+                walkMgr.SetAnim(pullingSmallBoxPoseLayerName);
 
                 /* Override PullablePCDIK Target */
                 pullingObject.GetComponentInParent<PullablePCDIKController>()?.SetFollowTargetOverride(pullingObjFollowTarget, animationTransition);
 
-                lHandFollowTarget.position = human.humanBone.lShoulder.position + (pullingObject.transform.position + human.humanBone.root.right * pullingObject.lHaft.localPosition.x - human.humanBone.lShoulder.position).normalized * 1f;
-                rHandFollowTarget.position = human.humanBone.rShoulder.position + (pullingObject.transform.position + human.humanBone.root.right * pullingObject.rHaft.localPosition.x - human.humanBone.rShoulder.position).normalized * 1f;
+                lHandFollowTarget.position = skeleton.humanBone.lShoulder.transform.position + (pullingObject.transform.position + skeleton.humanBone.root.transform.right * pullingObject.lHaft.localPosition.x - skeleton.humanBone.lShoulder.transform.position).normalized * 1f;
+                rHandFollowTarget.position = skeleton.humanBone.rShoulder.transform.position + (pullingObject.transform.position + skeleton.humanBone.root.transform.right * pullingObject.rHaft.localPosition.x - skeleton.humanBone.rShoulder.transform.position).normalized * 1f;
                 pullingObjFollowTarget.position = (lHandFollowTarget.transform.position + rHandFollowTarget.transform.position) / 2.0f;
 
             },
             () => {
-                lHandFollowTarget.position = human.humanBone.lShoulder.position + (pullingObject.transform.position + human.humanBone.root.right * pullingObject.lHaft.localPosition.x - human.humanBone.lShoulder.position).normalized * 1f;
-                rHandFollowTarget.position = human.humanBone.rShoulder.position + (pullingObject.transform.position + human.humanBone.root.right * pullingObject.rHaft.localPosition.x - human.humanBone.rShoulder.position).normalized * 1f;
+                lHandFollowTarget.position = skeleton.humanBone.lShoulder.transform.position + (pullingObject.transform.position + skeleton.humanBone.root.transform.right * pullingObject.lHaft.localPosition.x - skeleton.humanBone.lShoulder.transform.position).normalized * 1f;
+                rHandFollowTarget.position = skeleton.humanBone.rShoulder.transform.position + (pullingObject.transform.position + skeleton.humanBone.root.transform.right * pullingObject.rHaft.localPosition.x - skeleton.humanBone.rShoulder.transform.position).normalized * 1f;
                 pullingObjFollowTarget.position = (lHandFollowTarget.transform.position + rHandFollowTarget.transform.position) / 2.0f;
             },
             () => {
-                human.SetLookAt(null, null);
-                human.SetLHandArchoring(null);
-                human.SetRHandArchoring(null);
-                human.SetFootAndBodyPoseLayerOverrideIndex(-1); 
+                walkMgr.ResetLookAt();
+                // archoringMgr.SetLHandArchoring(null);
+                // archoringMgr.SetRHandArchoring(null);
+                archoringMgr.ResetBoneFromArchoring("LHand");
+                archoringMgr.ResetBoneFromArchoring("RHand");
+                // walkMgr.SetFootAndBodyPoseLayerOverrideIndex(-1); 
+                walkMgr.ResetAnimToDefault();
                 if (pullingObject) {
                     pullingObject.GetComponentInParent<PullablePCDIKController>(true)?.SetFollowTargetOverride(null);
                 }
@@ -108,12 +122,12 @@ public class PCDHumanPullSM : MonoBehaviour {
         sm.GetState(State.PullingSmallBoxHover).Bind(
             
             () => {
-                human.SetLookAt(pullingObjectHover.transform, pullingObjectHover.transform);
+                walkMgr.SetLookAt(pullingObjectHover.transform);
             },
             () => {
             },
             () => {
-                human.SetLookAt(null, null);
+                walkMgr.ResetLookAt();
             }
         );
         
@@ -121,32 +135,38 @@ public class PCDHumanPullSM : MonoBehaviour {
             () => {
 
                 // 设置 HandArchoring & HandPoseOverride
-                human.SetLHandPoseLayerOverrideName(pullingStickPoseLayerName);
-                human.SetRHandArchoring(pullingObjFollowTarget, animationTransition);
+                // walkMgr.SetLHandPoseLayerOverrideName(pullingStickPoseLayerName);
+                // walkMgr.SetRHandArchoring(pullingObjFollowTarget, animationTransition);
+                poseMgr.FadeToKeyFrame(animator.GetAnimReader(pullingStickPoseLayerName).GetKeyFrameReader("Idle"), false, true, false, false, false);
+                // archoringMgr.SetRHandArchoring(pullingObjFollowTarget, animationTransition);
+                archoringMgr.BoneArchoringToTransform("RHand", pullingObjFollowTarget, animationTransition);
                 // human.SetRHandArchoring(rHandFollowTarget, animationTransition);
 
                 // 设置 LookAt & FootAndBodyOverride
-                human.SetLookAt(null, pullingObject.rHaft);
-                human.SetFootAndBodyPoseLayerOverrideName(pullingStickPoseLayerName);
+                walkMgr.SetLookAt(pullingObject.rHaft);
+                // walkMgr.SetFootAndBodyPoseLayerOverrideName(pullingStickPoseLayerName);
+                walkMgr.SetAnim(pullingStickPoseLayerName);
 
-                pullingObjFollowTarget.position = human.humanBone.rShoulder.position + (pullingObject.transform.position - human.humanBone.rShoulder.position).normalized * 1f;
+                pullingObjFollowTarget.position = skeleton.humanBone.rShoulder.transform.position + (pullingObject.transform.position - skeleton.humanBone.rShoulder.transform.position).normalized * 1f;
 
             },
             () => {
 
                 // 计算并更新手部位置
-                pullingObjFollowTarget.position = human.humanBone.rShoulder.position + (pullingObject.transform.position - human.humanBone.rShoulder.position).normalized * 1f;
+                pullingObjFollowTarget.position = skeleton.humanBone.rShoulder.transform.position + (pullingObject.transform.position - skeleton.humanBone.rShoulder.transform.position).normalized * 1f;
 
             },
             () => {
 
                 // 解除 HandArchoring & HandPoseOverride
-                human.SetLHandPoseLayerOverrideIndex(-1);
-                human.SetRHandArchoring(null);
+                // walkMgr.SetLHandPoseLayerOverrideIndex(-1);
+                poseMgr.ResetPose();
+                // walkMgr.SetRHandArchoring(null);
+                archoringMgr.ResetBoneFromArchoring("RHand");
 
                 // 解除 LookAt & FootAndBodyOverride
-                human.SetLookAt(null, null);
-                human.SetFootAndBodyPoseLayerOverrideIndex(-1);
+                walkMgr.ResetLookAt();
+                walkMgr.ResetAnimToDefault();
 
                 
             }
@@ -155,12 +175,12 @@ public class PCDHumanPullSM : MonoBehaviour {
         sm.GetState(State.PullingStickHover).Bind(
             
             () => {
-                human.SetLookAt(pullingObjectHover.transform, pullingObjectHover.rHaft);
+                walkMgr.SetLookAt(pullingObjectHover.rHaft);
             },
             () => {
             },
             () => {
-                human.SetLookAt(null, null);
+                walkMgr.ResetLookAt();
             }
         );
 
@@ -187,8 +207,8 @@ public class PCDHumanPullSM : MonoBehaviour {
         }
         OnPullEnter(box);
         if (dragStickEffect) {
-            GameObject.Instantiate(dragStickEffect, human.humanBone.lHand.position, Quaternion.identity, human.humanBone.lHand);
-            GameObject.Instantiate(dragStickEffect, human.humanBone.rHand.position, Quaternion.identity, human.humanBone.rHand);
+            GameObject.Instantiate(dragStickEffect, skeleton.humanBone.lHand.transform.position, Quaternion.identity, skeleton.humanBone.lHand.transform);
+            GameObject.Instantiate(dragStickEffect, skeleton.humanBone.rHand.transform.position, Quaternion.identity, skeleton.humanBone.rHand.transform);
         }
         // GameObject.Instantiate(holdBoxEffect, curFollowTarget.position + Vector3.up * 0.5f, Quaternion.identity);
         sm.GotoState(State.PullingSmallBox);
