@@ -48,7 +48,7 @@ public class PCDPoseMgr : MonoBehaviour
     }
    
 
-    public void FadeToKeyFrame(PCDKFReader kfReader, bool ctlBody = true, bool ctlLFoot = true, bool ctlRFoot = true, bool ctlLHand = true, bool ctlRHand = true) {
+    public void FadeToKeyFrame(PCDKFReader kfReader, bool ctlBody = true, bool ctlLHand = true, bool ctlRHand = true, bool ctlLFoot = true, bool ctlRFoot = true) {
         if (ctlBody)
             ctlBody = ctlBody && body.TryGetOwnership();
         if (ctlLFoot)

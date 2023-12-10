@@ -54,7 +54,11 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
     [Space]
     [SerializeField]
     private StateMachine<State> sm;
-    private PCDHuman human;
+    private PCDWalkMgr walkMgr;
+    private PCDPoseMgr poseMgr;
+    private PCDArchoringMgr archoringMgr;
+    private PCDAnimator animator;
+    private PCDHumanConfig humanConfig;
 
     private FMODUnity.StudioEventEmitter emitter;
     private FMOD.Studio.EventInstance actionEventInstance;
@@ -67,7 +71,11 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
 
     void Awake() {
 
-        human = GetComponentInChildren<PCDHuman>();
+        walkMgr = GetComponentInChildren<PCDWalkMgr>();
+        poseMgr = GetComponentInChildren<PCDPoseMgr>();
+        archoringMgr = GetComponentInChildren<PCDArchoringMgr>();
+        humanConfig = GetComponentInChildren<PCDHumanConfig>();
+        animator = GetComponentInChildren<PCDAnimator>();
         InitHandActionSM();
 
         emitter = GetComponent<FMODUnity.StudioEventEmitter>();
@@ -117,26 +125,28 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
 
         sm.GetState(State.HoldingBox).Bind(
             () => {
-                human.SetBodyPoseLayerOverrideName(holdingBoxPoseLayerName);
-                human.SetLHandPoseLayerOverrideName(holdingBoxPoseLayerName);
-                human.SetRHandPoseLayerOverrideName(holdingBoxPoseLayerName);
-                human.DoHandPose(0);
-                human.poseInfo.bodyVelocity = Vector3.down * 5.0f;
+                poseMgr.FadeToKeyFrame(animator.GetAnimReader(holdingBoxPoseLayerName).GetKeyFrameReader("Idle"), false, true, true, false, false);
+                // human.SetBodyPoseLayerOverrideName(holdingBoxPoseLayerName);
+                // human.SetLHandPoseLayerOverrideName(holdingBoxPoseLayerName);
+                // human.SetRHandPoseLayerOverrideName(holdingBoxPoseLayerName);
+                // human.DoHandPose(0);
+                poseMgr.poseInfo.bodyVelocity = Vector3.down * 5.0f;
             },
             () => {
                 OnHoldUpdate();
             },
             () => {
-                ClearPoseLayerOverride();
+                ResetPoseAndDriveHandToKF();
             }
         );
         
         sm.GetState(State.DropBox).Bind(
             () => {
-                human.SetBodyPoseLayerOverrideName(dropBoxPoseLayerName);
-                human.SetLHandPoseLayerOverrideName(dropBoxPoseLayerName);
-                human.SetRHandPoseLayerOverrideName(dropBoxPoseLayerName);
-                human.DoHandPose(0);
+                poseMgr.FadeToKeyFrame(animator.GetAnimReader(dropBoxPoseLayerName).GetKeyFrameReader("Idle"), false, true, true, false, false);
+                // human.SetBodyPoseLayerOverrideName(dropBoxPoseLayerName);
+                // human.SetLHandPoseLayerOverrideName(dropBoxPoseLayerName);
+                // human.SetRHandPoseLayerOverrideName(dropBoxPoseLayerName);
+                // human.DoHandPose(0);
                 dropBoxPoseDurationCount = 0;
             },
             () => {
@@ -146,52 +156,58 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
                 }
             },
             () => {
-                ClearPoseLayerOverride();
+                ResetPoseAndDriveHandToKF();
             }
         );
 
         sm.GetState(State.HoldingSmallBox).Bind(
             () => {
-                human.SetBodyPoseLayerOverrideName(holdingSmallBoxPoseLayerName);
-                human.SetLHandPoseLayerOverrideName(holdingSmallBoxPoseLayerName);
-                human.SetRHandPoseLayerOverrideName(holdingSmallBoxPoseLayerName);
-                human.DoHandPose(0);
+                poseMgr.FadeToKeyFrame(animator.GetAnimReader(holdingSmallBoxPoseLayerName).GetKeyFrameReader("Idle"), false, true, true, false, false);
+                // human.SetBodyPoseLayerOverrideName(holdingSmallBoxPoseLayerName);
+                // human.SetLHandPoseLayerOverrideName(holdingSmallBoxPoseLayerName);
+                // human.SetRHandPoseLayerOverrideName(holdingSmallBoxPoseLayerName);
+                // human.DoHandPose(0);
                 // human.poseInfo.bodyVelocity = Vector3.down * 5.0f;
             },
             () => {
                 OnHoldUpdate();
             },
             () => {
-                ClearPoseLayerOverride();
+                ResetPoseAndDriveHandToKF();
             }
         );
 
         sm.GetState(State.HoldingStick).Bind(
             () => {
-                human.SetRHandArchoring(followTarget);
+                // human.SetRHandArchoring(followTarget);
+                archoringMgr.BoneArchoringToTransform("RHand", followTarget);
             },
             () => {
                 OnHoldUpdate();
             },
             () => {
-                human.SetRHandArchoring(null);
-                ClearPoseLayerOverride();
+                // poseMgr.SetRHandArchoring(null);
+                archoringMgr.ResetBoneFromArchoring("RHand");
+                ResetPoseAndDriveHandToKF();
             }
         );
 
         sm.GetState(State.HoldingLongStick).Bind(
             () => {
-                human.SetLHandArchoring(holdingObject.Find("LHandTarget"));
-                human.SetRHandArchoring(holdingObject.Find("RHandTarget"));
-                // human.StartUpdateHandPose(0.05f);
+                // poseMgr.SetLHandArchoring(holdingObject.Find("LHandTarget"));
+                // poseMgr.SetRHandArchoring(holdingObject.Find("RHandTarget"));
+                archoringMgr.BoneArchoringToTransform("LHand", holdingObject.Find("LHandTarget"));
+                archoringMgr.BoneArchoringToTransform("RHand", holdingObject.Find("RHandTarget"));
             },
             () => {
                 OnHoldUpdate();
             },
             () => {
-                ClearPoseLayerOverride();
-                human.SetLHandArchoring(null);
-                human.SetRHandArchoring(null);
+                ResetPoseAndDriveHandToKF();
+                // poseMgr.SetLHandArchoring(null);
+                // poseMgr.SetRHandArchoring(null);
+                archoringMgr.ResetBoneFromArchoring("LHand");
+                archoringMgr.ResetBoneFromArchoring("RHand");
             }
         );
 
@@ -200,8 +216,10 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
                 // controller.LockPosAndRot
                 // circle Movement Start
                 if (attackingWeapon) {
-                    human.SetLHandArchoring(attackingWeapon.Find("LHandTarget"));
-                    human.SetRHandArchoring(attackingWeapon.Find("RHandTarget"));
+                    // poseMgr.SetLHandArchoring(attackingWeapon.Find("LHandTarget"));
+                    // poseMgr.SetRHandArchoring(attackingWeapon.Find("RHandTarget"));
+                    archoringMgr.BoneArchoringToTransform("LHand", holdingObject.Find("LHandTarget"));
+                    archoringMgr.BoneArchoringToTransform("RHand", holdingObject.Find("RHandTarget"));
                     // human.SetLookAt(attackingWeapon, attackingWeapon);
                     // longStickHorizonCircleMovement.AddProcessEvent(0.45f, () => {attackingWeapon.GetComponentInChildren<DamageArea>()?.SetDamageDetectActive(true);});
                     // longStickHorizonCircleMovement.AddProcessEvent(0.55f, () => {attackingWeapon.GetComponentInChildren<DamageArea>()?.SetDamageDetectActive(false);});
@@ -215,8 +233,10 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
             },
             () => {
                 // controller.UnLockPosAndRot
-                human.SetLHandArchoring(null);
-                human.SetRHandArchoring(null);
+                // poseMgr.SetLHandArchoring(null);
+                // poseMgr.SetRHandArchoring(null);
+                archoringMgr.ResetBoneFromArchoring("LHand");
+                archoringMgr.ResetBoneFromArchoring("RHand");
                 // human.SetLookAt(null, null);
                 // longStickHorizonCircleMovement.ClearAllProcessEvent();
                 longStickHorizonCircleMovement.StopMovement();
@@ -243,8 +263,8 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
         OnHoldEnter(box, boxObjFollowTarget);
         if (!muteHoldSound) {
             if (holdBoxEffect) {
-                GameObject.Instantiate(holdBoxEffect, human.humanBone.lHand.position, Quaternion.identity, human.humanBone.lHand);
-                GameObject.Instantiate(holdBoxEffect, human.humanBone.rHand.position, Quaternion.identity, human.humanBone.rHand);
+                GameObject.Instantiate(holdBoxEffect, humanConfig.skeleton.GetBone("LHand").transform.position, Quaternion.identity, humanConfig.skeleton.GetBone("LHand").transform);
+                GameObject.Instantiate(holdBoxEffect, humanConfig.skeleton.GetBone("RHand").transform.position, Quaternion.identity, humanConfig.skeleton.GetBone("RHand").transform);
             }
             emitter.SafePlaySetParameterByNameWithLabel("Action", "Pick");
         }
@@ -279,8 +299,8 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
         OnHoldEnter(box, smallBoxObjFollowTarget);
         if (!muteHoldSound) {
             if (holdBoxEffect) {
-                GameObject.Instantiate(holdBoxEffect, human.humanBone.lHand.position, Quaternion.identity, human.humanBone.lHand);
-                GameObject.Instantiate(holdBoxEffect, human.humanBone.rHand.position, Quaternion.identity, human.humanBone.rHand);
+                GameObject.Instantiate(holdBoxEffect, humanConfig.skeleton.GetBone("LHand").transform.position, Quaternion.identity, humanConfig.skeleton.GetBone("LHand").transform);
+                GameObject.Instantiate(holdBoxEffect, humanConfig.skeleton.GetBone("RHand").transform.position, Quaternion.identity, humanConfig.skeleton.GetBone("RHand").transform);
             }
             emitter.SafePlaySetParameterByNameWithLabel("Action", "Pick");
         }
@@ -313,7 +333,7 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
         }
         if (!muteHoldSound) {
             if (holdStickEffect) {
-                GameObject.Instantiate(holdStickEffect, human.humanBone.rHand.position, Quaternion.identity, human.humanBone.rHand);
+                GameObject.Instantiate(holdStickEffect, humanConfig.skeleton.GetBone("RHand").transform.position, Quaternion.identity, humanConfig.skeleton.GetBone("RHand").transform);
             }
             emitter.SafePlaySetParameterByNameWithLabel("Action", "Pick");
         }
@@ -342,8 +362,8 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
         }
         if (!muteHoldSound) {
             if (holdStickEffect) {
-                GameObject.Instantiate(holdStickEffect, human.humanBone.lHand.position, Quaternion.identity, human.humanBone.lHand);
-                GameObject.Instantiate(holdStickEffect, human.humanBone.rHand.position, Quaternion.identity, human.humanBone.rHand);
+                GameObject.Instantiate(holdStickEffect, humanConfig.skeleton.GetBone("LHand").transform.position, Quaternion.identity, humanConfig.skeleton.GetBone("LHand").transform);
+                GameObject.Instantiate(holdStickEffect, humanConfig.skeleton.GetBone("RHand").transform.position, Quaternion.identity, humanConfig.skeleton.GetBone("RHand").transform);
             }
             emitter.SafePlaySetParameterByNameWithLabel("Action", "Pick");
         }
@@ -371,7 +391,7 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
             return;
         }
 
-        longStickHorizonCircleMovement = GameObject.Instantiate(PCDWeapon.attackAnimPrefab, human.humanBone.body.position, human.humanBone.body.rotation, human.humanBone.body).GetComponentInChildren<PCDCircleMovement>();
+        longStickHorizonCircleMovement = GameObject.Instantiate(PCDWeapon.attackAnimPrefab, humanConfig.skeleton.GetBone("Body").transform.position, humanConfig.skeleton.GetBone("Body").transform.rotation, humanConfig.skeleton.GetBone("Body").transform).GetComponentInChildren<PCDCircleMovement>();
 
         if (!longStickHorizonCircleMovement) {
             return;
@@ -454,11 +474,13 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
 
 #endregion
 
-    private void ClearPoseLayerOverride() {
-        human.SetBodyPoseLayerOverrideIndex(-1);
-        human.SetLHandPoseLayerOverrideIndex(-1);
-        human.SetRHandPoseLayerOverrideIndex(-1);
-        human.DoHandPose();
+    private void ResetPoseAndDriveHandToKF() {
+        poseMgr.ResetPose();
+        walkMgr.DriveHandToKF();
+        // human.SetBodyPoseLayerOverrideIndex(-1);
+        // human.SetLHandPoseLayerOverrideIndex(-1);
+        // human.SetRHandPoseLayerOverrideIndex(-1);
+        // human.DoHandPose();
     }
 
 }

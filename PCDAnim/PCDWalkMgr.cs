@@ -27,6 +27,7 @@ public class PCDWalkMgr : MonoBehaviour
 	[SerializeField] private PCDBodyHead bodyHead;
 
 	private PCDAnimReader curAnimReader;
+	private PCDKFReader curKFReader;
 	private Rigidbody rb;
 	private string curKeyFrame = "Idle";
 	private BoneTransInfo lFootInfo;
@@ -59,6 +60,19 @@ public class PCDWalkMgr : MonoBehaviour
 		lShoulder = new PCDShoulder(skeleton.GetBone("LShoulder"), skeleton.GetBone("LHand"), true);
 		rShoulder = new PCDShoulder(skeleton.GetBone("RShoulder"), skeleton.GetBone("RHand"), true);
 		bodyHead = new PCDBodyHead(this, skeleton.GetBone("Body"), skeleton.GetBone("Head"));
+
+
+		
+		SetAnim("Walk");
+		curKFReader = curAnimReader.GetKeyFrameReader(curKeyFrame);
+		bodyHead.SetBodyPosLocal(curKFReader.GetBoneInfo("Body").localPosition);
+		lHand.SetLocalPosition(curKFReader.GetBoneInfo("LHand").localPosition);
+		rHand.SetLocalPosition(curKFReader.GetBoneInfo("RHand").localPosition);
+		lFoot.SetLocalPosition(curKFReader.GetBoneInfo("LFoot").localPosition);
+		lFoot.SetFootPos(skeleton.GetBone("Root").transform.position + skeleton.GetBone("Root").transform.rotation * curKFReader.GetBoneInfo("LFoot").localPosition);
+		rFoot.SetLocalPosition(curKFReader.GetBoneInfo("RFoot").localPosition);
+		rFoot.SetFootPos(skeleton.GetBone("Root").transform.position + skeleton.GetBone("Root").transform.rotation * curKFReader.GetBoneInfo("RFoot").localPosition);
+
 	}
 
 	private void UpdateFootTarget() {
@@ -102,9 +116,9 @@ public class PCDWalkMgr : MonoBehaviour
 	}
 
 	private void UpdateBodyHeadShoulder() {
-		var kfReader = animator.GetAnimReader("Walk").GetKeyFrameReader(curKeyFrame);
+		curKFReader = curAnimReader.GetKeyFrameReader(curKeyFrame);
 		var activeFoot = (curKeyFrame == "Idle" ? null : (curKeyFrame == "LStep" ? lFoot : rFoot));
-		bodyHead.UpdateBodyAndHead(kfReader, activeFoot, lookAtTarget);
+		bodyHead.UpdateBodyAndHead(curKFReader, activeFoot, lookAtTarget);
 		lShoulder.UpdateShoulder();
 		rShoulder.UpdateShoulder();
 	}
@@ -115,30 +129,27 @@ public class PCDWalkMgr : MonoBehaviour
 	}
 
 	private void DriveNextStep(bool isStepLeft) {
-		var kfReader = animator.GetAnimReader("Walk").GetKeyFrameReader(curKeyFrame);
-		var idleKFReader = animator.GetAnimReader("Walk").GetKeyFrameReader("Idle");
+		curKFReader = curAnimReader.GetKeyFrameReader(curKeyFrame);
+		var idleKFReader = curAnimReader.GetKeyFrameReader("Idle");
 		if (isStepLeft) {
 			lFoot.Step(() => {
 				holdTime = 0f;
 				walkState = WalkState.Idle;
-				lHand.FadeBoneToKeyFrame(idleKFReader, animSetting.handPoseDuration, animSetting.handPosCurve);
-				rHand.FadeBoneToKeyFrame(idleKFReader, animSetting.handPoseDuration, animSetting.handPosCurve);
+				DriveHandToKF(idleKFReader);
 				// SendMessage("Play", SendMessageOptions.DontRequireReceiver);
 			});
-			lHand.FadeBoneToKeyFrame(kfReader, animSetting.handPoseDuration, animSetting.handPosCurve);
-			rHand.FadeBoneToKeyFrame(kfReader, animSetting.handPoseDuration, animSetting.handPosCurve);
-
+			DriveHandToKF();
 			// body.FadeBoneToKeyFrame(kfReader, animSetting.handPoseDuration);
 		} else {
 			rFoot.Step(() => {
 				holdTime = 0f;
 				walkState = WalkState.Idle;
-				lHand.FadeBoneToKeyFrame(idleKFReader, animSetting.handPoseDuration, animSetting.handPosCurve);
-				rHand.FadeBoneToKeyFrame(idleKFReader, animSetting.handPoseDuration, animSetting.handPosCurve);
+				DriveHandToKF(idleKFReader);
+				// lHand.FadeBoneToKeyFrame(idleKFReader, animSetting.handPoseDuration, animSetting.handPosCurve);
+				// rHand.FadeBoneToKeyFrame(idleKFReader, animSetting.handPoseDuration, animSetting.handPosCurve);
 				// SendMessage("Play", SendMessageOptions.DontRequireReceiver);
 			});
-			lHand.FadeBoneToKeyFrame(kfReader, animSetting.handPoseDuration, animSetting.handPosCurve);
-			rHand.FadeBoneToKeyFrame(kfReader, animSetting.handPoseDuration, animSetting.handPosCurve);
+			DriveHandToKF();
 		}
 	}
 
@@ -202,6 +213,16 @@ public class PCDWalkMgr : MonoBehaviour
 			return;
 		}
 		curAnimReader = newAnimReader;
+	}
+
+	public void DriveHandToKF(PCDKFReader targetKFReader = null) {
+		if (targetKFReader == null	) {
+			lHand.FadeBoneToKeyFrame(curKFReader, animSetting.handPoseDuration, animSetting.handPosCurve);
+			rHand.FadeBoneToKeyFrame(curKFReader, animSetting.handPoseDuration, animSetting.handPosCurve);
+		} else {
+			lHand.FadeBoneToKeyFrame(targetKFReader, animSetting.handPoseDuration, animSetting.handPosCurve);
+			rHand.FadeBoneToKeyFrame(targetKFReader, animSetting.handPoseDuration, animSetting.handPosCurve);
+		}
 	}
 
 }

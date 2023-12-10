@@ -20,12 +20,14 @@ public class PCDHumanMovementSM : MonoBehaviour {
     private StateMachine<State> sm;
     private CharacterManager charaM;
     private InputReader inputReader;
-    private PCDHuman[] humans;
+    // private PCDHuman[] humans;
+    private PCDWalkMgr[] walkMgrs;
 
     void Awake() {
         charaM = GetComponent<CharacterManager>();
         inputReader = GetComponent<InputReader>();
-        humans = GetComponentsInChildren<PCDHuman>();
+        // humans = GetComponentsInChildren<PCDHuman>();
+        walkMgrs = GetComponentsInChildren<PCDWalkMgr>();
 
         // InitMoveSM();
     }
@@ -40,8 +42,9 @@ public class PCDHumanMovementSM : MonoBehaviour {
 
         sm.GetState(State.Idle).Bind(
             () => {
-                foreach (PCDHuman human in humans)
-                    human.SetPoseLayerName(walkPoseLayerName);
+                // foreach (PCDHuman human in humans)
+                foreach (PCDWalkMgr human in walkMgrs)
+                    human.SetAnim(walkPoseLayerName);
             },
             () => {
                 SetControllerInput_Idle();
@@ -52,8 +55,9 @@ public class PCDHumanMovementSM : MonoBehaviour {
         sm.GetState(State.Walk).Bind(
             () => {
                 charaM.movementSpeed = walkSpeed;
-                foreach (PCDHuman human in humans)
-                    human.SetPoseLayerName(walkPoseLayerName);
+                // foreach (PCDHuman human in humans)
+                foreach (PCDWalkMgr human in walkMgrs)
+                    human.SetAnim(walkPoseLayerName);
             },
             () => {
                 SetControllerInput_Move();
@@ -63,8 +67,9 @@ public class PCDHumanMovementSM : MonoBehaviour {
 
         sm.GetState(State.Run).Bind(
             () => {
-                foreach (PCDHuman human in humans)
-                    human.SetPoseLayerName(runPoseLayerName);
+                // foreach (PCDHuman human in humans)
+                foreach (PCDWalkMgr human in walkMgrs)
+                    human.SetAnim(runPoseLayerName);
                 charaM.sprintSpeed = runSpeed;
                 inputReader.sprint = true;
             },

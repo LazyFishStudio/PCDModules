@@ -27,6 +27,10 @@ public class PCDBodyHead
     private Quaternion bodyTargetRotLocal;
     private Quaternion bodyRotLocalRes;
 
+    public void SetBodyPosLocal(Vector3 bodyPosLocal) {
+        bodyTargetPosLocal = bodyPosLocal;
+    }
+
     public void UpdateBodyAndHead(PCDKFReader kfReader, PCDFoot activeFoot, Transform lookAtTarget) {
         /*
          * P1: 从 KeyFrame 读取基本位置和旋转 -> Animation & (Idle / LStep / RStep)
@@ -67,10 +71,12 @@ public class PCDBodyHead
         /* HEADROT: Head Look At To Target */
         PCDBone headBone = skeleton.GetBone("Head");
         if (headBone) {
-            Vector3 toTargetWeight = Vector3.Lerp(rootBone.transform.forward, bodyBone.transform.forward, walkMgr.animSetting.lookAtWeight_head);
-            headBone.transform.rotation = Quaternion.Slerp(headBone.transform.rotation, Quaternion.LookRotation(toTargetWeight, bodyBone.transform.up), Time.deltaTime * walkMgr.animSetting.bodyRotSpeed);
+            Vector3 toTargetWeight;
             if (lookAtTarget) {
                 toTargetWeight = Vector3.Lerp(bodyBone.transform.forward, lookAtTarget.position - headBone.transform.position, walkMgr.animSetting.lookAtWeight_head);
+                headBone.transform.rotation = Quaternion.Slerp(headBone.transform.rotation, Quaternion.LookRotation(toTargetWeight, bodyBone.transform.up), Time.deltaTime * walkMgr.animSetting.bodyRotSpeed);
+            } else {
+                toTargetWeight = Vector3.Lerp(rootBone.transform.forward, rootBone.transform.forward, walkMgr.animSetting.lookAtWeight_head);
                 headBone.transform.rotation = Quaternion.Slerp(headBone.transform.rotation, Quaternion.LookRotation(toTargetWeight, bodyBone.transform.up), Time.deltaTime * walkMgr.animSetting.bodyRotSpeed);
             }
         }

@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: HumanSit
   m_EditorClassIdentifier: 
   keyFrameList:
-  - keyFrameName: Sit
+  - keyFrameName: Idle
     keyFramePrefab: {fileID: 5162571760200570484, guid: 9e6eb7e199e0e9d419306c93c8542b7c, type: 3}
