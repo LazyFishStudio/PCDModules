@@ -115,7 +115,7 @@ public class PCDFoot : PCDBoneDriver {
 				stepProcess = Mathf.Min(1.0f, stepDurationCount / human.animSetting.stepDuration);
 
 				curPos = Vector3.Lerp(archoringPos, targetPos, human.animSetting.footPosCurve.Evaluate(stepProcess));
-				curPos += Vector3.up * human.animSetting.footHeightCurve.Evaluate(stepProcess) * human.humanBone.rootScale;
+				curPos += Vector3.up * human.animSetting.footHeightCurve.Evaluate(stepProcess) * human.skeleton.GetBone("Root").transform.localScale.x;
 
 				footBone.position = curPos;
 				footBone.rotation = targetRot;
@@ -124,7 +124,7 @@ public class PCDFoot : PCDBoneDriver {
 				if (stepProcess >= 1.0f) {
 					sm.GotoState(State.Stand);
 					stepFinishCallBack.Invoke();
-					archoringPos = curPos.CopySetY(human.humanBone.root.position.y);                      
+					archoringPos = curPos.CopySetY(human.skeleton.GetBone("Root").transform.position.y);                      
 				}
 
 

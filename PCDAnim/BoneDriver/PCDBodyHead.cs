@@ -6,14 +6,14 @@ public class PCDBodyHead
 {
     private PCDWalkMgr walkMgr;
     private PCDHuman.PoseInfo poseInfo;
-    private PCDHuman.PCDHumanBoneSetting humanBone;
+    private PCDSkeleton skeleton;
     private PCDBoneDriver bodyDriver;
     private PCDBoneDriver headDriver;
 
     public PCDBodyHead(PCDWalkMgr walkMgr, PCDBone body, PCDBone head) {
         this.walkMgr = walkMgr;
         poseInfo = walkMgr.poseInfo;
-        humanBone = walkMgr.humanBone;
+        skeleton = walkMgr.skeleton;
         bodyDriver = new PCDBoneDriver(body, true);
         headDriver = new PCDBoneDriver(head, true);
     }
@@ -42,14 +42,17 @@ public class PCDBodyHead
 
         bodyTargetRotLocal = bodyFKRotLocal;
         if (true) {//Vector3.Angle(poseInfo.moveDir, humanBone.root.forward) < 180.1f) {
-            float bodyRollProcess = Mathf.Clamp((Mathf.Abs(Vector3.SignedAngle(poseInfo.moveDir, humanBone.root.forward, Vector3.up)) * 1.5f) / 120.0f, 0, 1.0f);
+            float bodyRollProcess = Mathf.Clamp((Mathf.Abs(Vector3.SignedAngle(poseInfo.moveDir, skeleton.GetBone("Root").transform.forward, Vector3.up)) * 1.5f) / 120.0f, 0, 1.0f);
             bodyRollProcess = Mathf.Sin(bodyRollProcess * Mathf.PI);
             bodyRollProcess = poseInfo.speed < 0.5f ? 0 : bodyRollProcess;
-            float bodyRollSign = Mathf.Sign(Vector3.SignedAngle(poseInfo.moveDir, humanBone.root.forward, Vector3.up));
+            float bodyRollSign = Mathf.Sign(Vector3.SignedAngle(poseInfo.moveDir, skeleton.GetBone("Root").transform.forward, Vector3.up));
             Quaternion bodyRoll = Quaternion.AngleAxis(bodyRollSign * bodyRollProcess * walkMgr.animSetting.bodyRollAngle, Vector3.forward);
             bodyTargetRotLocal = bodyRoll * bodyFKRotLocal;
         }
-        bodyRotLocalRes = Quaternion.Slerp(humanBone.body.localRotation, bodyTargetRotLocal, Time.deltaTime * walkMgr.animSetting.bodyRotSpeed);
+        bodyRotLocalRes = Quaternion.Slerp(skeleton.GetBone("Body").transform.localRotation, bodyTargetRotLocal, Time.deltaTime * walkMgr.animSetting.bodyRotSpeed);
+
+        Vector3 bodyTargetOffsetLocal = bodyKFPosLocal.ClearY();
+        poseInfo.bodyOffsetLocal = Vector3.Lerp(poseInfo.bodyOffsetLocal, bodyTargetOffsetLocal, Time.deltaTime * walkMgr.animSetting.bodyOffsetSpeed);
 
         float toTargetY = bodyTargetPosLocal.y - bodyPosLocalRes.y;
         float dragForceY = toTargetY * walkMgr.animSetting.bodyDragStrength;
@@ -61,7 +64,7 @@ public class PCDBodyHead
         bodyPosLocalRes += poseInfo.bodyVelocity * Mathf.Min(Time.deltaTime, 0.0125f);
 
         /* Actual setup value */
-        bodyDriver.SetLocalPosition(bodyPosLocalRes);
+        bodyDriver.SetLocalPosition(bodyPosLocalRes + poseInfo.bodyOffsetLocal);
         bodyDriver.SetLocalRotation(bodyRotLocalRes);
     }
 }

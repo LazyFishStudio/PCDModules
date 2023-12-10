@@ -7,7 +7,7 @@ public class PCDArchoringMgr : MonoBehaviour
     private PCDAnimator animator;
     private PCDHumanConfig config;
 
-    public PCDHuman.PCDHumanBoneSetting humanBone => config.humanBone;
+    public PCDSkeleton skeleton => config.skeleton;
 	public PCDHuman.AnimSetting animSetting => config.animSetting;
 	public PCDHuman.PoseInfo poseInfo => config.poseInfo;
 
@@ -16,11 +16,11 @@ public class PCDArchoringMgr : MonoBehaviour
         animator = GetComponent<PCDAnimator>();
         config = GetComponent<PCDHumanConfig>();
 
-        body = new PCDBoneDriver(humanBone.body.GetComponent<PCDBone>(), false);
-        lFoot = new PCDBoneDriver(humanBone.lFoot.GetComponent<PCDBone>(), false);
-        rFoot = new PCDBoneDriver(humanBone.rFoot.GetComponent<PCDBone>(), false);
-        lHand = new PCDBoneDriver(humanBone.lHand.GetComponent<PCDBone>(), false);
-        rHand = new PCDBoneDriver(humanBone.rHand.GetComponent<PCDBone>(), false);
+        body = new PCDBoneDriver(skeleton.GetBone("Body"), false);
+        lFoot = new PCDBoneDriver(skeleton.GetBone("LFoot"), false);
+        rFoot = new PCDBoneDriver(skeleton.GetBone("RFoot"), false);
+        lHand = new PCDBoneDriver(skeleton.GetBone("LHand"), false);
+        rHand = new PCDBoneDriver(skeleton.GetBone("RHand"), false);
 
         nameDict = new Dictionary<string, PCDBoneDriver> {
             {"Body", body},

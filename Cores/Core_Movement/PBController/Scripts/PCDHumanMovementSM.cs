@@ -1,8 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using PhysicsBasedCharacterController;
-using Unity.VisualScripting;
-using UnityEditor.Rendering.Universal;
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterManager))]
@@ -11,7 +9,6 @@ public class PCDHumanMovementSM : MonoBehaviour {
     public enum State {
         Idle, Walk, Run,
     }
-
     public float walkSpeed = 6.0f;
     public float runSpeed = 7.0f;
     public MoveInput moveInput;
@@ -51,7 +48,7 @@ public class PCDHumanMovementSM : MonoBehaviour {
             },
             () => {}
         );
-
+        
         sm.GetState(State.Walk).Bind(
             () => {
                 charaM.movementSpeed = walkSpeed;

@@ -14,11 +14,10 @@ public class PCDHuman : MonoBehaviour {
         ArchoringAtTarget, 
         Idle, Wait, Standing, Stepping
     }
-
     public enum HandState {
         Pose
     }
-
+    
     private float scaleDeltaTime => Time.deltaTime / humanBone.rootScale * Mathf.Max(poseInfo.speed / animSetting.oriSpeed, 0.5f);
 
 #region Setting
@@ -550,7 +549,7 @@ private void UpdatePelvisAndFoot() {
                 UpdateBodyTargetRotToLookAt();  // walk animation
                 UpdateHeadRotToLookAt();    // walk animation
             }
-
+        
         } else {
             poseInfo.bodyPosLocal = Vector3.Lerp(poseInfo.bodyPosLocal, poseInfo.bodyTargetPosLocal, 10.0f * Time.deltaTime);
         }

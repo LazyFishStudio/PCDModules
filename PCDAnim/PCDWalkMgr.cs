@@ -13,7 +13,7 @@ public class PCDWalkMgr : MonoBehaviour
 	private PCDAnimator animator;
 	private PCDHumanConfig config;
 
-	public PCDHuman.PCDHumanBoneSetting humanBone => config.humanBone;
+	public PCDSkeleton skeleton => config.skeleton;
 	public PCDHuman.AnimSetting animSetting => config.animSetting;
 	public PCDHuman.PoseInfo poseInfo => config.poseInfo;
 
@@ -30,30 +30,33 @@ public class PCDWalkMgr : MonoBehaviour
 	private BoneTransInfo lFootInfo;
 	private BoneTransInfo rFootInfo;
 
-	public float scaleDeltaTime => Time.deltaTime / humanBone.rootScale * Mathf.Max(poseInfo.speed / animSetting.oriSpeed, 0.5f);
-	private bool isAnyFootOutRange => lFoot.GetDisToTargetPos() >= animSetting.stepTriggerDis * humanBone.rootScale || rFoot.GetDisToTargetPos() >= animSetting.stepTriggerDis * humanBone.rootScale;
-    private bool isAnyFootNotReset => isAnyFootOutRange || Mathf.Abs(humanBone.lFoot.position.y - humanBone.root.position.y) > 0.01f || Mathf.Abs(humanBone.rFoot.position.y - humanBone.root.position.y) > 0.01f;
+	public float rootScale => skeleton.GetBone("Root").transform.localScale.x;
+	public float scaleDeltaTime => Time.deltaTime / rootScale * Mathf.Max(poseInfo.speed / animSetting.oriSpeed, 0.5f);
+	private bool isAnyFootOutRange => lFoot.GetDisToTargetPos() >= animSetting.stepTriggerDis * rootScale || rFoot.GetDisToTargetPos() >= animSetting.stepTriggerDis * rootScale;
+    private bool isAnyFootNotReset => isAnyFootOutRange || Mathf.Abs(skeleton.GetBone("LFoot").transform.position.y - skeleton.GetBone("Root").transform.position.y) > 0.01f || Mathf.Abs(skeleton.GetBone("RFoot").transform.position.y - skeleton.GetBone("Root").transform.position.y) > 0.01f;
+
+
 
 	private void Awake() {
 		config = GetComponent<PCDHumanConfig>();
 		animator = GetComponent<PCDAnimator>();
 		rb = GetComponentInParent<Rigidbody>();
 
-		if (humanBone.isLLegActive) {
-			lFoot = new(this, humanBone.lFoot.GetComponent<PCDBone>(), true);
+		if (skeleton.GetBone("LFoot")) {
+			lFoot = new(this, skeleton.GetBone("LFoot"), true);
 		}
-		if (humanBone.isRLegActive) {
-			rFoot = new(this, humanBone.rFoot.GetComponent<PCDBone>(), true);
+		if (skeleton.GetBone("RFoot")) {
+			rFoot = new(this, skeleton.GetBone("RFoot"), true);
 		}
-		if (true) {
-			lHand = new PCDBoneDriver(humanBone.lHand.GetComponent<PCDBone>(), true);
+		if (skeleton.GetBone("LHand")) {
+			lHand = new PCDBoneDriver(skeleton.GetBone("LHand"), true);
 		}
-		if (true) {
-			rHand = new PCDBoneDriver(humanBone.rHand.GetComponent<PCDBone>(), true);
+		if (skeleton.GetBone("RHand")) {
+			rHand = new PCDBoneDriver(skeleton.GetBone("RHand"), true);
 		}
-		lShoulder = new PCDShoulder(humanBone.lShoulder.GetComponent<PCDBone>(), humanBone.lHand.GetComponent<PCDBone>(), true);
-		rShoulder = new PCDShoulder(humanBone.rShoulder.GetComponent<PCDBone>(), humanBone.rHand.GetComponent<PCDBone>(), true);
-		bodyHead = new PCDBodyHead(this, humanBone.body.GetComponent<PCDBone>(), humanBone.head.GetComponent<PCDBone>());
+		lShoulder = new PCDShoulder(skeleton.GetBone("LShoulder"), skeleton.GetBone("LHand"), true);
+		rShoulder = new PCDShoulder(skeleton.GetBone("RShoulder"), skeleton.GetBone("RHand"), true);
+		bodyHead = new PCDBodyHead(this, skeleton.GetBone("Body"), skeleton.GetBone("Head"));
 	}
 
 	private void UpdateFootTarget() {
@@ -63,23 +66,23 @@ public class PCDWalkMgr : MonoBehaviour
 
 		/* Update Left-Foot */
 		UpdateLFootTargetPosToStepTarget();
-		lFoot.Update(poseInfo.lFootTargetPos, humanBone.body.rotation * lFootInfo.localRotation);
+		lFoot.Update(poseInfo.lFootTargetPos, skeleton.GetBone("Body").transform.rotation * lFootInfo.localRotation);
 
 		/* Update Right-Foot */
 		UpdateRFootTargetPosToStepTarget();
-		rFoot.Update(poseInfo.rFootTargetPos, humanBone.body.rotation * rFootInfo.localRotation);
+		rFoot.Update(poseInfo.rFootTargetPos, skeleton.GetBone("Body").transform.rotation * rFootInfo.localRotation);
 
 		/* Private function implements */
 		void UpdateLFootTargetPosToStepTarget() {
-			poseInfo.lFootTargetPos = (humanBone.root.position + humanBone.root.rotation * lFootInfo.localPosition).CopySetY(humanBone.root.position.y);
+			poseInfo.lFootTargetPos = (skeleton.GetBone("Root").transform.position + skeleton.GetBone("Root").transform.rotation * lFootInfo.localPosition).CopySetY(skeleton.GetBone("Root").transform.position.y);
 			if (walkState == WalkState.Walking) {
-				poseInfo.lFootTargetPos += poseInfo.moveDir * animSetting.stepTargetOffset * humanBone.rootScale;
+				poseInfo.lFootTargetPos += poseInfo.moveDir * animSetting.stepTargetOffset * skeleton.GetBone("Root").transform.localScale.x;
 			}
 		}
 		void UpdateRFootTargetPosToStepTarget() {
-			poseInfo.rFootTargetPos = (humanBone.root.position + humanBone.root.rotation * rFootInfo.localPosition).CopySetY(humanBone.root.position.y);
+			poseInfo.rFootTargetPos = (skeleton.GetBone("Root").transform.position + skeleton.GetBone("Root").transform.rotation * rFootInfo.localPosition).CopySetY(skeleton.GetBone("Root").transform.position.y);
 			if (walkState == WalkState.Walking) {
-				poseInfo.rFootTargetPos += poseInfo.moveDir * animSetting.stepTargetOffset * humanBone.rootScale;
+				poseInfo.rFootTargetPos += poseInfo.moveDir * animSetting.stepTargetOffset * skeleton.GetBone("Root").transform.localScale.x;
 			}
 		}
 	}
