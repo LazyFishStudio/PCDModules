@@ -46,6 +46,7 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
     [Space]
     [Header("Attacking设置")]
     public Transform testWeapon;
+    [SerializeField]
     private Transform attackingWeapon;
     [SerializeField]
     private PCDCircleMovement longStickHorizonCircleMovement;
@@ -196,18 +197,18 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
             () => {
                 // poseMgr.SetLHandArchoring(holdingObject.Find("LHandTarget"));
                 // poseMgr.SetRHandArchoring(holdingObject.Find("RHandTarget"));
-                archoringMgr.BoneArchoringToTransform("LHand", holdingObject.Find("LHandTarget"));
-                archoringMgr.BoneArchoringToTransform("RHand", holdingObject.Find("RHandTarget"));
+                archoringMgr.BoneArchoringToTransform("LHand", holdingObject.Find("LHandTarget"), 0);
+                archoringMgr.BoneArchoringToTransform("RHand", holdingObject.Find("RHandTarget"), 0);
             },
             () => {
                 OnHoldUpdate();
             },
             () => {
-                ResetPoseAndDriveHandToKF();
                 // poseMgr.SetLHandArchoring(null);
                 // poseMgr.SetRHandArchoring(null);
                 archoringMgr.ResetBoneFromArchoring("LHand");
                 archoringMgr.ResetBoneFromArchoring("RHand");
+                ResetPoseAndDriveHandToKF();
             }
         );
 
@@ -218,8 +219,8 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
                 if (attackingWeapon) {
                     // poseMgr.SetLHandArchoring(attackingWeapon.Find("LHandTarget"));
                     // poseMgr.SetRHandArchoring(attackingWeapon.Find("RHandTarget"));
-                    archoringMgr.BoneArchoringToTransform("LHand", holdingObject.Find("LHandTarget"));
-                    archoringMgr.BoneArchoringToTransform("RHand", holdingObject.Find("RHandTarget"));
+                    archoringMgr.BoneArchoringToTransform("LHand", attackingWeapon.Find("LHandTarget"), 0);
+                    archoringMgr.BoneArchoringToTransform("RHand", attackingWeapon.Find("RHandTarget"), 0);
                     // human.SetLookAt(attackingWeapon, attackingWeapon);
                     // longStickHorizonCircleMovement.AddProcessEvent(0.45f, () => {attackingWeapon.GetComponentInChildren<DamageArea>()?.SetDamageDetectActive(true);});
                     // longStickHorizonCircleMovement.AddProcessEvent(0.55f, () => {attackingWeapon.GetComponentInChildren<DamageArea>()?.SetDamageDetectActive(false);});
