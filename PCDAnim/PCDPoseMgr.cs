@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 public class PCDPoseMgr : MonoBehaviour
 {
@@ -62,6 +63,7 @@ public class PCDPoseMgr : MonoBehaviour
 
         foreach (var boneName in nameDict.Keys) {
             PCDBoneDriver driver = nameDict[boneName];
+            driver.attachedBone.transform.DOKill();
             driver.FadeBoneToKeyFrame(kfReader);
         }
     }

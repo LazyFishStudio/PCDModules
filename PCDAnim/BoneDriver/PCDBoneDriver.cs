@@ -8,6 +8,7 @@ public class PCDBoneDriver
 {
 	public PCDBone attachedBone;
 	private PCDBoneDriver prevOwner;
+	private BoneTransInfo lastKFBoneTransInfo;
 
 	public PCDBoneDriver(PCDBone bone, bool autoTryGetOwnship = false) {
 		attachedBone = bone;
@@ -73,6 +74,12 @@ public class PCDBoneDriver
 	public void FadeBoneToTransInfo(BoneTransInfo info, float fadeTime = 0.05f, AnimationCurve curve = null) {
 		if (!CheckBoneOwnership())
 			return;
+		
+		float curPosToTargetDis = Vector3.Distance(info.localPosition, attachedBone.transform.localPosition);
+		float lastPosePosToTargetDis = Vector3.Distance(info.localPosition, lastKFBoneTransInfo.localPosition);
+		float scaleFadeTime = fadeTime * (curPosToTargetDis / lastPosePosToTargetDis);
+
+		fadeTime = (scaleFadeTime < 0.01f || scaleFadeTime > fadeTime) ? fadeTime : scaleFadeTime;
 
 		attachedBone.transform.DOKill();
 		if (curve == null) {
@@ -84,5 +91,6 @@ public class PCDBoneDriver
 			attachedBone.transform.DOLocalRotateQuaternion(info.localRotation, fadeTime).SetEase(curve);
 			attachedBone.transform.DOScale(info.localScale, fadeTime).SetEase(curve);
 		}
+		lastKFBoneTransInfo = info;
 	}
 }

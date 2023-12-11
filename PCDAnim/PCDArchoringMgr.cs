@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 
 public class PCDArchoringMgr : MonoBehaviour
@@ -75,6 +76,7 @@ public class PCDArchoringMgr : MonoBehaviour
     private Dictionary<string, Transform> targetDict;
     private Dictionary<string, float> lerpRemTimeDict;
     public void BoneArchoringToTransform(string partName, Transform target, float lerpTime = 0.06f) {
+        nameDict[partName].attachedBone.transform.DOKill();
         nameDict[partName].TryGetOwnership();
         targetDict[partName] = target;
         lerpRemTimeDict[partName] = lerpTime;

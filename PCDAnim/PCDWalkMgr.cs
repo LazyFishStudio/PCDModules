@@ -37,7 +37,8 @@ public class PCDWalkMgr : MonoBehaviour
 	public float rootScale => skeleton.GetBone("Root").transform.localScale.x;
 	public float scaleDeltaTime => Time.deltaTime / rootScale * Mathf.Max(poseInfo.speed / animSetting.oriSpeed, 0.5f);
 	private bool isAnyFootOutRange => lFoot.GetDisToTargetPos() >= animSetting.stepTriggerDis * rootScale || rFoot.GetDisToTargetPos() >= animSetting.stepTriggerDis * rootScale;
-    private bool isAnyFootNotReset => isAnyFootOutRange || Mathf.Abs(skeleton.GetBone("LFoot").transform.position.y - skeleton.GetBone("Root").transform.position.y) > 0.01f || Mathf.Abs(skeleton.GetBone("RFoot").transform.position.y - skeleton.GetBone("Root").transform.position.y) > 0.01f;
+    private bool isAnyFootNotReset => isAnyFootOutRange;
+    // private bool isAnyFootNotReset => isAnyFootOutRange || Mathf.Abs(skeleton.GetBone("LFoot").transform.position.y - skeleton.GetBone("Root").transform.position.y) > 0.01f || Mathf.Abs(skeleton.GetBone("RFoot").transform.position.y - skeleton.GetBone("Root").transform.position.y) > 0.01f;
 
 
 
@@ -108,6 +109,8 @@ public class PCDWalkMgr : MonoBehaviour
 		/* ���� Walk ���� Idle ѡ�����ĸ� Pos */
 		float lFootToTargetDis = Vector3.Distance(poseInfo.lFootTargetPos, lFoot.curPos);
 		float rFootToTargetDis = Vector3.Distance(poseInfo.rFootTargetPos, rFoot.curPos);
+		float lFootYOffset = Mathf.Abs(skeleton.GetBone("LFoot").transform.position.y - skeleton.GetBone("Root").transform.position.y);
+		float rFootYOffset = Mathf.Abs(skeleton.GetBone("RFoot").transform.position.y - skeleton.GetBone("Root").transform.position.y);
 
 		if (Mathf.Abs(lFootToTargetDis - rFootToTargetDis) < animSetting.stepTargetOffset / 2.0f) {
 			return !animSetting.stepRightFootFirst;
@@ -180,6 +183,10 @@ public class PCDWalkMgr : MonoBehaviour
 			return;
 		if (isSpeedSlow && !isAnyFootNotReset)
 			return;
+		Debug.Log("holdTime < animSetting.stepInterval: " + (holdTime < animSetting.stepInterval));
+		Debug.Log("isSpeedSlow: " + isSpeedSlow);
+		Debug.Log("poseInfo.speed < animSetting.stepTriggerSpeed: " + poseInfo.speed + " " + animSetting.stepTriggerSpeed);
+		Debug.Log("isAnyFootNotReset: " + isAnyFootNotReset);
 
 		/* Next step */
 		walkState = WalkState.Walking;
