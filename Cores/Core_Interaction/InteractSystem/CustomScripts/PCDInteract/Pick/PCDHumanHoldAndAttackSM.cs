@@ -12,6 +12,14 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
         AttackingLongStickHorizon
     }
 
+    public enum AttackState {
+        Idle, Charging, Attacking
+    }
+
+    public enum FishState {
+        Idle, Throwing, Fishing, Catching
+    }
+
     public string playerName = "P1";
 
     [Header("Holding设置")]
@@ -21,6 +29,7 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
     public Transform longStickObjFollowTarget;
     
     [Space]
+    [SerializeField]
     private Transform holdingObject;
     private Transform followTarget;
     [SerializeField]
@@ -55,6 +64,9 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
     [Space]
     [SerializeField]
     private StateMachine<State> sm;
+    [SerializeField]
+    private SubStateMachine<State, AttackState> attackSM;
+    private SubStateMachine<State, FishState> fishSM;
     private PCDWalkMgr walkMgr;
     private PCDPoseMgr poseMgr;
     private PCDArchoringMgr archoringMgr;
@@ -68,7 +80,7 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
     public bool isHoldingBox => sm.curState.Equals(State.HoldingBox);
     public bool isHoldingStick => sm.curState.Equals(State.HoldingStick);
     public bool isHoldingLongStick => sm.curState.Equals(State.HoldingLongStick);
-    public bool isAttacking => sm.curState.Equals(State.AttackingLongStickHorizon);
+    public bool isAttacking => sm.curState.Equals(State.AttackingLongStickHorizon) || (attackSM.isActiveSM && (attackSM.curState.Equals(AttackState.Charging) || attackSM.curState.Equals(AttackState.Attacking)));
 
     void Awake() {
 
@@ -114,6 +126,8 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
 	void InitHandActionSM() {
 
         sm = new StateMachine<State>(State.Idle);
+        attackSM = new SubStateMachine<State, AttackState>(sm, AttackState.Idle);
+        fishSM = new SubStateMachine<State, FishState>(sm, FishState.Idle);
 
         sm.GetState(State.Idle).Bind(
             () => {
@@ -244,12 +258,51 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
             }
         );
 
+        attackSM.GetState(AttackState.Charging).Bind(
+            () => {
+               attackSM.GotoState(AttackState.Attacking);
+            },
+            () => {
+                
+            },
+            () => {
+               
+            }
+        );
+
+        attackSM.GetState(AttackState.Attacking).Bind(
+            () => {
+                // controller.LockPosAndRot
+                // circle Movement Start
+                if (attackingWeapon) {
+                    archoringMgr.BoneArchoringToTransform("LHand", attackingWeapon.Find("LHandTarget"), 0);
+                    archoringMgr.BoneArchoringToTransform("RHand", attackingWeapon.Find("RHandTarget"), 0);
+                }
+            },
+            () => {
+                if (attackingWeapon) {
+                    attackingWeapon.transform.position = followTarget.position;
+                    attackingWeapon.transform.rotation = followTarget.GetChild(0).rotation;
+                }
+            },
+            () => {
+                // archoringMgr.ResetBoneFromArchoring("LHand");
+                // archoringMgr.ResetBoneFromArchoring("RHand");
+                // Debug.Log("Stop attacking movment");
+                longStickHorizonCircleMovement.StopMovement();
+            }
+        );
+
         sm.Init();
+        attackSM.Init();
+        fishSM.Init();
 
     }
 
     public void update() {
         sm.UpdateStateAction();
+        attackSM.UpdateStateAction();
+        fishSM.UpdateStateAction();
     }
 
 #region PRIVATE IMPLEMENT
@@ -399,13 +452,17 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
         }
 
         attackingWeapon = weapon;
+        Transform lastFollowTarget = followTarget; 
         followTarget = longStickHorizonCircleMovement.movingObj;
         longStickHorizonCircleMovement.StartMovement(transform, transform, () => {
-            sm.GotoState(State.Idle);
-            HoldObj(attackingWeapon, PCDObjectProperties.Shape.LongStick, true);
+            // sm.GotoState(State.Idle);
+            attackSM.ReturnToParentSM();
+            followTarget = lastFollowTarget;
+            // HoldObj(attackingWeapon, PCDObjectProperties.Shape.LongStick, true);
         });
 
-        sm.GotoState(State.AttackingLongStickHorizon);
+        sm.GotoSubSM<AttackState>(attackSM, AttackState.Charging);
+        // sm.GotoState(State.AttackingLongStickHorizon);
 
     }
 
@@ -435,6 +492,9 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
     /// <param name="weapon">武器物体</param>
     /// <param name="shape">武器形状</param>
     public void UseWeaponAttack(Transform weapon, PCDObjectProperties.Shape shape) {
+        if (isAttacking) {
+            return;
+        }
         if (shape == PCDObjectProperties.Shape.LongStick && isHoldingLongStick) {
             UseLongStickHorizonAttack(weapon);
         }
