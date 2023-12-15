@@ -62,9 +62,9 @@ public class PCDWalkMgr : MonoBehaviour
 		lShoulder = new PCDShoulder(skeleton.GetBone("LShoulder"), skeleton.GetBone("LHand"), true);
 		rShoulder = new PCDShoulder(skeleton.GetBone("RShoulder"), skeleton.GetBone("RHand"), true);
 		bodyHead = new PCDBodyHead(this, skeleton.GetBone("Body"), skeleton.GetBone("Head"));
+	}
 
-
-		
+	private void Start() {
 		SetAnim(defaultAnim);
 		curKFReader = curAnimReader.GetKeyFrameReader(curKeyFrame);
 		bodyHead.SetBodyPosLocal(curKFReader.GetBoneInfo("Body").localPosition);
@@ -74,7 +74,6 @@ public class PCDWalkMgr : MonoBehaviour
 		lFoot.SetFootPos(skeleton.GetBone("Root").transform.position + skeleton.GetBone("Root").transform.rotation * curKFReader.GetBoneInfo("LFoot").localPosition);
 		rFoot.SetLocalPosition(curKFReader.GetBoneInfo("RFoot").localPosition);
 		rFoot.SetFootPos(skeleton.GetBone("Root").transform.position + skeleton.GetBone("Root").transform.rotation * curKFReader.GetBoneInfo("RFoot").localPosition);
-
 	}
 
 	private void UpdateFootTarget() {
