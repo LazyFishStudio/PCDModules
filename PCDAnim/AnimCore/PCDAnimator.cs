@@ -8,13 +8,20 @@ public class PCDAnimator : MonoBehaviour
     private Dictionary<string, PCDAnimReader> animDict;
 
     private void Awake() {
-        animDict = new Dictionary<string, PCDAnimReader>();
-        foreach (var item in animList) {
-            animDict[item.animName] = new PCDAnimReader(item.animSO);
-		}
-	}
+        LoadAllAnim();
+    }
+
+    public void LoadAllAnim() {
+        if (animDict == null) {
+            animDict = new Dictionary<string, PCDAnimReader>();
+            foreach (var item in animList) {
+                animDict[item.animName] = new PCDAnimReader(item.animSO);
+            }
+        }
+    }
 
     public PCDAnimReader GetAnimReader(string animName) {
+        LoadAllAnim();
         return animDict[animName];
     }
 }

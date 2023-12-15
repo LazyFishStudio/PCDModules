@@ -339,7 +339,6 @@ MonoBehaviour:
   lEye: {fileID: 4843249625253013550}
   rEye: {fileID: 1182265671665353218}
   eyeSetting:
-    color: {r: 0, g: 0, b: 0, a: 1}
     textureIndex: 0
     spacing: 0.2
     height: 0.075
@@ -347,7 +346,6 @@ MonoBehaviour:
     scale: {x: 1, y: 1}
   nose: {fileID: 5847562711240879630}
   noseSetting:
-    color: {r: 0, g: 0, b: 0, a: 1}
     textureIndex: 1
     spacing: 0
     height: 0.01
@@ -355,7 +353,6 @@ MonoBehaviour:
     scale: {x: 0.15, y: 0.15}
   mouth: {fileID: 6362700659075415106}
   mouthSetting:
-    color: {r: 0, g: 0, b: 0, a: 1}
     textureIndex: 2
     spacing: 0
     height: -0.085
@@ -364,7 +361,6 @@ MonoBehaviour:
   lEyebrow: {fileID: 5654012660866323130}
   rEyebrow: {fileID: 5930894962396347254}
   eyebrowSetting:
-    color: {r: 0, g: 0, b: 0, a: 1}
     textureIndex: 0
     spacing: 0.22
     height: 0.27
@@ -373,7 +369,6 @@ MonoBehaviour:
   lBlusher: {fileID: 0}
   rBlusher: {fileID: 0}
   blusherSetting:
-    color: {r: 0, g: 0, b: 0, a: 1}
     textureIndex: 0
     spacing: 0.05
     height: 0.1
@@ -8673,7 +8668,6 @@ MonoBehaviour:
   lEye: {fileID: 2900850828817420755}
   rEye: {fileID: 403787200826822421}
   eyeSetting:
-    color: {r: 0, g: 0, b: 0, a: 1}
     textureIndex: 14
     spacing: 0
     height: 0.1
@@ -8681,7 +8675,6 @@ MonoBehaviour:
     scale: {x: 3, y: 1.5}
   nose: {fileID: 1688761743176370563}
   noseSetting:
-    color: {r: 0, g: 0, b: 0, a: 1}
     textureIndex: 1
     spacing: 0
     height: 0.01
@@ -8689,7 +8682,6 @@ MonoBehaviour:
     scale: {x: 0.1, y: 0.1}
   mouth: {fileID: 4898302038512695646}
   mouthSetting:
-    color: {r: 0, g: 0, b: 0, a: 1}
     textureIndex: 2
     spacing: 0
     height: -0.085
@@ -8698,7 +8690,6 @@ MonoBehaviour:
   lEyebrow: {fileID: 3603008153242247730}
   rEyebrow: {fileID: 7335224480562949011}
   eyebrowSetting:
-    color: {r: 0, g: 0, b: 0, a: 1}
     textureIndex: 0
     spacing: 0.22
     height: 0.27
@@ -8707,7 +8698,6 @@ MonoBehaviour:
   lBlusher: {fileID: 0}
   rBlusher: {fileID: 0}
   blusherSetting:
-    color: {r: 0, g: 0, b: 0, a: 1}
     textureIndex: 0
     spacing: 0.05
     height: 0.1
@@ -10937,7 +10927,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   groundMask:
     serializedVersion: 2
-    m_Bits: 512
+    m_Bits: 0
   movementSpeed: 14
   crouchSpeedMultiplier: 0.248
   movementThrashold: 0.01
@@ -11243,7 +11233,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   vehicle: {fileID: 0}
   testVehicle: {fileID: 0}
-  ridingBicycleAnimName: RidingBicycle
+  ridingBicycleAnimIndex: 8
 --- !u!1 &8592403152900436019
 GameObject:
   m_ObjectHideFlags: 0
@@ -12129,13 +12119,13 @@ GameObject:
   m_Component:
   - component: {fileID: 8871205662993462413}
   - component: {fileID: 5378108888520325312}
-  - component: {fileID: 6817126862461534628}
-  - component: {fileID: 2069428932141753353}
   - component: {fileID: 1379496505142791537}
+  - component: {fileID: 7421568533847874967}
+  - component: {fileID: 2069428932141753353}
+  - component: {fileID: 7606538540278512541}
+  - component: {fileID: 6817126862461534628}
   - component: {fileID: 8520324575678022675}
   - component: {fileID: 898367525752904433}
-  - component: {fileID: 7606538540278512541}
-  - component: {fileID: 7421568533847874967}
   m_Layer: 12
   m_Name: PCDHuman_Interaction
   m_TagString: Untagged
@@ -12195,84 +12185,6 @@ MonoBehaviour:
   OverrideAttenuation: 0
   OverrideMinDistance: 1
   OverrideMaxDistance: 60
---- !u!114 &6817126862461534628
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9055372025514928057}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9f786244fa7816b49a15eb91a0e52cfa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  walkState: 0
-  defaultAnim: Walk
-  lookAtTarget: {fileID: 0}
-  lFoot:
-    attachedBone: {fileID: 0}
-    archoringTarget: {fileID: 0}
-    archoringTransition: 0
-    archoringTransitionCount: 0
-    archoringTransitionProcess: 0
-    lastPos: {x: 0, y: 0, z: 0}
-    lastRot: {x: 0, y: 0, z: 0, w: 0}
-    archoringPos: {x: 0, y: 0, z: 0}
-    archoringRot: {x: 0, y: 0, z: 0, w: 0}
-    targetPos: {x: 0, y: 0, z: 0}
-    curPos: {x: 0, y: 0, z: 0}
-    targetRot: {x: 0, y: 0, z: 0, w: 0}
-    poseDuration: 0
-    poseDurationCount: 0
-    poseProcess: 0
-    sm:
-      curState: 0
-      defaultState: 0
-  rFoot:
-    attachedBone: {fileID: 0}
-    archoringTarget: {fileID: 0}
-    archoringTransition: 0
-    archoringTransitionCount: 0
-    archoringTransitionProcess: 0
-    lastPos: {x: 0, y: 0, z: 0}
-    lastRot: {x: 0, y: 0, z: 0, w: 0}
-    archoringPos: {x: 0, y: 0, z: 0}
-    archoringRot: {x: 0, y: 0, z: 0, w: 0}
-    targetPos: {x: 0, y: 0, z: 0}
-    curPos: {x: 0, y: 0, z: 0}
-    targetRot: {x: 0, y: 0, z: 0, w: 0}
-    poseDuration: 0
-    poseDurationCount: 0
-    poseProcess: 0
-    sm:
-      curState: 0
-      defaultState: 0
---- !u!114 &2069428932141753353
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9055372025514928057}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c42ded49bf0e6154d8b64a55f783cce3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  animList:
-  - animName: Walk
-    animSO: {fileID: 11400000, guid: f932bcb40f9ebf14aaf2e5c2ad4de022, type: 2}
-  - animName: Sit
-    animSO: {fileID: 11400000, guid: f2a1141e12c4e6249a354ed3fcb80fa1, type: 2}
-  - animName: Run
-    animSO: {fileID: 11400000, guid: 2928d79f150b8ca4d80ec58898791ecc, type: 2}
-  - animName: HoldingBox
-    animSO: {fileID: 11400000, guid: 4234668ed5642bc459d228b725a2d6ff, type: 2}
-  - animName: HoldingSmallBox
-    animSO: {fileID: 11400000, guid: 87620e7ec83c70848aa32cb0a5121ce8, type: 2}
-  - animName: PullingSmallBox
-    animSO: {fileID: 11400000, guid: 619d32d0eb30b514580e4744db180b7d, type: 2}
 --- !u!114 &1379496505142791537
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12473,6 +12385,110 @@ MonoBehaviour:
     bodyTargetPosLocal: {x: 0, y: 0, z: 0}
     bodyVelocity: {x: 0, y: 0, z: 0}
     bodyOffsetLocal: {x: 0, y: 0, z: 0}
+--- !u!114 &7421568533847874967
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9055372025514928057}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba16f6b5f7587de43901a1982f90c346, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &2069428932141753353
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9055372025514928057}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c42ded49bf0e6154d8b64a55f783cce3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animList:
+  - animName: Walk
+    animSO: {fileID: 11400000, guid: f932bcb40f9ebf14aaf2e5c2ad4de022, type: 2}
+  - animName: Sit
+    animSO: {fileID: 11400000, guid: f2a1141e12c4e6249a354ed3fcb80fa1, type: 2}
+  - animName: Run
+    animSO: {fileID: 11400000, guid: 2928d79f150b8ca4d80ec58898791ecc, type: 2}
+  - animName: HoldingBox
+    animSO: {fileID: 11400000, guid: 4234668ed5642bc459d228b725a2d6ff, type: 2}
+  - animName: HoldingSmallBox
+    animSO: {fileID: 11400000, guid: 87620e7ec83c70848aa32cb0a5121ce8, type: 2}
+  - animName: PullingSmallBox
+    animSO: {fileID: 11400000, guid: 619d32d0eb30b514580e4744db180b7d, type: 2}
+--- !u!114 &7606538540278512541
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9055372025514928057}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f34305eaef3a8724aba80c87d73ecddf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  boneName: Root
+  forceOwner: 0
+--- !u!114 &6817126862461534628
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9055372025514928057}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f786244fa7816b49a15eb91a0e52cfa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  walkState: 0
+  defaultAnim: Walk
+  lookAtTarget: {fileID: 0}
+  lFoot:
+    attachedBone: {fileID: 0}
+    archoringTarget: {fileID: 0}
+    archoringTransition: 0
+    archoringTransitionCount: 0
+    archoringTransitionProcess: 0
+    lastPos: {x: 0, y: 0, z: 0}
+    lastRot: {x: 0, y: 0, z: 0, w: 0}
+    archoringPos: {x: 0, y: 0, z: 0}
+    archoringRot: {x: 0, y: 0, z: 0, w: 0}
+    targetPos: {x: 0, y: 0, z: 0}
+    curPos: {x: 0, y: 0, z: 0}
+    targetRot: {x: 0, y: 0, z: 0, w: 0}
+    poseDuration: 0
+    poseDurationCount: 0
+    poseProcess: 0
+    sm:
+      curState: 0
+      defaultState: 0
+  rFoot:
+    attachedBone: {fileID: 0}
+    archoringTarget: {fileID: 0}
+    archoringTransition: 0
+    archoringTransitionCount: 0
+    archoringTransitionProcess: 0
+    lastPos: {x: 0, y: 0, z: 0}
+    lastRot: {x: 0, y: 0, z: 0, w: 0}
+    archoringPos: {x: 0, y: 0, z: 0}
+    archoringRot: {x: 0, y: 0, z: 0, w: 0}
+    targetPos: {x: 0, y: 0, z: 0}
+    curPos: {x: 0, y: 0, z: 0}
+    targetRot: {x: 0, y: 0, z: 0, w: 0}
+    poseDuration: 0
+    poseDurationCount: 0
+    poseProcess: 0
+    sm:
+      curState: 0
+      defaultState: 0
 --- !u!114 &8520324575678022675
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12499,32 +12515,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   testTrans: {fileID: 0}
   testPartName: LHand
---- !u!114 &7606538540278512541
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9055372025514928057}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f34305eaef3a8724aba80c87d73ecddf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  boneName: Root
-  forceOwner: 0
---- !u!114 &7421568533847874967
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9055372025514928057}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ba16f6b5f7587de43901a1982f90c346, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &9078524629656916269
 GameObject:
   m_ObjectHideFlags: 0
