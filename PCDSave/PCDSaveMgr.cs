@@ -50,7 +50,37 @@ namespace PCD.SaveSystem
                 PCDSaveMgr.Current.saveObjects.Remove(gameObject);
         }
         static public void PCDSaveAll() { Current.PCDSaveAllImpl(); }
-        static public void PCDLoadAll() { Current.PCDLoadAllImpl(); }
+        static public void PCDLoadAll() {
+            loadWhenAwake = true;
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
+
+        private void ForceSyncSaveObjects() {
+            saveObjects.Clear();
+            foreach (var gameObject in FindObjectsOfType<PCDSaveGameObject>()) {
+                saveObjects.Add(gameObject);
+            }
+        }
+
+        static public bool loadWhenAwake = false;
+        static public bool loadWhenStart = false;
+        private void Awake() {
+            if (loadWhenAwake) {
+                loadWhenAwake = false;
+                PCDLoadAllImpl();
+                ForceSyncSaveObjects();
+            } else {
+                ForceSyncSaveObjects();
+            }
+        }
+
+        private void Start() {
+            if (loadWhenStart) {
+                loadWhenStart = false;
+                PCDLoadAllImpl();
+                ForceSyncSaveObjects();
+            }
+		}
 
         public void PCDSaveAllImpl() {
             var gameObjects = new List<GameObject>();
@@ -60,7 +90,7 @@ namespace PCD.SaveSystem
             // Save in the same order as their depth in the hierarchy.
             var sortedObjects = gameObjects.OrderBy(x => GetDepth(x.transform)).ToArray();
             PCDSaveHelper.WriteSimpleGameObjects(ES3AutoSaveMgr.Current.key + "-Simple", sortedObjects, ES3AutoSaveMgr.Current.settings);
-            ES3.Save<GameObject[]>(ES3AutoSaveMgr.Current.key, sortedObjects, ES3AutoSaveMgr.Current.settings);
+            PCDSaveHelper.WriteActualGameObjects(ES3AutoSaveMgr.Current.key, sortedObjects, ES3AutoSaveMgr.Current.settings);
 
             int GetDepth(Transform t) {
                 int depth = 0;
@@ -72,6 +102,7 @@ namespace PCD.SaveSystem
             }
         }
         public void PCDLoadAllImpl() {
+            ForceSyncSaveObjects();
             PCDSaveGameObject[] originalObjects = saveObjects.ToArray();
 
             ES3.Load<GameObject[]>(ES3AutoSaveMgr.Current.key + "-Simple", ES3AutoSaveMgr.Current.settings);
