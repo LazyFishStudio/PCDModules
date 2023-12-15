@@ -86,13 +86,13 @@ namespace PCD.SaveSystem
                     /* Consistence check. */
                     var markedInLists = es3Go.components.Contains(component);
                     if (markedInLists != markedToBeSaved)
-                        Debug.LogError("Incorrect State!");
+                        Debug.LogError(string.Format("Incorrect State: Component[{0}] found {1} in dict but {2} in component list", component, markedToBeSaved, markedInLists));
                 } else {
                     markedToBeSaved = es3Go.GetDefaultSaveState(component);
                 }
 
                 var newMarkedToBeSaved = EditorGUILayout.Toggle(component.GetType().Name, markedToBeSaved);
-                newMarkedToBeSaved = newMarkedToBeSaved && PCDSaveGameObject.SafetyCheckDerivedType(component.GetType());
+                newMarkedToBeSaved = PCDSaveGameObject.SafetyCheckDerivedType(component.GetType()) && newMarkedToBeSaved;
                 if (!foundInDict) {
                     if (newMarkedToBeSaved) {
                         Undo.RecordObject(es3Go, "Unmarked Component to save");
