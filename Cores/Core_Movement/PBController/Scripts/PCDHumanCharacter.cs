@@ -20,6 +20,11 @@ public class PCDHumanCharacter : MonoBehaviour {
     protected float right = 0f;
     void Update() {
         Vector3 moveAxis = PCDPlayerActionManager.GetInstance().GetMoveAxis(playerName);
+        var locker = GetComponent<PCDActLocker>();
+        if (locker != null && locker.movementLocked)
+            moveAxis = Vector3.zero;
+
+
         forward = moveAxis.y;
         right = moveAxis.x;
 

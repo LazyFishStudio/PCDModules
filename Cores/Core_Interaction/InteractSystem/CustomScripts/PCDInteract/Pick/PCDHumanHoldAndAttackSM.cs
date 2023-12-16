@@ -105,6 +105,10 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
     }
 
     public void RegisterActionOnUpdate() {
+        var locker = GetComponent<PCDActLocker>();
+        if (locker != null && locker.attackLocked)
+            return;
+        
         PCDPlayerActionManager actionManager = PCDPlayerActionManager.GetInstance();
 
         var holdingItem = GetComponent<PCDHumanInteractSM>().holdingItem;

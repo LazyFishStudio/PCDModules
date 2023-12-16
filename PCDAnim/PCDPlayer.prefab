@@ -10820,6 +10820,7 @@ GameObject:
   - component: {fileID: 2389160402150452828}
   - component: {fileID: 4308386406305777869}
   - component: {fileID: 8626283864810970716}
+  - component: {fileID: 8138245139236234531}
   m_Layer: 0
   m_Name: PCDPlayer
   m_TagString: Untagged
@@ -11234,6 +11235,21 @@ MonoBehaviour:
   vehicle: {fileID: 0}
   testVehicle: {fileID: 0}
   ridingBicycleAnimIndex: 8
+--- !u!114 &8138245139236234531
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8563529639004972078}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc5255823689ad541900e43f72ea0323, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  movementLocked: 0
+  interactionLocked: 0
+  attackLocked: 0
 --- !u!1 &8592403152900436019
 GameObject:
   m_ObjectHideFlags: 0

@@ -152,6 +152,9 @@ public partial class PCDPlayerInteractionManager : BaseInteractionManager, IPCDA
     public void RegisterActionOnUpdate() {
         if (!gameObject.activeInHierarchy)
             return;
+        var locker = GetComponent<PCDActLocker>();
+        if (locker != null && locker.interactionLocked)
+            return;
 
         PCDPlayerActionManager actionManager = PCDPlayerActionManager.GetInstance();
 
