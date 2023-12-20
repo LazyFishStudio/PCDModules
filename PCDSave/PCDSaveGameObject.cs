@@ -53,7 +53,7 @@ namespace PCD.SaveSystem
         }
     }
 
-
+#if UNITY_EDITOR
     [CustomEditor(typeof(PCDSaveGameObject))]
     public class PCDSaveGameObjectEditor : Editor
     {
@@ -118,7 +118,7 @@ namespace PCD.SaveSystem
             }
         }
     }
-
+#endif
 
     [System.Serializable]
     public class ComponentSaveDictionary : ES3SerializableDictionary<Component, bool>
