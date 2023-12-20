@@ -106,13 +106,14 @@ public class PCDHumanPullSM : MonoBehaviour {
                 pullingObjFollowTarget.position = (lHandFollowTarget.transform.position + rHandFollowTarget.transform.position) / 2.0f;
             },
             () => {
-                walkMgr.ResetLookAt();
                 // archoringMgr.SetLHandArchoring(null);
                 // archoringMgr.SetRHandArchoring(null);
                 archoringMgr.ResetBoneFromArchoring("LHand");
                 archoringMgr.ResetBoneFromArchoring("RHand");
                 // walkMgr.SetFootAndBodyPoseLayerOverrideIndex(-1); 
+                walkMgr.ResetLookAt();
                 walkMgr.ResetAnimToDefault();
+                walkMgr.DriveHandToKF();
                 if (pullingObject) {
                     pullingObject.GetComponentInParent<PullablePCDIKController>(true)?.SetFollowTargetOverride(null);
                 }
@@ -167,6 +168,7 @@ public class PCDHumanPullSM : MonoBehaviour {
                 // 解除 LookAt & FootAndBodyOverride
                 walkMgr.ResetLookAt();
                 walkMgr.ResetAnimToDefault();
+                walkMgr.DriveHandToKF();
 
                 
             }

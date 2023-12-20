@@ -30,6 +30,7 @@ public class PCDWalkMgr : MonoBehaviour
 	private PCDAnimReader curAnimReader;
 	private PCDKFReader curKFReader;
 	private Rigidbody rb;
+	[SerializeField]
 	private string curKeyFrame = "Idle";
 	private BoneTransInfo lFootInfo;
 	private BoneTransInfo rFootInfo;
@@ -182,10 +183,10 @@ public class PCDWalkMgr : MonoBehaviour
 			return;
 		if (isSpeedSlow && !isAnyFootNotReset)
 			return;
-		Debug.Log("holdTime < animSetting.stepInterval: " + (holdTime < animSetting.stepInterval));
-		Debug.Log("isSpeedSlow: " + isSpeedSlow);
-		Debug.Log("poseInfo.speed < animSetting.stepTriggerSpeed: " + poseInfo.speed + " " + animSetting.stepTriggerSpeed);
-		Debug.Log("isAnyFootNotReset: " + isAnyFootNotReset);
+		// Debug.Log("holdTime < animSetting.stepInterval: " + (holdTime < animSetting.stepInterval));
+		// Debug.Log("isSpeedSlow: " + isSpeedSlow);
+		// Debug.Log("poseInfo.speed < animSetting.stepTriggerSpeed: " + poseInfo.speed + " " + animSetting.stepTriggerSpeed);
+		// Debug.Log("isAnyFootNotReset: " + isAnyFootNotReset);
 
 		/* Next step */
 		walkState = WalkState.Walking;
@@ -236,7 +237,7 @@ public class PCDWalkMgr : MonoBehaviour
 	}
 
 	public void DriveHandToKF(PCDKFReader targetKFReader = null) {
-		if (targetKFReader == null	) {
+		if (targetKFReader == null) {
 			lHand.FadeBoneToKeyFrame(curKFReader, animSetting.handPoseDuration, animSetting.handPosCurve);
 			rHand.FadeBoneToKeyFrame(curKFReader, animSetting.handPoseDuration, animSetting.handPosCurve);
 		} else {

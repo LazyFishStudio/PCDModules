@@ -145,10 +145,6 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
         sm.GetState(State.HoldingBox).Bind(
             () => {
                 poseMgr.FadeToKeyFrame(animator.GetAnimReader(holdingBoxPoseLayerName).GetKeyFrameReader("Idle"), false, true, true, false, false);
-                // human.SetBodyPoseLayerOverrideName(holdingBoxPoseLayerName);
-                // human.SetLHandPoseLayerOverrideName(holdingBoxPoseLayerName);
-                // human.SetRHandPoseLayerOverrideName(holdingBoxPoseLayerName);
-                // human.DoHandPose(0);
                 poseMgr.poseInfo.bodyVelocity = Vector3.down * 5.0f;
             },
             () => {
@@ -162,10 +158,6 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
         sm.GetState(State.DropBox).Bind(
             () => {
                 poseMgr.FadeToKeyFrame(animator.GetAnimReader(dropBoxPoseLayerName).GetKeyFrameReader("Idle"), false, true, true, false, false);
-                // human.SetBodyPoseLayerOverrideName(dropBoxPoseLayerName);
-                // human.SetLHandPoseLayerOverrideName(dropBoxPoseLayerName);
-                // human.SetRHandPoseLayerOverrideName(dropBoxPoseLayerName);
-                // human.DoHandPose(0);
                 dropBoxPoseDurationCount = 0;
             },
             () => {
@@ -182,11 +174,6 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
         sm.GetState(State.HoldingSmallBox).Bind(
             () => {
                 poseMgr.FadeToKeyFrame(animator.GetAnimReader(holdingSmallBoxPoseLayerName).GetKeyFrameReader("Idle"), false, true, true, false, false);
-                // human.SetBodyPoseLayerOverrideName(holdingSmallBoxPoseLayerName);
-                // human.SetLHandPoseLayerOverrideName(holdingSmallBoxPoseLayerName);
-                // human.SetRHandPoseLayerOverrideName(holdingSmallBoxPoseLayerName);
-                // human.DoHandPose(0);
-                // human.poseInfo.bodyVelocity = Vector3.down * 5.0f;
             },
             () => {
                 OnHoldUpdate();
@@ -198,14 +185,12 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
 
         sm.GetState(State.HoldingStick).Bind(
             () => {
-                // human.SetRHandArchoring(followTarget);
                 archoringMgr.BoneArchoringToTransform("RHand", followTarget);
             },
             () => {
                 OnHoldUpdate();
             },
             () => {
-                // poseMgr.SetRHandArchoring(null);
                 archoringMgr.ResetBoneFromArchoring("RHand");
                 ResetPoseAndDriveHandToKF();
             }
@@ -213,8 +198,6 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
 
         sm.GetState(State.HoldingLongStick).Bind(
             () => {
-                // poseMgr.SetLHandArchoring(holdingObject.Find("LHandTarget"));
-                // poseMgr.SetRHandArchoring(holdingObject.Find("RHandTarget"));
                 archoringMgr.BoneArchoringToTransform("LHand", holdingObject.Find("LHandTarget"), 0);
                 archoringMgr.BoneArchoringToTransform("RHand", holdingObject.Find("RHandTarget"), 0);
             },
@@ -222,8 +205,6 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
                 OnHoldUpdate();
             },
             () => {
-                // poseMgr.SetLHandArchoring(null);
-                // poseMgr.SetRHandArchoring(null);
                 archoringMgr.ResetBoneFromArchoring("LHand");
                 archoringMgr.ResetBoneFromArchoring("RHand");
                 ResetPoseAndDriveHandToKF();
@@ -235,13 +216,8 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
                 // controller.LockPosAndRot
                 // circle Movement Start
                 if (attackingWeapon) {
-                    // poseMgr.SetLHandArchoring(attackingWeapon.Find("LHandTarget"));
-                    // poseMgr.SetRHandArchoring(attackingWeapon.Find("RHandTarget"));
                     archoringMgr.BoneArchoringToTransform("LHand", attackingWeapon.Find("LHandTarget"), 0);
                     archoringMgr.BoneArchoringToTransform("RHand", attackingWeapon.Find("RHandTarget"), 0);
-                    // human.SetLookAt(attackingWeapon, attackingWeapon);
-                    // longStickHorizonCircleMovement.AddProcessEvent(0.45f, () => {attackingWeapon.GetComponentInChildren<DamageArea>()?.SetDamageDetectActive(true);});
-                    // longStickHorizonCircleMovement.AddProcessEvent(0.55f, () => {attackingWeapon.GetComponentInChildren<DamageArea>()?.SetDamageDetectActive(false);});
                 }
             },
             () => {
@@ -252,12 +228,8 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
             },
             () => {
                 // controller.UnLockPosAndRot
-                // poseMgr.SetLHandArchoring(null);
-                // poseMgr.SetRHandArchoring(null);
                 archoringMgr.ResetBoneFromArchoring("LHand");
                 archoringMgr.ResetBoneFromArchoring("RHand");
-                // human.SetLookAt(null, null);
-                // longStickHorizonCircleMovement.ClearAllProcessEvent();
                 longStickHorizonCircleMovement.StopMovement();
             }
         );
