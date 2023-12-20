@@ -9,7 +9,6 @@ using DG.Tweening;
 public class PickableObject : MonoBehaviour, IFocusable, IPickable, IPlaceable {
     [TextArea]
     public string pickHint;
-    [ES3NonSerializable]
     public InteractComp picker;
 
     public UnityEngine.Object attachedPlaceInternal;
