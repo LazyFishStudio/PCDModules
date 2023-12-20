@@ -77,20 +77,27 @@ public class PCDBoneDriver
 		
 		float curPosToTargetDis = Vector3.Distance(info.localPosition, attachedBone.transform.localPosition);
 		float lastPosePosToTargetDis = Vector3.Distance(info.localPosition, lastKFBoneTransInfo.localPosition);
-		float scaleFadeTime = fadeTime * (curPosToTargetDis / lastPosePosToTargetDis);
 
-		fadeTime = (scaleFadeTime < 0.01f || scaleFadeTime > fadeTime) ? fadeTime : scaleFadeTime;
+		if (lastPosePosToTargetDis > 0.0001f) {
+			float scaleFadeTime = fadeTime * (curPosToTargetDis / lastPosePosToTargetDis);
+			fadeTime = (scaleFadeTime < 0.01f || scaleFadeTime > fadeTime) ? fadeTime : scaleFadeTime;
+		}
+
 
 		attachedBone.transform.DOKill();
-		if (curve == null) {
-			attachedBone.transform.DOLocalMove(info.localPosition, fadeTime);
-			attachedBone.transform.DOLocalRotateQuaternion(info.localRotation, fadeTime);
-			attachedBone.transform.DOScale(info.localScale, fadeTime);
-		} else {
-			attachedBone.transform.DOLocalMove(info.localPosition, fadeTime).SetEase(curve);
-			attachedBone.transform.DOLocalRotateQuaternion(info.localRotation, fadeTime).SetEase(curve);
-			attachedBone.transform.DOScale(info.localScale, fadeTime).SetEase(curve);
-		}
+		// if (fadeTime <= 0) {
+			
+		// } else {
+			if (curve == null) {
+				attachedBone.transform.DOLocalMove(info.localPosition, fadeTime);
+				attachedBone.transform.DOLocalRotateQuaternion(info.localRotation, fadeTime);
+				attachedBone.transform.DOScale(info.localScale, fadeTime);
+			} else {
+				attachedBone.transform.DOLocalMove(info.localPosition, fadeTime).SetEase(curve);
+				attachedBone.transform.DOLocalRotateQuaternion(info.localRotation, fadeTime).SetEase(curve);
+				attachedBone.transform.DOScale(info.localScale, fadeTime).SetEase(curve);
+			}
+		// }
 		lastKFBoneTransInfo = info;
 	}
 }
