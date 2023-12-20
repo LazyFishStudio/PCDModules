@@ -19,14 +19,14 @@ public class PCDFocusable : Focusable
 	}
 
 	public override void OnFocusEnter(InteractionManager manager) {
-        GetComponentInChildren<MeshUI>()?.ShowUI();
+        // GetComponentInChildren<MeshUI>()?.ShowUI();
 
         PCDHumanInteractSM player = manager.interactComp as PCDHumanInteractSM;
         player?.OnFocusEnter(this);
     }
 
     public override void OnFocusExit(InteractionManager manager) {
-        GetComponentInChildren<MeshUI>()?.HideUI();
+        // GetComponentInChildren<MeshUI>()?.HideUI();
 
         PCDHumanInteractSM player = manager.interactComp as PCDHumanInteractSM;
         player?.OnFocusExit(this);
