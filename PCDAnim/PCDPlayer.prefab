@@ -12142,6 +12142,7 @@ GameObject:
   - component: {fileID: 6817126862461534628}
   - component: {fileID: 8520324575678022675}
   - component: {fileID: 898367525752904433}
+  - component: {fileID: 5872866922665228820}
   m_Layer: 12
   m_Name: PCDHuman_Interaction
   m_TagString: Untagged
@@ -12505,6 +12506,7 @@ MonoBehaviour:
     sm:
       curState: 0
       defaultState: 0
+  curKeyFrame: Idle
 --- !u!114 &8520324575678022675
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12531,6 +12533,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   testTrans: {fileID: 0}
   testPartName: LHand
+--- !u!114 &5872866922665228820
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9055372025514928057}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e5065faead5834a4193dd5ac2289642f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rb: {fileID: 5850322207924486609}
 --- !u!1 &9078524629656916269
 GameObject:
   m_ObjectHideFlags: 0

@@ -193,8 +193,10 @@ public class PCDWalkMgr : MonoBehaviour
 		DriveNextStep(isStepLeft);
 	}
 
+	public IVelocitySyncer velocitySyncer;
 	private void UpdateVelocityInfo() {
-		poseInfo.velocity = rb.velocity;
+		if (velocitySyncer == null) velocitySyncer = GetComponent<IVelocitySyncer>();
+		poseInfo.velocity = velocitySyncer.GetCharacterVelocity();
 
 		Vector3 lastMoveDir = poseInfo.moveDir;
 		poseInfo.speed = poseInfo.velocity.magnitude;
