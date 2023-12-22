@@ -48,24 +48,27 @@ public class PCDWalkMgr : MonoBehaviour
 		animator = GetComponent<PCDAnimator>();
 		rb = GetComponentInParent<Rigidbody>();
 
-		if (skeleton.GetBone("LFoot")) {
+		if (skeleton.GetBone("LFoot"))
 			lFoot = new(this, skeleton.GetBone("LFoot"), true);
-		}
-		if (skeleton.GetBone("RFoot")) {
+		if (skeleton.GetBone("RFoot"))
 			rFoot = new(this, skeleton.GetBone("RFoot"), true);
-		}
-		if (skeleton.GetBone("LHand")) {
+		if (skeleton.GetBone("LHand"))
 			lHand = new PCDBoneDriver(skeleton.GetBone("LHand"), true);
-		}
-		if (skeleton.GetBone("RHand")) {
+		if (skeleton.GetBone("RHand"))
 			rHand = new PCDBoneDriver(skeleton.GetBone("RHand"), true);
-		}
-		lShoulder = new PCDShoulder(skeleton.GetBone("LShoulder"), skeleton.GetBone("LHand"), true);
-		rShoulder = new PCDShoulder(skeleton.GetBone("RShoulder"), skeleton.GetBone("RHand"), true);
-		bodyHead = new PCDBodyHead(this, skeleton.GetBone("Body"), skeleton.GetBone("Head"));
+		if (skeleton.GetBone("LShoulder"))
+			lShoulder = new PCDShoulder(skeleton.GetBone("LShoulder"), skeleton.GetBone("LHand"), true);
+		if (skeleton.GetBone("RShoulder"))
+			rShoulder = new PCDShoulder(skeleton.GetBone("RShoulder"), skeleton.GetBone("RHand"), true);
+		if (skeleton.GetBone("Body"))
+			bodyHead = new PCDBodyHead(this, skeleton.GetBone("Body"));
 	}
 
 	private void Start() {
+		InitPose();
+	}
+
+	public void InitPose() {
 		SetAnim(defaultAnim);
 		curKFReader = curAnimReader.GetKeyFrameReader(curKeyFrame);
 		bodyHead.SetBodyPosLocal(curKFReader.GetBoneInfo("Body").localPosition);
@@ -195,6 +198,9 @@ public class PCDWalkMgr : MonoBehaviour
 
 	public IVelocitySyncer velocitySyncer;
 	private void UpdateVelocityInfo() {
+		if (rb) {
+			poseInfo.velocity = rb.velocity;
+		}
 		if (velocitySyncer == null) velocitySyncer = GetComponent<IVelocitySyncer>();
 		poseInfo.velocity = velocitySyncer.GetCharacterVelocity();
 

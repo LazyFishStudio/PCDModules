@@ -10,14 +10,12 @@ public class PCDBodyHead
     private PCDHuman.PoseInfo poseInfo;
     private PCDSkeleton skeleton;
     private PCDBoneDriver bodyDriver;
-    private PCDBoneDriver headDriver;
 
-    public PCDBodyHead(PCDWalkMgr walkMgr, PCDBone body, PCDBone head) {
+    public PCDBodyHead(PCDWalkMgr walkMgr, PCDBone body) {
         this.walkMgr = walkMgr;
         poseInfo = walkMgr.poseInfo;
         skeleton = walkMgr.skeleton;
         bodyDriver = new PCDBoneDriver(body, true);
-        headDriver = new PCDBoneDriver(head, true);
     }
 
     private Vector3 bodyKFPosLocal;

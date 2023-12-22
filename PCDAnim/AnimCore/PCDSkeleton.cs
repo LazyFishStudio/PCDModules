@@ -48,7 +48,24 @@ public class PCDSkeleton : MonoBehaviour
         if (!isInit) {
             InitBones();
         }
+        if (!pcdBoneDict.ContainsKey(boneName)) {
+            return null;
+        }
         return pcdBoneDict[boneName];
+    }
+
+    public void ResetToTPose() {
+        humanBone.root.ResetToOriTrans();
+        humanBone.head.ResetToOriTrans();
+        humanBone.body.ResetToOriTrans();
+        humanBone.lShoulder.ResetToOriTrans();
+        humanBone.rShoulder.ResetToOriTrans();
+        humanBone.lPelvis.ResetToOriTrans();
+        humanBone.rPelvis.ResetToOriTrans();
+        humanBone.lHand.ResetToOriTrans();
+        humanBone.rHand.ResetToOriTrans();
+        humanBone.lFoot.ResetToOriTrans();
+        humanBone.rFoot.ResetToOriTrans();
     }
 
 }
