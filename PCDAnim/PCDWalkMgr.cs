@@ -198,9 +198,6 @@ public class PCDWalkMgr : MonoBehaviour
 
 	public IVelocitySyncer velocitySyncer;
 	private void UpdateVelocityInfo() {
-		if (rb) {
-			poseInfo.velocity = rb.velocity;
-		}
 		if (velocitySyncer == null) velocitySyncer = GetComponent<IVelocitySyncer>();
 		poseInfo.velocity = velocitySyncer.GetCharacterVelocity();
 
