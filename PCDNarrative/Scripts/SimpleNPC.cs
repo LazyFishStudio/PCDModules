@@ -11,10 +11,8 @@ namespace PCD.Narrative
 		public DialogueTree dialogueTree;
 
 		public override bool OnInteract(InteractComp interactor) {
-			if (ChatManager.Instance.controller)
-				;
-
 			ChatManager.Instance.controller.StartDialogue(dialogueTree, GetComponent<DialogueActor>(), null);
+			EasyEvent.TriggerEvent(string.Format("TalkWith[{0}]", GetComponent<DialogueActor>().name));
 			return true;
 		}
 	}

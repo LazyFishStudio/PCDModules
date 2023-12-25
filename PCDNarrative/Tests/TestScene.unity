@@ -1605,6 +1605,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8563529639004972078, guid: 632c17da04b9f174481ec140c3da42ee, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1412303801}
+    - targetCorrespondingSourceObject: {fileID: 8563529639004972078, guid: 632c17da04b9f174481ec140c3da42ee, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1412303814}
+    - targetCorrespondingSourceObject: {fileID: 8563529639004972078, guid: 632c17da04b9f174481ec140c3da42ee, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1412303813}
   m_SourcePrefab: {fileID: 100100000, guid: 632c17da04b9f174481ec140c3da42ee, type: 3}
 --- !u!1 &788979448 stripped
 GameObject:
@@ -1673,8 +1679,8 @@ GameObject:
   - component: {fileID: 928621936}
   - component: {fileID: 928621935}
   - component: {fileID: 928621939}
-  - component: {fileID: 928621938}
   - component: {fileID: 928621942}
+  - component: {fileID: 928621943}
   m_Layer: 0
   m_Name: NPC-Skin
   m_TagString: Untagged
@@ -1770,21 +1776,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 928621933}
   m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
---- !u!114 &928621938
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 928621933}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8f74683ad10eb394291e65479bb29780, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  interactHint: "\u63D0\u793A\u5185\u5BB9"
-  interactType: "\u5BF9\u8BDD"
-  dialogueTree: {fileID: 11400000, guid: 65d140ae92f848d4bb29dd8593f7b893, type: 2}
 --- !u!114 &928621939
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1814,6 +1805,23 @@ MonoBehaviour:
   _portrait: {fileID: 2800000, guid: 9aa4e5f0ff745cc4395c568fa094e64b, type: 3}
   _dialogueColor: {r: 1, g: 1, b: 1, a: 1}
   _dialogueOffset: {x: 0, y: 0, z: 0}
+--- !u!114 &928621943
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 928621933}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9403c34e39354f644a2c9856ee9f6656, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  interactHint: 
+  interactType: "\u5BF9\u8BDD"
+  dialogueTree: {fileID: 11400000, guid: 65d140ae92f848d4bb29dd8593f7b893, type: 2}
+  questName: Tutorial
+  hintTree: {fileID: 11400000, guid: e7878401d23dc364e9cf0137b5be24e3, type: 2}
 --- !u!1 &949561810
 GameObject:
   m_ObjectHideFlags: 0
@@ -1932,9 +1940,10 @@ GameObject:
   - component: {fileID: 1001645465}
   - component: {fileID: 1001645464}
   - component: {fileID: 1001645463}
-  - component: {fileID: 1001645462}
+  - component: {fileID: 1001645468}
+  - component: {fileID: 1001645469}
   m_Layer: 0
-  m_Name: Cube
+  m_Name: Box
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1955,25 +1964,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 721224192}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1001645462
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1001645460}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0400a6b993f8b304985405dd00a6d390, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  pickHint: Box
-  picker: {fileID: 0}
-  attachedPlaceInternal: {fileID: 0}
-  shape: 0
-  gravity: 30
-  isCantBePicked: 0
-  disablePhysicOnSlot: 1
 --- !u!114 &1001645463
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2085,6 +2075,44 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1001645460}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1001645468
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1001645460}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a46b1fe3f23490645bc54ba977b7bc5e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pickHint: "\u642C\u8D77"
+  picker: {fileID: 0}
+  attachedPlaceInternal: {fileID: 0}
+  shape: 0
+  gravity: 30
+  isCantBePicked: 0
+  disablePhysicOnSlot: 1
+  withInteractorName: 0
+  pickEventName: PickQuestBox
+  dropEventName: 
+  placeEventName: 
+  removeEventName: 
+--- !u!114 &1001645469
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1001645460}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e56669a5e5f0b65449d4475630b113a4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dialogueTree: {fileID: 11400000, guid: fe293654fdb9e11459e104e483d0a76c, type: 2}
+  actor: {fileID: 1412303801}
 --- !u!1001 &1015005089
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2200,8 +2228,10 @@ GameObject:
   - component: {fileID: 1116294067}
   - component: {fileID: 1116294066}
   - component: {fileID: 1116294065}
-  - component: {fileID: 1116294064}
   - component: {fileID: 1116294063}
+  - component: {fileID: 1116294069}
+  - component: {fileID: 1116294071}
+  - component: {fileID: 1116294070}
   m_Layer: 0
   m_Name: NPC-Hair
   m_TagString: Untagged
@@ -2240,21 +2270,6 @@ MonoBehaviour:
   _portrait: {fileID: 2800000, guid: 9aa4e5f0ff745cc4395c568fa094e64b, type: 3}
   _dialogueColor: {r: 1, g: 1, b: 1, a: 1}
   _dialogueOffset: {x: 0, y: 0, z: 0}
---- !u!114 &1116294064
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1116294061}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8f74683ad10eb394291e65479bb29780, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  interactHint: "\u63D0\u793A\u5185\u5BB9"
-  interactType: "\u5BF9\u8BDD"
-  dialogueTree: {fileID: 11400000, guid: e7878401d23dc364e9cf0137b5be24e3, type: 2}
 --- !u!114 &1116294065
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2341,6 +2356,67 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1116294061}
   m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1116294069
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1116294061}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e6145a0403e25a04ab6a2c896aad877a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  interactHint: 
+  interactType: "\u5BF9\u8BDD"
+  dialogueTree: {fileID: 11400000, guid: 4c2c5fd5e5b58fe47a7a90cbfef8bf01, type: 2}
+  questName: BoxQuest
+--- !u!114 &1116294070
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1116294061}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98a6db0b653f764eac834f85857a9dd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _parentBlackboard: {fileID: 0}
+  _serializedBlackboard: '{"_variables":{}}'
+  _objectReferences: []
+  _serializedVariables: []
+--- !u!114 &1116294071
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1116294061}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c32e4b851ebd8fa4ea0645b99be1cf97, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _serializedExposedParameters: []
+  _boundGraphSerialization: 
+  _boundGraphObjectReferences: []
+  _boundGraphSource:
+    _version: 0
+    _category: 
+    _comments: 
+    _translation: {x: 0, y: 0}
+    _zoomFactor: 1
+  _firstActivation: 0
+  _enableAction: 1
+  _disableAction: 2
+  _lockBoundGraphPrefabOverrides: 1
+  _preInitializeSubGraphs: 0
+  _updateMode: 0
+  _graph: {fileID: 0}
+  _blackboard: {fileID: 1116294070}
 --- !u!1001 &1177714004
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2352,6 +2428,10 @@ PrefabInstance:
     - target: {fileID: 100010, guid: ea4f45f1433c2404197edc445210b679, type: 3}
       propertyPath: m_Name
       value: '@DialogueUGUI'
+      objectReference: {fileID: 0}
+    - target: {fileID: 22400000, guid: ea4f45f1433c2404197edc445210b679, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 59.80005
       objectReference: {fileID: 0}
     - target: {fileID: 22400010, guid: ea4f45f1433c2404197edc445210b679, type: 3}
       propertyPath: m_Pivot.x
@@ -2436,6 +2516,10 @@ PrefabInstance:
     - target: {fileID: 22400014, guid: ea4f45f1433c2404197edc445210b679, type: 3}
       propertyPath: m_AnchoredPosition.x
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 224000012677293416, guid: ea4f45f1433c2404197edc445210b679, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -19.550049
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 11400010, guid: ea4f45f1433c2404197edc445210b679, type: 3}
@@ -2554,6 +2638,51 @@ MonoBehaviour:
   _portrait: {fileID: 2800000, guid: 5d748d1a98ffa3e4ca0503b9ad25560e, type: 3}
   _dialogueColor: {r: 1, g: 1, b: 1, a: 1}
   _dialogueOffset: {x: 0, y: 0, z: 0}
+--- !u!114 &1412303813
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 796718240}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98a6db0b653f764eac834f85857a9dd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _parentBlackboard: {fileID: 0}
+  _serializedBlackboard: '{"_variables":{}}'
+  _objectReferences: []
+  _serializedVariables: []
+--- !u!114 &1412303814
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 796718240}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c32e4b851ebd8fa4ea0645b99be1cf97, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _serializedExposedParameters: []
+  _boundGraphSerialization: 
+  _boundGraphObjectReferences: []
+  _boundGraphSource:
+    _version: 0
+    _category: 
+    _comments: 
+    _translation: {x: 0, y: 0}
+    _zoomFactor: 1
+  _firstActivation: 0
+  _enableAction: 1
+  _disableAction: 2
+  _lockBoundGraphPrefabOverrides: 1
+  _preInitializeSubGraphs: 0
+  _updateMode: 0
+  _graph: {fileID: 0}
+  _blackboard: {fileID: 1412303813}
 --- !u!224 &1454232207 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 22400012, guid: ea4f45f1433c2404197edc445210b679, type: 3}
@@ -2610,6 +2739,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4d31900175ebe624db1beaacb2aa4045, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  player: {fileID: 1412303789}
+  talkTarget: {fileID: 0}
   skipOnInput: 0
   waitForInput: 0
   subtitlesGroup: {fileID: 573418801}

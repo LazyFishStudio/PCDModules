@@ -11,6 +11,9 @@ namespace NodeCanvas.DialogueTrees.UI.Examples
 {
     public class ChatGUI : MonoBehaviour, IPointerClickHandler
     {
+        public Transform player;
+        public Transform talkTarget;
+
         [System.Serializable]
         public class SubtitleDelays
         {
@@ -55,8 +58,11 @@ namespace NodeCanvas.DialogueTrees.UI.Examples
         public void OnPointerClick(PointerEventData eventData) => anyKeyDown = true;
         void LateUpdate() => anyKeyDown = false;
 
+        void Awake() {
+            EasyEvent.RegisterCallback("ShowChatBox", ShowChatBox);
+            EasyEvent.RegisterCallback("HideChatBox", HideChatBox);
 
-        void Awake() { Subscribe(); Hide(); }
+            Subscribe(); Hide(); }
         void OnEnable() { UnSubscribe(); Subscribe(); }
         void OnDisable() { UnSubscribe(); }
 
@@ -77,6 +83,7 @@ namespace NodeCanvas.DialogueTrees.UI.Examples
         }
 
         void Hide() {
+            Debug.Log("Hide");
             subtitlesGroup.gameObject.SetActive(false);
             optionsGroup.gameObject.SetActive(false);
             optionButton.gameObject.SetActive(false);
@@ -89,16 +96,14 @@ namespace NodeCanvas.DialogueTrees.UI.Examples
         }
 
         void OnDialoguePaused(DialogueTree dlg) {
-            subtitlesGroup.gameObject.SetActive(false);
-            optionsGroup.gameObject.SetActive(false);
+            Debug.Log("OnDialoguePaused");
             StopAllCoroutines();
             if (playSource != null)
                 playSource.Stop();
         }
 
         void OnDialogueFinished(DialogueTree dlg) {
-            subtitlesGroup.gameObject.SetActive(false);
-            optionsGroup.gameObject.SetActive(false);
+            Debug.Log("OnDialoguePaused");
             if (cachedButtons != null) {
                 foreach (var tempBtn in cachedButtons.Keys) {
                     if (tempBtn != null) {
@@ -112,11 +117,40 @@ namespace NodeCanvas.DialogueTrees.UI.Examples
                 playSource.Stop();
         }
 
+        private bool isShowingChatBox = false;
+        public void ShowChatBox() {
+            if (!isShowingChatBox) {
+                isShowingChatBox = true;
+                OnChatBoxShow();
+            }
+        }
+        public void HideChatBox() {
+            if (isShowingChatBox) {
+                isShowingChatBox = false;
+                OnChatBoxHide();
+            }
+		}
+
+        public void OnChatBoxShow() {
+            var locker = player.GetComponent<PCDActLocker>();
+            locker.attackLocked = true;
+            locker.interactionLocked = true;
+            locker.movementLocked = true;
+        }
+
+        public void OnChatBoxHide() {
+            var locker = player.GetComponent<PCDActLocker>();
+            locker.attackLocked = false;
+            locker.interactionLocked = false;
+            locker.movementLocked = false;
+        }
+
         ///----------------------------------------------------------------------------------------------
         private SubtitlesRequestInfo curInfo;
 
         void OnSubtitlesRequest(SubtitlesRequestInfo info) {
             Debug.Log("OnSubtitlesRequest");
+            ShowChatBox();
 
             var text = info.statement.text;
             var audio = info.statement.audio;
@@ -138,10 +172,13 @@ namespace NodeCanvas.DialogueTrees.UI.Examples
         }
 
         private void Update() {
-            if (typewriter.gameObject.activeInHierarchy && !typewriter.isShowingText && Input.anyKeyDown) {
-                Debug.Log("MyContinue");
-                subtitlesGroup.gameObject.SetActive(false);
-                curInfo?.Continue();
+            if (typewriter.gameObject.activeInHierarchy && !typewriter.isShowingText && Input.GetKeyDown(KeyCode.Mouse0)) {
+                if (curInfo != null) {
+                    Debug.Log("MyContinue");
+                    subtitlesGroup.gameObject.SetActive(false);
+                    optionsGroup.gameObject.SetActive(false);
+                    curInfo.Continue();
+                }
             }
 		}
 
@@ -173,6 +210,7 @@ namespace NodeCanvas.DialogueTrees.UI.Examples
 
         void OnMultipleChoiceRequest(MultipleChoiceRequestInfo info) {
             Debug.Log("OnMultipleChoiceRequest");
+            ShowChatBox();
             curInfo = null;
 
             optionsGroup.gameObject.SetActive(true);

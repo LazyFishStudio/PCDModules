@@ -8,7 +8,7 @@ namespace PCD.Narrative
     /* Whole chat script -> script, single line of chat -> chat */
     public class ChatManager : SingletonMono<ChatManager>
     {
-        public GameObject chatBoxUI;
+        public GameObject chatBoxUI; 
         public DialogueTreeController controller;
 
         private void Awake() {
