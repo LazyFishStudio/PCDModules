@@ -6,13 +6,14 @@ public class PCDBodyHead
 {
     public float headLookAtWeight;
     public float bodyLookAtWeight;
-    private PCDWalkMgr walkMgr;
+    private PCDHumanMgr PCDHuman;
+    private PCDWalkMgr walkMgr => PCDHuman.walkMgr;
     private PCDHuman.PoseInfo poseInfo;
     private PCDSkeleton skeleton;
     private PCDBoneDriver bodyDriver;
 
     public PCDBodyHead(PCDWalkMgr walkMgr, PCDBone body) {
-        this.walkMgr = walkMgr;
+        PCDHuman = walkMgr.GetComponent<PCDHumanMgr>();
         poseInfo = walkMgr.poseInfo;
         skeleton = walkMgr.skeleton;
         bodyDriver = new PCDBoneDriver(body, true);
@@ -74,8 +75,8 @@ public class PCDBodyHead
                 toTargetWeight = Vector3.Lerp(bodyBone.transform.forward, lookAtTarget.position - headBone.transform.position, walkMgr.animSetting.lookAtWeight_head);
                 headBone.transform.rotation = Quaternion.Slerp(headBone.transform.rotation, Quaternion.LookRotation(toTargetWeight, bodyBone.transform.up), Time.deltaTime * walkMgr.animSetting.bodyRotSpeed);
             } else {
-                toTargetWeight = Vector3.Lerp(rootBone.transform.forward, rootBone.transform.forward, walkMgr.animSetting.lookAtWeight_head);
-                headBone.transform.rotation = Quaternion.Slerp(headBone.transform.rotation, Quaternion.LookRotation(toTargetWeight, bodyBone.transform.up), Time.deltaTime * walkMgr.animSetting.bodyRotSpeed);
+                toTargetWeight = Vector3.Lerp(bodyBone.transform.forward, rootBone.transform.forward, PCDHuman.humanConfig.animSetting.lookAtWeight_head);
+                headBone.transform.rotation = Quaternion.Slerp(headBone.transform.rotation, Quaternion.LookRotation(toTargetWeight, bodyBone.transform.up), Time.deltaTime * walkMgr.animSetting.bodyRotSpeed * 5.0f);
             }
         }
 
