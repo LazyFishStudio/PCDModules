@@ -22,10 +22,10 @@ namespace PCD.Narrative
 				});
 			}
 
-			ChatManager.Instance.controller.StartDialogue(dialogueTree, GetComponent<DialogueActor>(), null);
-			ChatManager.Instance.controller.graph.blackboard.SetVariableValue("BranchIdx", branchIdx);
-			// GetComponent<DialogueTreeController>().StartDialogue(dialogueTree, GetComponent<DialogueActor>(), null);
-			// GetComponent<DialogueTreeController>().graph.blackboard.SetVariableValue("BranchIdx", branchIdx);
+			// ChatManager.Instance.controller.StartDialogue(dialogueTree, GetComponent<DialogueActor>(), null);
+			// ChatManager.Instance.controller.graph.blackboard.SetVariableValue("BranchIdx", branchIdx);
+			GetComponent<DialogueTreeController>().StartDialogue(dialogueTree, GetComponent<DialogueActor>(), null);
+			GetComponent<DialogueTreeController>().graph.blackboard.SetVariableValue("BranchIdx", branchIdx);
 			return true;
 		}
 	}

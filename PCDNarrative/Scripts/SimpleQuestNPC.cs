@@ -20,11 +20,11 @@ namespace PCD.Narrative
 
             switch (EasyQuest.GetQuestState(questName)) {
                 case EasyQuest.QuestState.Locked: {
-                    ChatManager.Instance.controller.StartDialogue(dialogueTree, GetComponent<DialogueActor>(), null);
+                    GetComponent<DialogueTreeController>().StartDialogue(dialogueTree, GetComponent<DialogueActor>(), null);
                     break;
                 }
                 case EasyQuest.QuestState.Active: {
-                    ChatManager.Instance.controller.StartDialogue(hintTree, GetComponent<DialogueActor>(), null);
+                    GetComponent<DialogueTreeController>().StartDialogue(hintTree, GetComponent<DialogueActor>(), null);
                     break;
                 }
                 case EasyQuest.QuestState.Finished: {

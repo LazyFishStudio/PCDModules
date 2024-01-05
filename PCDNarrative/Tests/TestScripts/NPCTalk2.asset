@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c3f478ef69fbe04fa9ed3664a8a443e, type: 3}
   m_Name: NPCTalk2
   m_EditorClassIdentifier: 
-  _serializedGraph: '{"type":"NodeCanvas.DialogueTrees.DialogueTree","nodes":[{"statement":{"_text":"\u4f60\u597d"},"_position":{"x":478.0,"y":54.8},"$type":"NodeCanvas.DialogueTrees.StatementNode","$id":"0"},{"statement":{"_text":"\u4f60\u8fd9\u4e2a\u50bb\u903c"},"_position":{"x":402.2152,"y":185.4184},"$type":"NodeCanvas.DialogueTrees.StatementNode","$id":"1"}],"connections":[{"_sourceNode":{"$ref":"0"},"_targetNode":{"$ref":"1"},"$type":"NodeCanvas.DialogueTrees.DTConnection"}],"canvasGroups":[],"localBlackboard":{"_variables":{"questName":{"_value":"BoxQuest","_name":"questName","_id":"029dbd47-e029-49e1-a49f-6173e376b0fb","$type":"NodeCanvas.Framework.Variable`1[[System.String,
+  _serializedGraph: '{"type":"NodeCanvas.DialogueTrees.DialogueTree","nodes":[{"statement":{"_text":"\u4f60\u597d"},"_position":{"x":478.0,"y":54.8},"$type":"NodeCanvas.DialogueTrees.StatementNode","$id":"0"},{"statement":{"_text":"\u4f60\u8fd9\u4e2a\u50bb\u903c"},"_position":{"x":402.2152,"y":185.4184},"$type":"NodeCanvas.DialogueTrees.StatementNode","$id":"1"},{"_action":{"$type":"HideChatBox"},"_position":{"x":490.396,"y":313.7413},"$type":"NodeCanvas.DialogueTrees.ActionNode","$id":"2"}],"connections":[{"_sourceNode":{"$ref":"0"},"_targetNode":{"$ref":"1"},"$type":"NodeCanvas.DialogueTrees.DTConnection"},{"_sourceNode":{"$ref":"1"},"_targetNode":{"$ref":"2"},"$type":"NodeCanvas.DialogueTrees.DTConnection"}],"canvasGroups":[],"localBlackboard":{"_variables":{"QuestName":{"_value":"BoxQuest","_name":"QuestName","_id":"029dbd47-e029-49e1-a49f-6173e376b0fb","$type":"NodeCanvas.Framework.Variable`1[[System.String,
     mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]"}}},"derivedData":{"actorParameters":[{"_keyName":"Player","_id":"13219ef8-ca0a-4488-b5aa-672159804f6e","_actorObject":1},{"_keyName":"NPC-Skin","_id":"b824f3db-6f44-441f-959d-edfb16ff6e37","_actorObject":2},{"_keyName":"NPC-Hair","_id":"7c0b5575-bc75-446a-94d0-db9c858aff8d","_actorObject":3}],"$type":"NodeCanvas.DialogueTrees.DialogueTree+DerivedSerializationData"}}'
   _objectReferences:
   - {fileID: 0}
@@ -23,8 +23,8 @@ MonoBehaviour:
     _version: 3.29
     _category: 
     _comments: 
-    _translation: {x: 25, y: -2}
-    _zoomFactor: 1
+    _translation: {x: 111.1587, y: -22.334269}
+    _zoomFactor: 0.7500903
   _haltSerialization: 0
   _externalSerializationFile: {fileID: 0}
   actorParameters:
