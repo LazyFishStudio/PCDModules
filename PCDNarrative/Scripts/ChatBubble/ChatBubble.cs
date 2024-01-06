@@ -39,7 +39,7 @@ public class ChatBubble : MonoBehaviour
         Vector2 rawTextSize = textMesh.GetRenderedValues(false);
         Vector2 textSize = rawTextSize + paddingChar * textMesh.fontSize;
 
-        textMesh.SetText("");
+        textMesh.SetText(""); 
         Vector2 newBodyPos = new Vector2(0f, (rawTextSize.y - textMesh.fontSize) * 0.5f);
         if (!gameObject.activeInHierarchy) {
             body.anchoredPosition = newBodyPos;
