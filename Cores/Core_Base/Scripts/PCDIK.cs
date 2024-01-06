@@ -20,8 +20,7 @@ public class PCDIK : MonoBehaviour {
 
     [Range(0.1f, 0.9f)]
     public float midPointProp = 0.5f;
-    [SerializeField]
-    private float oriLength;
+    public float oriLength;
     [SerializeField]
     private float oriLengthScale;
     [SerializeField]

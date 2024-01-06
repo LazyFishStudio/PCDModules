@@ -16,6 +16,7 @@ public class PCDTriggerProp : MonoBehaviour, ITriggerInteractable
 
     public virtual bool OnInteract(InteractComp interactor) {
         Debug.Log("Prop " + gameObject.name + " used by " + interactor.gameObject.name);
+        SendMessage("Play", SendMessageOptions.DontRequireReceiver);
         return true;
 	}
 }

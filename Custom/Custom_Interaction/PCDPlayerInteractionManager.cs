@@ -179,17 +179,20 @@ public partial class PCDPlayerInteractionManager : BaseInteractionManager, IPCDA
                 if (slot is PCDGenericSlot genericSlot && genericSlot.interactDesc != null && genericSlot.interactDesc != "") {
                     interactDesc = genericSlot.interactDesc;
                 }
-                actionManager.RegisterAction(playerName, "SecondInteract", "GetKeyDown", interactDesc, () => {
-                    InteractLogger.LogInteractEvent("PlaceItem", gameObject, (placeable as Component).gameObject);
-                    placeable.PlacedTo(interactComp, slot);
-                });
+                if (!locker.dropLocked)
+                        actionManager.RegisterAction(playerName, "SecondInteract", "GetKeyDown", interactDesc, () => {
+                            InteractLogger.LogInteractEvent("PlaceItem", gameObject, (placeable as Component).gameObject);
+                            placeable.PlacedTo(interactComp, slot);
+                        });
             } else {
                 PCDHumanInteractSM player = interactComp as PCDHumanInteractSM;
                 if (player.pullingObject != null) {
                     /* 需要持续注册"抓住"，用以显示提示 */
                     actionManager.RegisterAction(playerName, "FirstInteract", "GetKeyUp", "抓住", HandleRestPullingAction);
                 } else if (player.holdingObject != null) {
-                    actionManager.RegisterAction(playerName, "SecondInteract", "GetKeyDown", "放下", HandleDropHoldingAction);
+                    if (!locker.dropLocked) {
+                        actionManager.RegisterAction(playerName, "SecondInteract", "GetKeyDown", "放下", HandleDropHoldingAction);
+                    }
                 }
             }
         }
