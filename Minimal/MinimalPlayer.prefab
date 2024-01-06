@@ -11879,6 +11879,7 @@ GameObject:
   - component: {fileID: 8520324575678022675}
   - component: {fileID: 898367525752904433}
   - component: {fileID: 764563180809687731}
+  - component: {fileID: 1220172341499593949}
   m_Layer: 12
   m_Name: PCDHuman_Interaction
   m_TagString: Untagged
@@ -12251,6 +12252,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rb: {fileID: 5850322207924486609}
+--- !u!114 &1220172341499593949
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9055372025514928057}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39beb4aaedd089f418d0315aa2d9e16b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  skeleton: {fileID: 0}
+  humanConfig: {fileID: 0}
+  animator: {fileID: 0}
+  walkMgr: {fileID: 0}
+  poseMgr: {fileID: 0}
+  arhchoringMgr: {fileID: 0}
 --- !u!1 &9078524629656916269
 GameObject:
   m_ObjectHideFlags: 0
