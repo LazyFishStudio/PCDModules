@@ -13,23 +13,36 @@ public class FishRod : PCDHoldProp
     public float progress = 0f;
     public float lineBias = 0f;
     public float lineTime = 0.2f;
+    public float bobberSwingTime = 1.0f;
+    public float bobberGatherTime = 0.5f;
+    public float bobberJumpHeight = 3.0f;
+    public AnimationCurve bobberJumpCurve;
     public Transform bobber;
     public Transform bobberIdle;
     public Transform bobberStart;
     public Transform bobberTarget;
+    public Transform tapeStartPoint;
     public PCDIK lineIK;
+    public float rodCurvingTime = 1.0f;
+    public float draggingFadeTime = 0.5f;
     private PCDHumanMgr PCDHuman;
     private PCDBoneDriver fakeBodyDriver;
     private PCDWeaponDriver weaponAnimationDriver;
+    private PCDTransfromLerp rodCurveLerp;
 
     private float holdTime = 0f;
+    private Transform player;
+    private bool isDragging;
+    private float oriTapeLength;
 
     void Awake() {
-        
+        rodCurveLerp = GetComponentInChildren<PCDTransfromLerp>();
+        oriTapeLength = lineIK.oriLength;
     }
 
     private void OnFishingStart(InteractComp interactor) {
         isFishing = true;
+        isDragging = false;
         holdTime = 0f;
 
         var locker = interactor.GetComponent<PCDActLocker>();
@@ -48,25 +61,33 @@ public class FishRod : PCDHoldProp
         PCDHuman.uanimator.enabled = true;
         PCDHuman.uanimator.CrossFadeInFixedTime("Fishing-Start", 0.1f);
 
-        SwingBobber(interactor.transform);
+        bobber.position = bobberStart.position;
+
+        player = interactor.transform;
+        // SwingBobber(interactor.transform);
 
         interactType = "收竿";
     }
 
     private void OnFishingSucceed(InteractComp interactor) {
+
+        PCDHuman.uanimator.CrossFadeInFixedTime("Fishing-End", 0.16f);
+
         // 动作 & 浮标回到竿上
-        GatherBobber(interactor.transform);
+        player = interactor.transform;
+        GatherBobber();
 
         interactType = "甩竿";
     }
 
-    private void OnFishingPause(InteractComp interactor) {
-        // 回到 Fishing-Idle 动画
-        PCDHuman.uanimator.CrossFadeInFixedTime("Fishing-Idle", 0.1f);
-	}
 
-    private FuncUpdater updater = null;
-    private void SwingBobber(Transform player) {
+    private FuncUpdater tapeCurvingUpdater = null;
+    private FuncUpdater rodCurvingUpdater = null;
+    /// <summary>
+    /// 甩出浮漂
+    /// </summary>
+    /// <param name="player"></param>
+    public void SwingBobber() {
         Rigidbody bobberRb = bobber.GetComponent<Rigidbody>();
         Vector3 targetPos = player.position + player.rotation * bobberTarget.localPosition;
         bobberRb.DOMove(bobberStart.position, 0f);
@@ -74,15 +95,15 @@ public class FishRod : PCDHoldProp
         
         bobberRb.isKinematic = false;
         bobber.GetComponent<Collider>().enabled = true;
-        bobberRb.DOJump(targetPos.CopySetY(0f), 3f, 1, 1f);
+        bobberRb.DOJump(targetPos.CopySetY(0f), bobberJumpHeight, 1, bobberSwingTime).SetEase(bobberJumpCurve);
 
         EasyEvent.RegisterOnceCallback("BobberHit", () => {
             isBobberReady = true;
             targetHoldTime = 0f;
 
             float timeElapse = 0f;
-            float startLength = (bobber.position - bobberStart.position).magnitude;
-            updater = FuncUpdater.Create(() => {
+            float startLength = (bobber.position - tapeStartPoint.position).magnitude;
+            tapeCurvingUpdater = FuncUpdater.Create(() => {
                 timeElapse += Time.deltaTime;
                 float progress = Mathf.Clamp01(timeElapse / lineTime);
                 float curLength = startLength + lineBias * progress;
@@ -90,24 +111,31 @@ public class FishRod : PCDHoldProp
 
                 bool finish = timeElapse >= lineTime;
                 if (finish) {
-                    updater = null;
+                    tapeCurvingUpdater = null;
                 }
                 return finish;
             });
         });
     }
 
-    private void GatherBobber(Transform player) {
+    /// <summary>
+    /// 收回浮漂
+    /// </summary>
+    /// <param name="player"></param>
+    public void GatherBobber() {
         isBobberReady = false;
-        lineIK.oriLength = 0f;
-        if (updater != null) {
-            updater.DestroySelf();
-            updater = null;
+        // lineIK.oriLength = 0f;
+        lineIK.oriLength = oriTapeLength;
+        if (tapeCurvingUpdater != null) {
+            tapeCurvingUpdater.DestroySelf();
+            tapeCurvingUpdater = null;
 		}
+
+        RodCurving(0.0f, 0.16f);
 
         Rigidbody bobberRb = bobber.GetComponent<Rigidbody>();
         bobberRb.isKinematic = false;
-        bobberRb.DOJump(bobberIdle.position, 3f, 1, 1f).OnComplete(() => {
+        bobberRb.DOJump(bobberIdle.position, bobberJumpHeight, 1, bobberGatherTime).SetEase(bobberJumpCurve).OnComplete(() => {
             bobber.SetParent(transform);
             bobberRb.isKinematic = true;
 
@@ -121,6 +149,8 @@ public class FishRod : PCDHoldProp
             weaponAnimationDriver.ReturnOwnership();
             PCDHuman.uanimator.enabled = false;
 
+            bobber.position = bobberIdle.position;
+
         });
     }
 
@@ -131,7 +161,12 @@ public class FishRod : PCDHoldProp
     public override bool OnInteractStay(InteractComp interactor) {
         if (!isFishing) return true;
         
-        PCDHuman.uanimator.CrossFadeInFixedTime("Fishing-Dragging", 0.1f);
+        if (!isDragging) {
+            PCDHuman.uanimator.CrossFadeInFixedTime("Fishing-Dragging", draggingFadeTime);
+            isDragging = true;
+
+            RodCurving(1.0f, rodCurvingTime);
+        }
 
         holdTime += Time.deltaTime;
         progress = Mathf.Clamp01(holdTime / (targetHoldTime + 0.0001f));
@@ -153,6 +188,31 @@ public class FishRod : PCDHoldProp
     public override void OnInteractTerminate(InteractComp interactor) {
         base.OnInteractTerminate(interactor);
         OnFishingPause(interactor);
+    }
+    
+    private void OnFishingPause(InteractComp interactor) {
+        isDragging = false;
+        // 回到 Fishing-Idle 动画
+        PCDHuman.uanimator.CrossFadeInFixedTime("Fishing-Idle", draggingFadeTime * 0.65f);
+        RodCurving(0.0f, draggingFadeTime * 0.65f);
+        
+	}
+
+    private void RodCurving(float curvingTTarget, float curvingTime) {
+        float timeElapse = 0;
+        float lastT = rodCurveLerp.t;
+        tapeCurvingUpdater?.DestroySelf();
+        tapeCurvingUpdater = FuncUpdater.Create(() => {
+            timeElapse += Time.deltaTime;
+            float progress = Mathf.Clamp01(timeElapse / curvingTime);
+
+            rodCurveLerp.t = Mathf.Lerp(lastT, curvingTTarget, progress);    
+            bool finish = timeElapse >= curvingTime;
+            if (finish) {
+                tapeCurvingUpdater = null;
+            }
+            return finish;
+        });
     }
 
     private void Update() {
