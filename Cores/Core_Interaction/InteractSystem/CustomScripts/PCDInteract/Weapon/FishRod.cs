@@ -18,8 +18,15 @@ public class FishRod : PCDHoldProp
     public Transform bobberStart;
     public Transform bobberTarget;
     public PCDIK lineIK;
+    private PCDHumanMgr PCDHuman;
+    private PCDBoneDriver fakeBodyDriver;
+    private PCDWeaponDriver weaponAnimationDriver;
 
     private float holdTime = 0f;
+
+    void Awake() {
+        
+    }
 
     private void OnFishingStart(InteractComp interactor) {
         isFishing = true;
@@ -30,6 +37,17 @@ public class FishRod : PCDHoldProp
         locker.dropLocked = true;
 
         // Animation
+        // 获取 Body 的控制权，什么都不做，让 Animation 来控制 Body
+        PCDHuman = interactor.GetComponentInChildren<PCDHumanMgr>();
+        // 创建一个新的 Driver 来接管 actor 的 Body 的动画
+        fakeBodyDriver = new PCDBoneDriver(PCDHuman.skeleton.GetBone("Body"));
+        fakeBodyDriver.TryGetOwnership();
+        // 将 WeaponDriver 的 WeaponBoneTarget 设置成 actor 身上的 AnimWeaponBone
+        weaponAnimationDriver = new PCDWeaponDriver(PCDHuman.skeleton.GetBone("WeaponBone"), PCDHuman.skeleton.GetBone("WeaponAnimationBone").transform);
+        weaponAnimationDriver.TryGetOwnership();
+        PCDHuman.uanimator.enabled = true;
+        PCDHuman.uanimator.CrossFadeInFixedTime("Fishing-Start", 0.1f);
+
         SwingBobber(interactor.transform);
 
         interactType = "收竿";
@@ -43,7 +61,8 @@ public class FishRod : PCDHoldProp
     }
 
     private void OnFishingPause(InteractComp interactor) {
-
+        // 回到 Fishing-Idle 动画
+        PCDHuman.uanimator.CrossFadeInFixedTime("Fishing-Idle", 0.1f);
 	}
 
     private FuncUpdater updater = null;
@@ -96,6 +115,12 @@ public class FishRod : PCDHoldProp
             var locker = player.GetComponent<PCDActLocker>();
             locker.movementLocked = false;
             locker.dropLocked = false;
+
+            // 归还 Body 的控制权
+            fakeBodyDriver.ReturnOwnership();
+            weaponAnimationDriver.ReturnOwnership();
+            PCDHuman.uanimator.enabled = false;
+
         });
     }
 
@@ -105,6 +130,9 @@ public class FishRod : PCDHoldProp
 
     public override bool OnInteractStay(InteractComp interactor) {
         if (!isFishing) return true;
+        
+        PCDHuman.uanimator.CrossFadeInFixedTime("Fishing-Dragging", 0.1f);
+
         holdTime += Time.deltaTime;
         progress = Mathf.Clamp01(holdTime / (targetHoldTime + 0.0001f));
         if (holdTime >= targetHoldTime) {

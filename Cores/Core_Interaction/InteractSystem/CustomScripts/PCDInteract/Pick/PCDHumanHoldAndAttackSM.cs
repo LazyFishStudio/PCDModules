@@ -23,6 +23,8 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
     public string playerName = "P1";
 
     [Header("Holding设置")]
+    public PCDWeaponDriver objHoldingDriver;
+    public PCDWeaponDriver PCDWeaponAnimtionDriver;
     public Transform boxObjFollowTarget;
     public Transform smallBoxObjFollowTarget;
     public Transform stickObjFollowTarget;
@@ -67,11 +69,12 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
     [SerializeField]
     private SubStateMachine<State, AttackState> attackSM;
     private SubStateMachine<State, FishState> fishSM;
-    private PCDWalkMgr walkMgr;
-    private PCDPoseMgr poseMgr;
-    private PCDArchoringMgr archoringMgr;
-    private PCDAnimator animator;
-    private PCDHumanConfig humanConfig;
+    private PCDHumanMgr PCDHuman;
+    private PCDWalkMgr walkMgr => PCDHuman.walkMgr;
+    private PCDPoseMgr poseMgr => PCDHuman.poseMgr;
+    private PCDArchoringMgr archoringMgr => PCDHuman.arhchoringMgr;
+    private PCDAnimator animator => PCDHuman.animator;
+    private PCDHumanConfig humanConfig => PCDHuman.humanConfig;
 
     private FMODUnity.StudioEventEmitter emitter;
     private FMOD.Studio.EventInstance actionEventInstance;
@@ -84,11 +87,7 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
 
     void Awake() {
 
-        walkMgr = GetComponentInChildren<PCDWalkMgr>();
-        poseMgr = GetComponentInChildren<PCDPoseMgr>();
-        archoringMgr = GetComponentInChildren<PCDArchoringMgr>();
-        humanConfig = GetComponentInChildren<PCDHumanConfig>();
-        animator = GetComponentInChildren<PCDAnimator>();
+        PCDHuman = GetComponentInChildren<PCDHumanMgr>();
         InitHandActionSM();
 
         emitter = GetComponent<FMODUnity.StudioEventEmitter>();
@@ -96,6 +95,8 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
             actionEventInstance = FMODUnity.RuntimeManager.CreateInstance(actionEventInstancePath);
         });
 
+        objHoldingDriver = new PCDWeaponDriver(PCDHuman.skeleton.GetBone("WeaponBone"));
+        PCDWeaponAnimtionDriver = new PCDWeaponDriver(PCDHuman.skeleton.GetBone("WeaponBone"));
         
     }
 
@@ -221,10 +222,10 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
                 }
             },
             () => {
-                if (attackingWeapon) {
-                    attackingWeapon.transform.position = followTarget.position;
-                    attackingWeapon.transform.rotation = followTarget.GetChild(0).rotation;
-                }
+                // if (attackingWeapon) {
+                //     attackingWeapon.transform.position = followTarget.position;
+                //     attackingWeapon.transform.rotation = followTarget.GetChild(0).rotation;
+                // }
             },
             () => {
                 // controller.UnLockPosAndRot
@@ -256,10 +257,10 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
                 }
             },
             () => {
-                if (attackingWeapon) {
-                    attackingWeapon.transform.position = followTarget.position;
-                    attackingWeapon.transform.rotation = followTarget.GetChild(0).rotation;
-                }
+                // if (attackingWeapon) {
+                //     attackingWeapon.transform.position = followTarget.position;
+                //     attackingWeapon.transform.rotation = followTarget.GetChild(0).rotation;
+                // }
             },
             () => {
                 // archoringMgr.ResetBoneFromArchoring("LHand");
@@ -429,11 +430,16 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
 
         attackingWeapon = weapon;
         Transform lastFollowTarget = followTarget; 
-        followTarget = longStickHorizonCircleMovement.movingObj;
+        followTarget = longStickHorizonCircleMovement.movingObj.GetChild(0);
+
+        PCDWeaponAnimtionDriver.weaponBoneTarget = followTarget;
+        PCDWeaponAnimtionDriver.TryGetOwnership();
+
         longStickHorizonCircleMovement.StartMovement(transform, transform, () => {
             // sm.GotoState(State.Idle);
             attackSM.ReturnToParentSM();
             followTarget = lastFollowTarget;
+            PCDWeaponAnimtionDriver.ReturnOwnership();
             // HoldObj(attackingWeapon, PCDObjectProperties.Shape.LongStick, true);
         });
 
@@ -491,11 +497,18 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
     private void OnHoldEnter(Transform obj, Transform objFollowTarget) {
         holdingObject = obj;
         followTarget = objFollowTarget;
+
+        // 用Driver来接管物体的跟随
+        holdingObject.SetParent(objHoldingDriver.attachedBone.transform);
+        holdingObject.localPosition = Vector3.zero;
+        holdingObject.localRotation = Quaternion.identity;
+        objHoldingDriver.weaponBoneTarget = followTarget;
+        objHoldingDriver.TryGetOwnership();
     }
 
     private void OnHoldUpdate() {
         
-        UpdateHoldingObjFollow();
+        // UpdateHoldingObjFollow();
 
         void UpdateHoldingObjFollow() {
             holdingObject.transform.position = followTarget.transform.position;
@@ -505,6 +518,9 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
     }
 
     private void OnHoldExit() {
+        objHoldingDriver.ReturnOwnership();
+        holdingObject.SetParent(null);
+
         holdingObject = null;
         followTarget = null;
     }

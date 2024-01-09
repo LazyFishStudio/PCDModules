@@ -27,6 +27,7 @@ public class PCDBoneDriver
 
 			attachedBone.ResetOwnership();
 			attachedBone.SetOwnership(this, force);
+			this.OnGetOwnership();
 			return true;
 		}
 		return false;
@@ -37,6 +38,8 @@ public class PCDBoneDriver
 			return;
 		attachedBone.owner = prevOwner;
 		attachedBone.forceOwner = false;
+
+		prevOwner?.OnGetOwnership();
 	}
 
 	public void SetGlobalPosition(Vector3 position) {
@@ -100,4 +103,9 @@ public class PCDBoneDriver
 		// }
 		lastKFBoneTransInfo = info;
 	}
+
+	public virtual void OnGetOwnership() {
+		
+	}
+
 }
