@@ -125,20 +125,26 @@ public class PickableObject : MonoBehaviour, IFocusable, IPickable, IPlaceable {
         return true;
 	}
 
+    public RigidbodyInterpolation oriRbInterpolation;
     public void SetPhysicActive(bool active) {
         if (active) {
             foreach (Collider collider in GetComponentsInChildren<Collider>()) {
                 collider.enabled = true;
             }
-            if (GetComponent<Rigidbody>()) {
-                GetComponent<Rigidbody>().isKinematic = false;
+            Rigidbody rb = GetComponent<Rigidbody>();
+            if (rb) {
+                rb.isKinematic = false;
+                oriRbInterpolation = rb.interpolation;
+                rb.interpolation = RigidbodyInterpolation.None;
             }
         } else {
             foreach (Collider collider in GetComponentsInChildren<Collider>()) {
                 collider.enabled = false;
             }
-            if (GetComponent<Rigidbody>()) {
-                GetComponent<Rigidbody>().isKinematic = true;
+            Rigidbody rb = GetComponent<Rigidbody>();
+            if (rb) {
+                rb.isKinematic = true;
+                rb.interpolation = oriRbInterpolation;
             }
         }
     }
