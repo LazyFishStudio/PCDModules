@@ -17,7 +17,9 @@ public class FishRod : PCDHoldProp
     public float bobberGatherTime = 0.5f;
     public float bobberJumpHeight = 3.0f;
     public AnimationCurve bobberJumpCurve;
-    public Transform bobber;
+    public float bobberRange = 4f;
+    public FishBobber fishBobber;
+    public FishShadow curFishShadow; 
     public Transform bobberIdle;
     public Transform bobberStart;
     public Transform bobberTarget;
@@ -25,7 +27,7 @@ public class FishRod : PCDHoldProp
     public PCDIK lineIK;
     public float rodCurvingTime = 1.0f;
     public float draggingFadeTime = 0.5f;
-    private PCDHumanMgr PCDHuman;
+    public PCDHumanMgr PCDHuman;
     private PCDBoneDriver fakeBodyDriver;
     private PCDWeaponDriver weaponAnimationDriver;
     private PCDTransfromLerp rodCurveLerp;
@@ -34,8 +36,11 @@ public class FishRod : PCDHoldProp
     private Transform player;
     private bool isDragging;
     private float oriTapeLength;
+    private Transform bobber;
 
     void Awake() {
+        bobber = fishBobber.transform;
+        fishBobber.fishRod = this;
         rodCurveLerp = GetComponentInChildren<PCDTransfromLerp>();
         oriTapeLength = lineIK.oriLength;
     }
@@ -76,6 +81,13 @@ public class FishRod : PCDHoldProp
         // 动作 & 浮标回到竿上
         player = interactor.transform;
         GatherBobber();
+        if (curFishShadow != null) {
+            curFishShadow.sm.GotoState(FishShadow.State.Finish);
+            curFishShadow = null;
+        } else if (fishBobber.probeFish != null) {
+            fishBobber.probeFish.sm.GotoState(FishShadow.State.Idle);
+            fishBobber.probeFish = null;
+        }
 
         interactType = "甩竿";
     }
@@ -95,7 +107,7 @@ public class FishRod : PCDHoldProp
         
         bobberRb.isKinematic = false;
         bobber.GetComponent<Collider>().enabled = true;
-        bobberRb.DOJump(targetPos.CopySetY(0f), bobberJumpHeight, 1, bobberSwingTime).SetEase(bobberJumpCurve);
+        bobberRb.DOJump(targetPos.CopySetY(fishBobber.ground.position.y), bobberJumpHeight, 1, bobberSwingTime).SetEase(bobberJumpCurve);
 
         EasyEvent.RegisterOnceCallback("BobberHit", () => {
             isBobberReady = true;
