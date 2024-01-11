@@ -20,6 +20,7 @@ public class ChatBubbleMgr : SingletonMono<ChatBubbleMgr>
             bubbleDict[actor] = chatBubble;
         }
         chatBubble.GetComponent<UIFollow>().target = actor.transform;
+        chatBubble.GetComponent<UIFollow>().bias = actor.dialoguePosition;
         chatBubble.ShowText(text, textShowedCallback, continueNextCallback);
     }
 

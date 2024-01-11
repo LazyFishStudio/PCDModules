@@ -50,8 +50,9 @@ public class ChatBubble : MonoBehaviour
             background.rectTransform.DOSizeDelta(textSize, 0.05f);
         }
 
-        System.Action delayShowText = async () => {
-            await Task.Delay((int)(0.05f * 1000f));
+        // System.Action delayShowText = async () => {
+        //  await Task.Delay((int)(0.01f * 1000f));
+        System.Action delayShowText = () => {
             _textShowedCallback = textShowedCallback;
             _continueNextCallback = continueNextCallback;
             typeWriter.ShowText(text);
