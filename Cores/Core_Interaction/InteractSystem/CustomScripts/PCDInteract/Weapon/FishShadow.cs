@@ -87,7 +87,7 @@ public class FishShadow : MonoBehaviour
             Quaternion targetRot = Quaternion.Euler(targetAngles);
             GameObject fish = Instantiate(product, transform.position, targetRot, null);
             Vector3 playerPos = fishBobber.fishRod.PCDHuman.skeleton.humanBone.root.transform.position.CopyAddY(0.15f);
-            Vector3 targetPos = playerPos + (playerPos - transform.position).CopySetY(playerPos.y).normalized * finishDropDist;
+            Vector3 targetPos = playerPos + (playerPos - transform.position).CopySetY(playerPos.y).normalized * finishDropDist + Vector3.up * 0.5f;
 
             PCDJumpFish fishJump = fish.GetComponent<PCDJumpFish>();
             Collider fishCollider = fish.GetComponent<Collider>();
@@ -96,7 +96,7 @@ public class FishShadow : MonoBehaviour
             fishCollider.enabled = false;
             fishRb.interpolation = RigidbodyInterpolation.None;
             fishRb.useGravity = false;
-            fish.GetComponent<Rigidbody>().DOJump(targetPos, finishJumpHigh, 1, finishDuration).OnComplete(() => {
+            fish.GetComponent<Rigidbody>().DOJump(targetPos, finishJumpHigh, 1, finishDuration).SetEase(Ease.Linear).OnComplete(() => {
                 fishRb.useGravity = true;
                 fishRb.interpolation = RigidbodyInterpolation.Interpolate;
                 fishCollider.enabled = true;
