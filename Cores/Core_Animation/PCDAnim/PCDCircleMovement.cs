@@ -59,17 +59,23 @@ public class PCDCircleMovement : MonoBehaviour {
         // transform.position = followPos.position;
         this.animFinishCallBack = animFinishCallBack;
         isStartMovement = true;
-        movingObj.transform.position = transform.position + transform.rotation * (Quaternion.AngleAxis(rollAngle, Vector3.forward) * Quaternion.AngleAxis(Mathf.LerpUnclamped(yawAngleRange.x, yawAngleRange.y, 0), Vector3.down)) * Vector3.forward * targetLengthWithCurve;
+        // movingObj.transform.position = transform.position + transform.rotation * (Quaternion.AngleAxis(rollAngle, Vector3.forward) * Quaternion.AngleAxis(Mathf.LerpUnclamped(yawAngleRange.x, yawAngleRange.y, 0), Vector3.down)) * Vector3.forward * targetLengthWithCurve;
+        // movingObj.transform.rotation = Quaternion.LookRotation(movingObj.transform.position - transform.position, transform.rotation * (Quaternion.AngleAxis(rollAngle, Vector3.forward) * Vector3.up));
+
+        movingObj.transform.position = transform.position + transform.rotation * (Quaternion.AngleAxis(rollAngle, Vector3.forward) 
+            * Quaternion.AngleAxis(Mathf.LerpUnclamped(yawAngleRange.x, yawAngleRange.y, 0), Vector3.down)) * Vector3.forward * targetLengthWithCurve;
         movingObj.transform.rotation = Quaternion.LookRotation(movingObj.transform.position - transform.position, transform.rotation * (Quaternion.AngleAxis(rollAngle, Vector3.forward) * Vector3.up));
-    
+        movingObj.transform.rotation = Quaternion.AngleAxis(pitchAngle, transform.right) * movingObj.transform.rotation;
         OnMovementEnter();
+        Debug.Log("Start Movement: " + isStartMovement);
+
     
     }
 
     public void StopMovement() {
         
         isStartMovement = false;
-    
+
     }
 
     private void OnDrawGizmosSelected() {
