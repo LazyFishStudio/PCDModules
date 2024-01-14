@@ -31,20 +31,52 @@ public class ChatBubble : MonoBehaviour
         textMesh.ForceMeshUpdate(true);
     }
 
+    /*
+     * 规则 1：高度不能超过长度的 50%
+     * 规则 2：尽量保证末行最少有 3 个字，通过不断宽度 + 1 来保证
+     * 规则 3：默认每行 7 个字
+     */
     public void ShowText(string text, System.Action textShowedCallback, System.Action continueNextCallback) {
         ResetText();
 
+        bool isActive = gameObject.activeInHierarchy;
+        if (!isActive) {
+            gameObject.SetActive(true);
+        }
+
+        textMesh.rectTransform.sizeDelta = new Vector2(textMesh.fontSize * 10000f, textMesh.fontSize);
         textMesh.SetText(text);
         textMesh.ForceMeshUpdate(true);
-        Vector2 rawTextSize = textMesh.GetRenderedValues(false);
+        Vector2 rawTextSize = textMesh.GetRenderedValues();
         Vector2 textSize = rawTextSize + paddingChar * textMesh.fontSize;
+        int totalChars = Mathf.CeilToInt(rawTextSize.x / textMesh.fontSize);
 
-        textMesh.SetText(""); 
-        Vector2 newBodyPos = new Vector2(0f, (rawTextSize.y - textMesh.fontSize) * 0.5f);
-        if (!gameObject.activeInHierarchy) {
+        /* Calculate suitable row size */
+        int charPerRow = 7;
+        for (; ; charPerRow++) {
+            int charCols = charPerRow;
+            int charRows = Mathf.CeilToInt(1f * totalChars / charPerRow);
+            if ((charCols + paddingChar.x) < (charRows + paddingChar.y) * 2f)
+                continue;
+            int lastRowChars = totalChars % charPerRow;
+            if (charRows > 1 && lastRowChars >= 1 && lastRowChars <= 2)
+                continue;
+            break;
+        }
+
+        /* Calculate actual text size */
+        textMesh.rectTransform.sizeDelta = new Vector2(charPerRow * textMesh.fontSize, textMesh.fontSize);
+        textMesh.ForceMeshUpdate(true);
+        rawTextSize = textMesh.GetRenderedValues();
+        textSize = rawTextSize + paddingChar * textMesh.fontSize;
+
+        /* Actually show the text */
+        textMesh.SetText("");
+        textMesh.ForceMeshUpdate(true);
+        Vector2 newBodyPos = new Vector2(0f, textSize.y * 0.5f);
+        if (!isActive) {
             body.anchoredPosition = newBodyPos;
             background.rectTransform.sizeDelta = textSize;
-            gameObject.SetActive(true);
         } else {
             body.DOAnchorPos(newBodyPos, 0.05f);
             background.rectTransform.DOSizeDelta(textSize, 0.05f);

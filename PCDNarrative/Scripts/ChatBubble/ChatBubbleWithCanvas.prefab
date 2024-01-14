@@ -176,6 +176,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: ChatBubble
       objectReference: {fileID: 0}
+    - target: {fileID: 6243522665064782738, guid: 2a98422312cc5354cbca9d00b852c7f4, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

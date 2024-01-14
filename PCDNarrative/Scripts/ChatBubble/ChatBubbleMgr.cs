@@ -16,7 +16,7 @@ public class ChatBubbleMgr : SingletonMono<ChatBubbleMgr>
     public void ActorSay(DialogueActor actor, string text, System.Action textShowedCallback, System.Action continueNextCallback) {
         ChatBubble chatBubble = null;
         if (!bubbleDict.TryGetValue(actor, out chatBubble) || !chatBubble) {
-            chatBubble = Instantiate(chatBubblePrefab, null).GetComponentInChildren<ChatBubble>();
+            chatBubble = Instantiate(chatBubblePrefab, null).GetComponentInChildren<ChatBubble>(true);
             bubbleDict[actor] = chatBubble;
         }
         chatBubble.GetComponent<UIFollow>().target = actor.transform;
