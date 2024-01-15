@@ -152,7 +152,7 @@ public class PCDWalkMgr : MonoBehaviour
 				holdTime = 0f;
 				walkState = WalkState.Idle;
 				DriveHandToKF(idleKFReader);
-				// SendMessage("Play", SendMessageOptions.DontRequireReceiver);
+				SendMessage("Play", SendMessageOptions.DontRequireReceiver);
 			});
 			DriveHandToKF();
 			// body.FadeBoneToKeyFrame(kfReader, animSetting.handPoseDuration);
@@ -163,7 +163,7 @@ public class PCDWalkMgr : MonoBehaviour
 				DriveHandToKF(idleKFReader);
 				// lHand.FadeBoneToKeyFrame(idleKFReader, animSetting.handPoseDuration, animSetting.handPosCurve);
 				// rHand.FadeBoneToKeyFrame(idleKFReader, animSetting.handPoseDuration, animSetting.handPosCurve);
-				// SendMessage("Play", SendMessageOptions.DontRequireReceiver);
+				SendMessage("Play", SendMessageOptions.DontRequireReceiver);
 			});
 			DriveHandToKF();
 		}
