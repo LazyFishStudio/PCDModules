@@ -36,13 +36,17 @@ public class ChatBubble : MonoBehaviour
      * 规则 2：尽量保证末行最少有 3 个字，通过不断宽度 + 1 来保证
      * 规则 3：默认每行 7 个字
      */
-    public void ShowText(string text, System.Action textShowedCallback, System.Action continueNextCallback) {
+    public void ShowText(string text, int fontSize = 50, TMP_SpriteAsset spriteAsset = null, System.Action textShowedCallback = null, System.Action continueNextCallback = null) {
         ResetText();
 
         bool isActive = gameObject.activeInHierarchy;
         if (!isActive) {
             gameObject.SetActive(true);
         }
+
+        textMesh.fontSize = fontSize;
+        if (spriteAsset != null)
+            textMesh.spriteAsset = spriteAsset;
 
         textMesh.rectTransform.sizeDelta = new Vector2(textMesh.fontSize * 10000f, textMesh.fontSize);
         textMesh.SetText(text);

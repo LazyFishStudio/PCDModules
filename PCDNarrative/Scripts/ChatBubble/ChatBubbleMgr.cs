@@ -13,7 +13,7 @@ public class ChatBubbleMgr : SingletonMono<ChatBubbleMgr>
         bubbleDict.Clear();
     }
 
-    public void ActorSay(DialogueActor actor, string text, System.Action textShowedCallback, System.Action continueNextCallback) {
+    public void ActorSay(DialogueActor actor, string text, int fontSize = 50, TMPro.TMP_SpriteAsset spriteAsset = null, System.Action textShowedCallback = null, System.Action continueNextCallback = null) {
         ChatBubble chatBubble = null;
         if (!bubbleDict.TryGetValue(actor, out chatBubble) || !chatBubble) {
             chatBubble = Instantiate(chatBubblePrefab, null).GetComponentInChildren<ChatBubble>(true);
@@ -21,7 +21,7 @@ public class ChatBubbleMgr : SingletonMono<ChatBubbleMgr>
         }
         chatBubble.GetComponent<UIFollow>().target = actor.transform;
         chatBubble.GetComponent<UIFollow>().bias = actor.dialoguePosition;
-        chatBubble.ShowText(text, textShowedCallback, continueNextCallback);
+        chatBubble.ShowText(text, fontSize, spriteAsset, textShowedCallback, continueNextCallback);
     }
 
     public void ActorStopSay(DialogueActor actor) {

@@ -29,7 +29,7 @@ namespace PCD.Narrative
                 ChatBubbleMgr.Instance.ActorStopSay(sayingActor);
             }
             sayingActor = curActor;
-            ChatBubbleMgr.Instance.ActorSay(sayingActor, info.statement.text, null, () => info.Continue());
+            ChatBubbleMgr.Instance.ActorSay(sayingActor, info.statement.text, continueNextCallback: () => info.Continue());
         }
 
         private void OnMultipleChoiceRequest(MultipleChoiceRequestInfo info) {
