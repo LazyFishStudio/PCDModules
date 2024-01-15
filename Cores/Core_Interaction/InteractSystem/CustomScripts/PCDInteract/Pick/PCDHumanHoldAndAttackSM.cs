@@ -95,12 +95,12 @@ public class PCDHumanHoldAndAttackSM : MonoBehaviour, IPCDActionHandler {
             actionEventInstance = FMODUnity.RuntimeManager.CreateInstance(actionEventInstancePath);
         });
 
-        objHoldingDriver = new PCDWeaponDriver(PCDHuman.skeleton.GetBone("WeaponBone"));
-        PCDWeaponAnimtionDriver = new PCDWeaponDriver(PCDHuman.skeleton.GetBone("WeaponBone"));
         
     }
 
 	private void Start() {
+        objHoldingDriver = new PCDWeaponDriver(PCDHuman.skeleton.GetBone("WeaponBone"));
+        PCDWeaponAnimtionDriver = new PCDWeaponDriver(PCDHuman.skeleton.GetBone("WeaponBone"));
         PCDPlayerActionManager actionManager = PCDPlayerActionManager.GetInstance();
         actionManager.RegisterActionHandler(this as IPCDActionHandler);
     }

@@ -28,6 +28,9 @@ public class FishRod : PCDHoldProp
     public float rodCurvingTime = 1.0f;
     public float draggingFadeTime = 0.5f;
     public PCDHumanMgr PCDHuman;
+
+    public GameObject smallSplashEffectPrefab;
+
     private PCDBoneDriver fakeBodyDriver;
     private PCDWeaponDriver weaponAnimationDriver;
     private PCDTransfromLerp rodCurveLerp;
@@ -49,6 +52,7 @@ public class FishRod : PCDHoldProp
         isFishing = true;
         isDragging = false;
         holdTime = 0f;
+
 
         var locker = interactor.GetComponent<PCDActLocker>();
         locker.movementLocked = true;
@@ -78,9 +82,18 @@ public class FishRod : PCDHoldProp
 
         PCDHuman.uanimator.CrossFadeInFixedTime("Fishing-End", 0.16f);
 
+        // SendMessage("PlayEvent", new string[2] {"FishingAction", "BobberOutOfWater"}, SendMessageOptions.DontRequireReceiver);
+
         // 动作 & 浮标回到竿上
         player = interactor.transform;
         GatherBobber();
+
+        if (targetHoldTime <= 0) {
+            if (smallSplashEffectPrefab) {
+                GameObject.Instantiate(smallSplashEffectPrefab, bobber.position, Quaternion.identity);
+            }
+        }
+
         if (curFishShadow != null) {
             curFishShadow.sm.GotoState(FishShadow.State.Finish);
             curFishShadow = null;
@@ -104,6 +117,9 @@ public class FishRod : PCDHoldProp
         Vector3 targetPos = player.position + player.rotation * bobberTarget.localPosition;
         bobberRb.DOMove(bobberStart.position, 0f);
         bobber.SetParent(null);
+
+        SendMessage("PlayEvent", new string[2] {"FishingAction", "SwingRod"}, SendMessageOptions.DontRequireReceiver);
+
         
         bobberRb.isKinematic = false;
         bobber.GetComponent<Collider>().enabled = true;
@@ -145,6 +161,7 @@ public class FishRod : PCDHoldProp
 
         RodCurving(0.0f, 0.16f);
 
+        bobber.DOKill();
         Rigidbody bobberRb = bobber.GetComponent<Rigidbody>();
         bobberRb.isKinematic = false;
         bobberRb.DOJump(bobberIdle.position, bobberJumpHeight, 1, bobberGatherTime).SetEase(bobberJumpCurve).OnComplete(() => {
@@ -176,6 +193,10 @@ public class FishRod : PCDHoldProp
         if (!isDragging) {
             PCDHuman.uanimator.CrossFadeInFixedTime("Fishing-Dragging", draggingFadeTime);
             isDragging = true;
+            
+            if (targetHoldTime > 0) {
+                SendMessage("PlayEvent", new string[2] {"FishingAction", "Dragging"}, SendMessageOptions.DontRequireReceiver);
+            }
 
             RodCurving(1.0f, rodCurvingTime);
         }
@@ -207,6 +228,8 @@ public class FishRod : PCDHoldProp
         // 回到 Fishing-Idle 动画
         PCDHuman.uanimator.CrossFadeInFixedTime("Fishing-Idle", draggingFadeTime * 0.65f);
         RodCurving(0.0f, draggingFadeTime * 0.65f);
+
+        SendMessage("Stop", SendMessageOptions.DontRequireReceiver);
         
 	}
 

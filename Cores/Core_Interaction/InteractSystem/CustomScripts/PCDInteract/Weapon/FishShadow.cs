@@ -24,6 +24,11 @@ public class FishShadow : MonoBehaviour
     public float finishJumpHigh = 4f;
     public float finishDuration = 1f;
 
+    public GameObject waterRipplePrefab;
+    public GameObject waterSplashPrefab;
+    public GameObject struggleWaterSplashPrefab;
+    private GameObject struggleWaterSplashEffect;
+
     /* Runtime Status */
     public FishBobber fishBobber;
     private Vector3 probeStartPos;
@@ -60,6 +65,8 @@ public class FishShadow : MonoBehaviour
 
                 probedTimes = 0;
                 TriggerProbeOnce();
+
+                fishBobber.OnFishProbe();
             },
             onExit: () => { transform.DOKill(); }
         );
@@ -73,16 +80,33 @@ public class FishShadow : MonoBehaviour
                     transform.DOShakeRotation(3f).OnComplete(() => { shakeAction?.Invoke(); });
                 };
                 */
+
+                fishBobber.OnFishBite();
+
+                SendMessage("PlayEvent", new string[2] {"FishingAction", "FishBite"}, SendMessageOptions.DontRequireReceiver);
+                if (struggleWaterSplashPrefab) {
+                    struggleWaterSplashEffect = GameObject.Instantiate(struggleWaterSplashPrefab, fishBobber.transform.position, Quaternion.identity);
+                }
+
                 biteRotation = transform.rotation;
-                transform.DOShakeRotation(10f);
+                transform.DOShakeRotation(100f);
 
                 fishBobber.fishRod.targetHoldTime = targetHoldTime;
                 fishBobber.fishRod.curFishShadow = this;
             },
-            onExit: () => { transform.DOKill(); }
+            onExit: () => { 
+                transform.DOKill(); 
+                Destroy(struggleWaterSplashEffect);
+            }
         );
 
         sm.GetState(State.Finish).Bind(onEnter: () => {
+
+            // SendMessage("PlayEvent", new string[2] {"FishingAction", "FishOutOfWater"}, SendMessageOptions.DontRequireReceiver);
+            if (waterSplashPrefab) {
+                GameObject.Instantiate(waterSplashPrefab, fishBobber.transform.position, Quaternion.identity);
+            }
+
             Vector3 targetAngles = product.transform.rotation.eulerAngles.CopySetY(biteRotation.eulerAngles.y);
             Quaternion targetRot = Quaternion.Euler(targetAngles);
             GameObject fish = Instantiate(product, transform.position, targetRot, null);
@@ -117,6 +141,13 @@ public class FishShadow : MonoBehaviour
     private int probedTimes = 0; 
     private void TriggerProbeOnce() {
         transform.DOJump(probeEndPos, 0f, 1, probeHalfDuration).OnComplete(() => {
+
+            // SendMessage("PlayEvent", new string[2] {"FishingAction", "FishProbe"}, SendMessageOptions.DontRequireReceiver);
+            if (waterRipplePrefab) {
+                GameObject.Instantiate(waterRipplePrefab, fishBobber.transform.position, Quaternion.identity);
+            }
+            
+
             probedTimes++;
             if (probedTimes < probeTimes) {
                 transform.DOJump(probeStartPos, 0f, 1, probeHalfDuration).OnComplete(TriggerProbeOnce);
