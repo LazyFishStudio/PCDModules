@@ -5,16 +5,12 @@ using UnityEngine;
 public class PCDHumanCharacter : MonoBehaviour {
     public string playerName = "P1";
 
-    public float oneConditionRuntimeSecond = 60.0f;
     [SerializeField]
     protected PCDHumanMovementSM moveSM;
-    protected Condition condition;
     protected bool isCanRun => IsCanRun();
     public Vector2 inputAxis;
 
-    protected virtual void Awake() {
-        condition = GetComponent<Condition>();
-    }
+    protected virtual void Awake() {}
 
     protected float forward = 0f;
     protected float right = 0f;
@@ -47,10 +43,6 @@ public class PCDHumanCharacter : MonoBehaviour {
             moveSM.moveInput.run = !moveSM.moveInput.run;
         }
 
-        if (moveSM.moveInput.run) {
-            condition?.LoseSaitity(Time.deltaTime / oneConditionRuntimeSecond);
-        }
-
         if (!isCanRun || moveSM.moveInput.moveAxis == Vector3.zero) {
             moveSM.moveInput.run = false;
         }
@@ -61,7 +53,7 @@ public class PCDHumanCharacter : MonoBehaviour {
     }
 
     public virtual bool IsCanRun() {
-        return condition ? condition.data.saitity > 0 : true;
+        return true;
     }
 
 }
