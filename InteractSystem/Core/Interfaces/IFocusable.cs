@@ -4,6 +4,6 @@ namespace InteractSystem
 {
 	public interface IFocusable
 	{
-		public bool CheckFocusCond(InteractionManager manager);
+		public bool CheckFocusCond(InteractComp interactor);
 	}
 }

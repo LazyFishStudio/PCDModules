@@ -10,13 +10,8 @@ namespace PhysicsBasedCharacterController
         [Header("Climb properties")]
         public float climbSpeed = 7f;
         public float forceOnDismount = -200f;
-        public InputReader input;
 
         private List<Rigidbody> rigidbodies = new List<Rigidbody>();
-
-
-        /**/
-
 
         private void FixedUpdate()
         {
@@ -25,6 +20,7 @@ namespace PhysicsBasedCharacterController
                 for (int i = 0; i < rigidbodies.Count; i++)
                 {
                     Rigidbody rb = rigidbodies[i];
+                    MovementInput input = rb.GetComponent<MovementInput>();
 
                     if (input.axisInput.y > 0) rb.velocity = new Vector3(0f, climbSpeed, 0f);
                     else if (input.axisInput.y < 0) rb.AddForce(forceOnDismount * this.transform.forward);

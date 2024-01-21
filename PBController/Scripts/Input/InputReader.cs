@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿#if false
+
+using UnityEngine;
 using UnityEngine.Events;
 
 namespace PhysicsBasedCharacterController
@@ -108,3 +110,5 @@ namespace PhysicsBasedCharacterController
         #endregion
     }
 }
+
+#endif

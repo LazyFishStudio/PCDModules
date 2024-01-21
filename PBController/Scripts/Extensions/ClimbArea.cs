@@ -9,14 +9,8 @@ namespace PhysicsBasedCharacterController
         public Vector3 climbSpeed = new Vector3(0f, 1.37f, 0f);
         [Space(10)]
 
-        public InputReader inputReader;
-
-
         private Rigidbody player;
-
-
-        /**/
-
+        private MovementInput inputReader;
 
         private void FixedUpdate()
         {
@@ -30,7 +24,11 @@ namespace PhysicsBasedCharacterController
         {
             Rigidbody rigidbody = other.GetComponent<Rigidbody>();
 
-            try { if (other.GetComponent<CharacterManager>()) player = rigidbody; }
+            try { if (other.GetComponent<CharacterManager>()) {
+                    player = rigidbody;
+                    inputReader = player.GetComponent<MovementInput>();
+                }
+            }
             catch { /* Debug.Log("Entered something else") */ }
         }
 
@@ -39,7 +37,11 @@ namespace PhysicsBasedCharacterController
         {
             Rigidbody rigidbody = other.GetComponent<Rigidbody>();
 
-            try { if (other.GetComponent<CharacterManager>()) player = null; }
+            try { if (other.GetComponent<CharacterManager>()) {
+                    player = null;
+                    inputReader = null;
+                }
+            }
             catch { /* Debug.Log("Entered something else") */ }
         }
 

@@ -77,8 +77,7 @@ namespace InteractSystem
 			removeItemCallbacks?.Invoke(this, item);
 		}
 
-		public virtual bool CheckFocusCond(InteractionManager manager) {
-			var interactor = manager.interactComp;
+		public virtual bool CheckFocusCond(InteractComp interactor) {
 			if (interactor.holdingItem == null)
 				return false;
 			IPlaceable placeable = interactor.holdingItem.GetComponent<IPlaceable>();

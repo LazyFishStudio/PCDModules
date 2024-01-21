@@ -1,3 +1,5 @@
+#if false
+
 using System.Collections;
 using System.Collections.Generic;
 using PhysicsBasedCharacterController;
@@ -131,3 +133,5 @@ public class PCDHumanMovementSM : MonoBehaviour {
     }
 
 }
+
+#endif

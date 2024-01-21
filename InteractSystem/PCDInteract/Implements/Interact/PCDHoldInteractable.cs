@@ -11,8 +11,8 @@ public class PCDHoldInteractable : MonoBehaviour, IHoldInteractable, IFocusable
     public InteractComp interactor { get; set; }
     public bool IsInteracting { get => interactor != null; }
 
-    public virtual bool CheckFocusCond(InteractionManager manager) {
-        if (CheckInteractCond(manager.interactComp)) {
+    public virtual bool CheckFocusCond(InteractComp interactor) {
+        if (CheckInteractCond(interactor)) {
             UI_FocusObjectNameTips.GetInstance().content = interactHint;
             return true;
         }

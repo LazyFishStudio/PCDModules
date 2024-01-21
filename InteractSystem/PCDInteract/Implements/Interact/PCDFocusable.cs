@@ -11,7 +11,7 @@ public class PCDFocusable : Focusable
 
         focusComps = new List<Component>();
         foreach (var focusable in GetComponents<IFocusable>()) {
-            if (focusable is Component comp && focusable.CheckFocusCond(manager)) {
+            if (focusable is Component comp && focusable.CheckFocusCond(manager.interactComp)) {
                 focusComps.Add(comp);
             }
 		}

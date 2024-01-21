@@ -6,7 +6,7 @@ namespace InteractSystem
 {
     public interface IPickable
     {
-        public bool CheckPickCond(InteractionManager manager);
+        public bool CheckPickCond(InteractComp interactor);
 
         /// <summary>
         /// All things about pick item **MUST** be resolved inside.

@@ -8,7 +8,7 @@ public class NetworkPlayerInfo : NetworkBehaviour
 {
 	public override void OnNetworkSpawn() {
 		string playerName = "Player" + OwnerClientId;
-		GetComponent<PCDHumanCharacter>().playerName = playerName;
+		GetComponent<PCDPlayerMovementInput>().playerName = playerName;
 		GetComponent<PCDPlayerInteractionManager>().playerName = playerName;
 
 		if (IsOwner) {

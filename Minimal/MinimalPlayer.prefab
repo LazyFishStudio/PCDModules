@@ -10615,14 +10615,14 @@ GameObject:
   - component: {fileID: 5850322207924486609}
   - component: {fileID: 7327193441684357390}
   - component: {fileID: 7455407032350913443}
-  - component: {fileID: 6744964001835550659}
-  - component: {fileID: 2953229455286988957}
-  - component: {fileID: 7269331577924436814}
+  - component: {fileID: 4474393017353075455}
+  - component: {fileID: 4026995953706849115}
   - component: {fileID: 5724006376549899536}
+  - component: {fileID: 1991715550616517044}
+  - component: {fileID: 8138245139236234531}
   - component: {fileID: 291713620501582082}
   - component: {fileID: 4032609252131292172}
   - component: {fileID: 2389160402150452828}
-  - component: {fileID: 8138245139236234531}
   m_Layer: 0
   m_Name: MinimalPlayer
   m_TagString: Untagged
@@ -10773,7 +10773,7 @@ MonoBehaviour:
   meshCharacter: {fileID: 0}
   meshCharacterCrouch: {fileID: 0}
   headPoint: {fileID: 2723793420472741100}
-  input: {fileID: 6744964001835550659}
+  input: {fileID: 0}
   debug: 1
   OnJump:
     m_PersistentCalls:
@@ -10800,7 +10800,7 @@ MonoBehaviour:
   enableFallProtection: 0
   fallProtectionDist: 0.6
   safeFallHeight: 10
---- !u!114 &6744964001835550659
+--- !u!114 &4474393017353075455
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -10809,63 +10809,34 @@ MonoBehaviour:
   m_GameObject: {fileID: 8563529639004972078}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8a3c4de7d05bf894897bbb80292a9644, type: 3}
+  m_Script: {fileID: 11500000, guid: 076f64b3aca2d65409fe824c837be512, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  changedInputToMouseAndKeyboard:
-    m_PersistentCalls:
-      m_Calls: []
-  changedInputToGamepad:
-    m_PersistentCalls:
-      m_Calls: []
+  walkSpeed: 6
+  walkPoseLayerName: Walk
+--- !u!114 &4026995953706849115
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8563529639004972078}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5127bdecea2c5b347a394880c56ba6c3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enableMovement: 1
   enableJump: 1
-  enableCrouch: 0
+  enableCrouch: 1
   enableSprint: 1
   axisInput: {x: 0, y: 0}
-  cameraInput: {x: 0, y: 0}
   jump: 0
   jumpHold: 0
-  zoom: 0
   sprint: 0
   crouch: 0
---- !u!114 &2953229455286988957
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8563529639004972078}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: db5bc681c8a7ab240aedc02d7a8a37c2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  walkSpeed: 5.5
-  runSpeed: 7
-  moveInput:
-    moveAxis: {x: 0, y: 0, z: 0}
-    run: 0
-  walkPoseLayerName: Walk
-  runPoseLayerName: Run
-  sm:
-    curState: 0
-    defaultState: 0
---- !u!114 &7269331577924436814
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8563529639004972078}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 00d9096474c03d34d80748ee100cedf6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  rawAxisInput: {x: 0, y: 0}
   playerName: P1
-  oneConditionRuntimeSecond: 60
-  moveSM: {fileID: 2953229455286988957}
-  inputAxis: {x: 0, y: 0}
 --- !u!114 &5724006376549899536
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10882,15 +10853,35 @@ MonoBehaviour:
   focusDist: 3
   focusDegree: 60
   thorwForce: 20
-  interactInput:
-    pick: 0
-    drop: 0
-    restPull: 0
-    interactBackpack: 0
-    interactTrigger: 0
-    interactHold: 0
-  virtualInput: {fileID: 0}
   playerName: P1
+--- !u!114 &1991715550616517044
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8563529639004972078}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec048cd8d411a9e4e9db9dc3b11c7f72, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &8138245139236234531
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8563529639004972078}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc5255823689ad541900e43f72ea0323, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  movementLocked: 0
+  interactionLocked: 0
+  attackLocked: 0
+  dropLocked: 0
 --- !u!114 &291713620501582082
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10921,6 +10912,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerName: P1
+  objHoldingDriver:
+    attachedBone: {fileID: 0}
+    weaponBoneTarget: {fileID: 0}
+  PCDWeaponAnimtionDriver:
+    attachedBone: {fileID: 0}
+    weaponBoneTarget: {fileID: 0}
   boxObjFollowTarget: {fileID: 7269110827402518179}
   smallBoxObjFollowTarget: {fileID: 8063259758377050014}
   stickObjFollowTarget: {fileID: 8230917037424107097}
@@ -10972,21 +10969,6 @@ MonoBehaviour:
     contractStrength: 2
     pullOutTime: 1
     archoringTransition: 0.1
---- !u!114 &8138245139236234531
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8563529639004972078}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bc5255823689ad541900e43f72ea0323, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  movementLocked: 0
-  interactionLocked: 0
-  attackLocked: 0
 --- !u!1 &8592403152900436019
 GameObject:
   m_ObjectHideFlags: 0
@@ -11880,6 +11862,7 @@ GameObject:
   - component: {fileID: 898367525752904433}
   - component: {fileID: 764563180809687731}
   - component: {fileID: 1220172341499593949}
+  - component: {fileID: 7135341893278686666}
   m_Layer: 12
   m_Name: PCDHuman_Interaction
   m_TagString: Untagged
@@ -12270,6 +12253,28 @@ MonoBehaviour:
   walkMgr: {fileID: 0}
   poseMgr: {fileID: 0}
   arhchoringMgr: {fileID: 0}
+  uanimator: {fileID: 0}
+--- !u!95 &7135341893278686666
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9055372025514928057}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 0}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &9078524629656916269
 GameObject:
   m_ObjectHideFlags: 0

@@ -129,7 +129,7 @@ namespace PhysicsBasedCharacterController
         [Space(10)]
 
         [Tooltip("Input reference")]
-        public InputReader input;
+        public MovementInput input;
         [Space(10)]
 
         public bool debug = true;
@@ -219,10 +219,15 @@ namespace PhysicsBasedCharacterController
             currentLockOnSlope = lockOnSlope;
         }
 
-
         private void Update()
         {
-            //input
+            if (input == null)
+                input = GetComponent<MovementInput>();
+            if (input == null)
+                return;
+
+            input.UpdateInput();
+
             axisInput = input.axisInput;
             jump = input.jump;
             jumpHold = input.jumpHold;

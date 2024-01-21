@@ -11,8 +11,8 @@ public class PCDTriggerInteractable : MonoBehaviour, ITriggerInteractable, IFocu
     public string interactType;
     public InteractComp interactor { get; set; }
 
-    public virtual bool CheckFocusCond(InteractionManager manager) {
-        if (CheckInteractCond(manager.interactComp)) {
+    public virtual bool CheckFocusCond(InteractComp interactor) {
+        if (CheckInteractCond(interactor)) {
             UI_FocusObjectNameTips.GetInstance().content = interactHint;
             return true;
         }

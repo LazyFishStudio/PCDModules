@@ -31,8 +31,8 @@ public class PickableObject : MonoBehaviour, IFocusable, IPickable, IPlaceable {
 		}
 	}
 
-	public bool CheckPickCond(InteractionManager manager) {
-        if (manager.interactComp.holdingItem != null)
+	public bool CheckPickCond(InteractComp interactor) {
+        if (interactor.holdingItem != null)
             return false;
         if (picker != null)
             return false;
@@ -42,8 +42,8 @@ public class PickableObject : MonoBehaviour, IFocusable, IPickable, IPlaceable {
         return true;
     }
 
-    public virtual bool CheckFocusCond(InteractionManager manager) {
-        bool cond = CheckPickCond(manager);
+    public virtual bool CheckFocusCond(InteractComp interactor) {
+        bool cond = CheckPickCond(interactor);
         if (cond) {
             UI_FocusObjectNameTips.GetInstance().content = pickHint;
         }

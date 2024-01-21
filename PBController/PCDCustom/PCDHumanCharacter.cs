@@ -1,3 +1,5 @@
+#if false
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -19,7 +21,6 @@ public class PCDHumanCharacter : MonoBehaviour {
         var locker = GetComponent<PCDActLocker>();
         if (locker != null && locker.movementLocked)
             moveAxis = Vector3.zero;
-
 
         forward = moveAxis.y;
         right = moveAxis.x;
@@ -57,3 +58,5 @@ public class PCDHumanCharacter : MonoBehaviour {
     }
 
 }
+
+#endif
