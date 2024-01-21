@@ -7,8 +7,8 @@ using UnityEngine;
  */
 public class PCDWalkMgr : MonoBehaviour
 {
-	public enum WalkState { Idle, Walking };
-	public WalkState walkState = WalkState.Idle;
+	public enum WalkState { Standing, Steping };
+	public WalkState walkState = WalkState.Standing;
 	public string defaultAnim = "Walk";
 
 	private PCDAnimator animator;
@@ -93,17 +93,20 @@ public class PCDWalkMgr : MonoBehaviour
 		UpdateRFootTargetPosToStepTarget();
 		rFoot.Update(poseInfo.rFootTargetPos, skeleton.GetBone("Body").transform.rotation * rFootInfo.localRotation);
 
+		// FootTarget Offset 只和 Walking 和 Idle 有关
 		/* Private function implements */
 		void UpdateLFootTargetPosToStepTarget() {
 			poseInfo.lFootTargetPos = (skeleton.GetBone("Root").transform.position + skeleton.GetBone("Root").transform.rotation * lFootInfo.localPosition).CopySetY(skeleton.GetBone("Root").transform.position.y);
-			if (walkState == WalkState.Walking) {
-				poseInfo.lFootTargetPos += poseInfo.moveDir * animSetting.stepTargetOffset * skeleton.GetBone("Root").transform.localScale.x;
+			if (walkState == WalkState.Steping) {
+				float speedWeightOffset = animSetting.stepTargetOffset * Mathf.Clamp01((poseInfo.speed - animSetting.stepTriggerSpeed) / (animSetting.oriSpeed - animSetting.stepTriggerSpeed));
+				poseInfo.lFootTargetPos += poseInfo.moveDir * speedWeightOffset * skeleton.GetBone("Root").transform.localScale.x;
 			}
 		}
 		void UpdateRFootTargetPosToStepTarget() {
 			poseInfo.rFootTargetPos = (skeleton.GetBone("Root").transform.position + skeleton.GetBone("Root").transform.rotation * rFootInfo.localPosition).CopySetY(skeleton.GetBone("Root").transform.position.y);
-			if (walkState == WalkState.Walking) {
-				poseInfo.rFootTargetPos += poseInfo.moveDir * animSetting.stepTargetOffset * skeleton.GetBone("Root").transform.localScale.x;
+			if (walkState == WalkState.Steping) {
+				float speedWeightOffset = animSetting.stepTargetOffset * Mathf.Clamp01((poseInfo.speed - animSetting.stepTriggerSpeed) / (animSetting.oriSpeed - animSetting.stepTriggerSpeed));
+				poseInfo.rFootTargetPos += poseInfo.moveDir * speedWeightOffset * skeleton.GetBone("Root").transform.localScale.x;
 			}
 		}
 	}
@@ -150,7 +153,7 @@ public class PCDWalkMgr : MonoBehaviour
 		if (isStepLeft) {
 			lFoot.Step(() => {
 				holdTime = 0f;
-				walkState = WalkState.Idle;
+				walkState = WalkState.Standing;
 				DriveHandToKF(idleKFReader);
 				SendMessage("Play", SendMessageOptions.DontRequireReceiver);
 			});
@@ -159,7 +162,7 @@ public class PCDWalkMgr : MonoBehaviour
 		} else {
 			rFoot.Step(() => {
 				holdTime = 0f;
-				walkState = WalkState.Idle;
+				walkState = WalkState.Standing;
 				DriveHandToKF(idleKFReader);
 				// lHand.FadeBoneToKeyFrame(idleKFReader, animSetting.handPoseDuration, animSetting.handPosCurve);
 				// rHand.FadeBoneToKeyFrame(idleKFReader, animSetting.handPoseDuration, animSetting.handPosCurve);
@@ -171,29 +174,38 @@ public class PCDWalkMgr : MonoBehaviour
 
 	private float holdTime = 0f;
 	private void UpdateWalkLoop() {
-		if (walkState == WalkState.Walking) {
+		if (walkState == WalkState.Steping) {
 			UpdateBodyParts();
 			return;
 		}
 
-		bool isStepLeft = CheckLeftStepFirst();
-		bool isSpeedSlow = poseInfo.speed < animSetting.stepTriggerSpeed;
-		curKeyFrame = isSpeedSlow ? "Idle" : (isStepLeft ? "LStep" : "RStep");
+		// 这里更新 Target Pos 是为了在 Walk State 变动之后重新计算 isStepLeft
 		UpdateBodyParts();
 
 		holdTime += scaleDeltaTime;
 		if (holdTime < animSetting.stepInterval)
 			return;
-		if (isSpeedSlow && !isAnyFootNotReset)
-			return;
-		// Debug.Log("holdTime < animSetting.stepInterval: " + (holdTime < animSetting.stepInterval));
-		// Debug.Log("isSpeedSlow: " + isSpeedSlow);
-		// Debug.Log("poseInfo.speed < animSetting.stepTriggerSpeed: " + poseInfo.speed + " " + animSetting.stepTriggerSpeed);
-		// Debug.Log("isAnyFootNotReset: " + isAnyFootNotReset);
-
-		/* Next step */
-		walkState = WalkState.Walking;
-		DriveNextStep(isStepLeft);
+		
+		// 这里需要处理 Step 和 Stand
+		bool isSpeedSlow = poseInfo.speed < animSetting.stepTriggerSpeed;
+		bool isStepLeft;
+		if (isSpeedSlow) {
+			curKeyFrame = "Idle";
+			UpdateBodyParts();
+			if (isAnyFootNotReset) {
+				isStepLeft = CheckLeftStepFirst();
+				DriveNextStep(isStepLeft);
+			}
+		} else {
+			/* Next step */
+			walkState = WalkState.Steping;
+			// 这里更新 Target Pos 是为了在 Walk State 变动之后重新计算 isStepLeft
+			UpdateBodyParts();
+			isStepLeft = CheckLeftStepFirst();
+			curKeyFrame = isStepLeft ? "LStep" : "RStep";
+			DriveNextStep(isStepLeft);
+		}
+		
 	}
 
 	public IVelocitySyncer velocitySyncer;
@@ -214,6 +226,10 @@ public class PCDWalkMgr : MonoBehaviour
 		}
 	}
 
+	// private void LateUpdate() {
+	// 	UpdateVelocityInfo();
+	// 	UpdateWalkLoop();
+	// }
 	private void Update() {
 		UpdateVelocityInfo();
 		UpdateWalkLoop();

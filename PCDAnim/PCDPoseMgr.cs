@@ -39,14 +39,14 @@ public class PCDPoseMgr : MonoBehaviour
 	[SerializeField] private PCDBoneDriver rHand;
 
     
-    private void Update() {
-        if (Input.GetKeyUp(KeyCode.P)) {
-            FadeToKeyFrame(animator.GetAnimReader("Sit").GetKeyFrameReader("Sit"));
-        }
-        if (Input.GetKeyUp(KeyCode.O)) {
-            ResetPose();
-        }
-    }
+    // private void Update() {
+    //     if (Input.GetKeyUp(KeyCode.P)) {
+    //         FadeToKeyFrame(animator.GetAnimReader("Sit").GetKeyFrameReader("Sit"));
+    //     }
+    //     if (Input.GetKeyUp(KeyCode.O)) {
+    //         ResetPose();
+    //     }
+    // }
    
 
     public void FadeToKeyFrame(PCDKFReader kfReader, bool ctlBody = true, bool ctlLHand = true, bool ctlRHand = true, bool ctlLFoot = true, bool ctlRFoot = true) {

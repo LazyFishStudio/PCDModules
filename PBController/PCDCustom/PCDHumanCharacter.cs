@@ -10,7 +10,7 @@ public class PCDHumanCharacter : MonoBehaviour {
     protected bool isCanRun => IsCanRun();
     public Vector2 inputAxis;
 
-    protected virtual void Awake() {}
+    protected virtual void Awake() { }
 
     protected float forward = 0f;
     protected float right = 0f;
