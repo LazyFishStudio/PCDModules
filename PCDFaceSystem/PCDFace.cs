@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Drawing;
+// using Drawing;
 using Unity.Mathematics;
 
 [ExecuteInEditMode]
@@ -82,8 +82,8 @@ public class PCDFace : MonoBehaviour {
 
     private void UpdateEyeTransform(Transform eye, EyeSetting eyeSetting, bool isLeft = true) {
         Vector3 eyeRayStartPoint = transform.position + (isLeft ? -1.0f : 1.0f) * transform.right * eyeSetting.spacing + transform.up * eyeSetting.height;
-        Draw.SphereOutline(eyeRayStartPoint, 0.05f);
-        Draw.Line(eyeRayStartPoint, eyeRayStartPoint + transform.forward);
+        // Draw.SphereOutline(eyeRayStartPoint, 0.05f);
+        // Draw.Line(eyeRayStartPoint, eyeRayStartPoint + transform.forward);
         if (eye) {
 
             RaycastHit rayHit;
@@ -92,8 +92,8 @@ public class PCDFace : MonoBehaviour {
                 eye.position = rayHit.point + rayHit.normal * normalOffset;
                 // 设置左眼的朝向为碰撞点的法线
                 eye.rotation = Quaternion.AngleAxis(isLeft ? eyeSetting.rollAngle.x : eyeSetting.rollAngle.y, rayHit.normal) * Quaternion.LookRotation(rayHit.normal, transform.up);
-                Draw.SphereOutline(eye.position, 0.05f);
-                Draw.Line(eye.position, eye.position + eye.forward * 0.1f);
+                // Draw.SphereOutline(eye.position, 0.05f);
+                // Draw.Line(eye.position, eye.position + eye.forward * 0.1f);
             }
             eye.localScale = new Vector3(eyeSetting.scale.x, eyeSetting.scale.y, 1.0f);
 
